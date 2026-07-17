@@ -1,5 +1,16 @@
 # Session log
 
+## 2026-07-17 - Subject Makefile compliance and official-map confirmation
+
+- Re-read Fly-In 1.5 §III.2 directly: `install`, `run`, `debug`, `clean`, `lint`, and optional
+  `lint-strict` are mandatory Makefile behavior; `lint` carries the subject's explicit mypy flags.
+- Implemented those targets with the existing `uv` workflow and verified `run` against the M0
+  temporary module entry point.
+- Confirmed `maps/maps-v1.5-added-before-m0/` as the official 1.5 package, added its hashes to
+  the immutable manifest, and updated source hierarchy, provenance, benchmark path, risks, and Q10.
+- Recorded the confirmed README login `masenjo` and resolved Q12.
+- Next: the smallest parser slice that turns `tests/test_minimal_map_parsing.py` green.
+
 ## 2026-07-17 - M0 executable contract / repository publishing
 
 - Verified local Python 3.13.14, `uv` 0.11.19, GNU Make 4.4.1, GitHub authentication, repository administration, and `main` as the default branch.

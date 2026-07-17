@@ -57,5 +57,6 @@ Do not commit a fake “live modification” history. The goal is understanding 
 
 ## Benchmark authority
 
-Use Fly-In 1.5 and the evaluation sheet values. The included v1.2 maps have known count
-conflicts. Refresh official attachments before final evidence and record map hashes.
+Use Fly-In 1.5 and the evaluation sheet values with the confirmed official package at
+`maps/maps-v1.5-added-before-m0/`. The v1.2 maps have known count conflicts; preserve both map
+packages' hashes with final benchmark evidence.

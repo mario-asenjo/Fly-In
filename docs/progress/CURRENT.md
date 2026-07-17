@@ -2,20 +2,20 @@
 
 - Last updated: 2026-07-17
 - Current milestone: M0 - Repository and executable contract
-- Production implementation: not started by design
+- Production implementation: only the mandatory temporary `python -m flyin` entry point exists
 - Mandatory completion: 0%
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
 
-- Fly-In 1.2 and 1.5 subjects compared.
-- Evaluation rubric inspected and mapped.
-- Current architecture/roadmap/source hierarchy documented.
-- Hermes context, skills, bundles, templates, and Ponytail integration prepared.
-- Supplied v1.2 map snapshot retained unchanged.
-- Python 3.13.14, `uv` 0.11.19, GNU Make 4.4.1, and GitHub CLI authentication verified locally.
-- First comment-free minimal-map acceptance test added as the intentional M0 red test.
-- A repository PR template now requires scope, invariant, quality-gate, risk, teaching, and Ponytail evidence.
+- Fly-In 1.2 and 1.5 subjects compared; the Fly-In 1.5 Makefile rules were rechecked directly.
+- `maps/maps-v1.5-added-before-m0/` is confirmed as the official 1.5 map package and hash-pinned.
+- The historical v1.2 snapshot remains immutable comparison evidence only.
+- `masenjo` is the confirmed README 42 login.
+- Python 3.13.14, `uv` 0.11.19, GNU Make 4.4.1, and GitHub CLI authentication are verified locally.
+- The Makefile provides the subject-required `install`, `run`, `debug`, `clean`, `lint`, and optional
+  `lint-strict` targets; `run` executes the temporary M0 module entry point.
+- First comment-free minimal-map acceptance test remains the intentional M0 red test.
 
 ## Next smallest slice
 
@@ -26,13 +26,12 @@ Implement only the production types and parser necessary to make
 - `MapParser.parse()` for drone count, start, end, and one connection;
 - no comments, metadata, regular hubs, malformed-input handling, pathfinding, simulation, or CLI.
 
-Then run the focused test and all mandatory M0 quality gates before opening the implementation
-iteration PR.
+Then replace the temporary `python -m flyin` message only when a real CLI adapter exists, and run
+all Makefile quality gates before opening the parser PR.
 
 ## Active blockers
 
-- README team login placeholders are still unknown (Q12); do not invent them.
-- Supplied maps are a tracked v1.2 snapshot risk, not a blocker for the minimal parser contract.
+None. The M0 acceptance test is intentionally red until the next parser slice.
 
 ## Required context for next session
 

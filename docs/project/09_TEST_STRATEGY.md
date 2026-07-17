@@ -114,7 +114,7 @@ pytest
 Benchmarking is separate so normal correctness tests remain fast:
 
 ```bash
-python -m flyin.devtools.benchmark maps/provided-v12-snapshot
+python -m flyin.devtools.benchmark maps/maps-v1.5-added-before-m0
 ```
 
 The benchmark command is a target interface to implement during M5, not present initially.

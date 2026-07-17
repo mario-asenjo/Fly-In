@@ -32,12 +32,14 @@ Read `docs/project/02_SOURCE_OF_TRUTH.md` before resolving requirements. In shor
 
 1. Fly-In subject 1.5.
 2. Intra evaluation rubric.
-3. Supplied map contents for topology only, with known v1.2 inconsistencies.
-4. Subject 1.2 for historical comparison only.
-5. Map README as non-normative guidance.
+3. Official Fly-In 1.5 map package at `maps/maps-v1.5-added-before-m0/`.
+4. Supplied v1.2 map contents for historical comparison only.
+5. Subject 1.2 for historical comparison only.
+6. Historical map README as non-normative guidance.
 
-Never modify files in `docs/sources/` or `maps/provided-v12-snapshot/`. Add derived test data
-under `tests/fixtures/` with provenance and the assumption stated in a leading comment.
+Never modify files in `docs/sources/`, `maps/maps-v1.5-added-before-m0/`, or
+`maps/provided-v12-snapshot/`. Add derived test data under `tests/fixtures/` with provenance and
+the assumption stated in a leading comment.
 
 ## Non-negotiable product rules
 
