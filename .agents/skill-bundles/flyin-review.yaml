@@ -1,0 +1,8 @@
+name: flyin-review
+description: Audit Fly-In against the specification and evaluation.
+skills:
+  - flyin-evaluation-audit
+  - flyin-spec-guardian
+instruction: |
+  Perform a read-only evidence-based audit unless fixes are separately requested. Run
+  /ponytail-audit and distinguish correctness, performance, and over-engineering findings.

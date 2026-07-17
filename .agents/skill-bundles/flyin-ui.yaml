@@ -1,0 +1,8 @@
+name: flyin-ui
+description: Build one React visualization behavior for Fly-In.
+skills:
+  - flyin-ui-implementation
+  - flyin-vertical-slice
+instruction: |
+  Keep authoritative computation in the backend. Prefer native SVG/CSS/HTML and test the smallest
+  projection or critical interaction.

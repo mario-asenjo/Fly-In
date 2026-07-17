@@ -1,0 +1,9 @@
+name: flyin-api
+description: Build and teach one Fly-In API contract slice.
+skills:
+  - flyin-api-mentor
+  - flyin-spec-guardian
+  - flyin-vertical-slice
+instruction: |
+  Keep FastAPI at the boundary, teach the full HTTP-to-domain flow, and implement only one
+  endpoint behavior. Do not add UI, streaming, persistence, or broker unless it is their phase.

@@ -1,0 +1,6 @@
+# DERIVED INVALID FIXTURE.
+# Expected: connections may reference only previously defined zones.
+nb_drones: 1
+start_hub: start 0 0
+end_hub: goal 2 0
+connection: start-missing

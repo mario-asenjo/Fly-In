@@ -1,0 +1,9 @@
+name: flyin-events
+description: Evolve the Fly-In event boundary one maturity level.
+skills:
+  - flyin-eda-evolution
+  - flyin-spec-guardian
+  - flyin-vertical-slice
+instruction: |
+  Start from a real consumer and committed fact. Do not jump from direct calls to a distributed
+  broker or event sourcing.

@@ -1,0 +1,15 @@
+# Merge deliberately into HERMES_HOME/config.yaml; do not replace unrelated settings.
+skills:
+  external_dirs:
+    - ${FLYIN_REPO}/.agents/skills
+  write_approval: true
+
+memory:
+  write_approval: true
+
+terminal:
+  cwd: ${FLYIN_REPO}
+  timeout: 180
+
+# Ponytail defaults to full without configuration. Set environment variable if desired:
+# PONYTAIL_DEFAULT_MODE=full

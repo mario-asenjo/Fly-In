@@ -1,0 +1,8 @@
+# DERIVED INVALID FIXTURE.
+# Expected: max_drones on a regular zone must be positive.
+nb_drones: 1
+start_hub: start 0 0
+hub: broken 1 0 [max_drones=0]
+end_hub: goal 2 0
+connection: start-broken
+connection: broken-goal

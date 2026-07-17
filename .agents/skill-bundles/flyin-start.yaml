@@ -1,0 +1,8 @@
+name: flyin-start
+description: Orient a Fly-In session and choose the next slice.
+skills:
+  - flyin-orchestrator
+  - flyin-spec-guardian
+instruction: |
+  Follow the repository session-start protocol. Verify state before proposing exactly one
+  smallest next slice. Ponytail is already injected globally by its Hermes plugin.

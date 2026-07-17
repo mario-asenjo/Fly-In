@@ -1,0 +1,8 @@
+# DERIVED EDGE-CASE FIXTURE.
+# Purpose: Fly-In 1.5 requires terminal max_drones to be accepted and ignored.
+nb_drones: 5
+start_hub: start 0 0 [max_drones=1 color=green]
+hub: middle 1 0 [max_drones=2]
+end_hub: goal 2 0 [max_drones=1 color=red]
+connection: start-middle [max_link_capacity=2]
+connection: middle-goal [max_link_capacity=2]
