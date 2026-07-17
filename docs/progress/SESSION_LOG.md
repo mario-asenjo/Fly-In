@@ -1,0 +1,24 @@
+# Session log
+
+## 2026-07-17 - M0 executable contract / repository publishing
+
+- Verified local Python 3.13.14, `uv` 0.11.19, GNU Make 4.4.1, GitHub authentication, repository administration, and `main` as the default branch.
+- Added the first intentionally failing, inline comment-free acceptance test for the smallest map: one drone, start, end, and one connection.
+- Added a repository-wide pull-request template requiring real commands, scope, Fly-In invariants, documentation, risk, teaching, and Ponytail evidence.
+- No production parser was added: M0 deliberately ends with the red executable contract.
+- Next: implement only the types and parser behavior required to make `tests/test_minimal_map_parsing.py` pass.
+
+## 2026-07-10 - Initial context package
+
+- Compared subjects 1.2 and 1.5 and aligned the evaluation rubric.
+- Recorded benchmark changes and stale-map conflicts.
+- Chose evolutionary modular-monolith architecture.
+- Planned mandatory CLI -> in-process events -> FastAPI -> React -> SSE -> optional broker.
+- Integrated official Ponytail Hermes plugin as minimalism supervisor.
+- Created project/Hermes context package; no production solution generated.
+- Forward-tested the start/spec-guardian workflows from clean agent contexts.
+- Tightened M0 to one inline comment-free failing test and removed a premature broken CLI entry.
+- Added the terminal invalid-capacity ambiguity as Q13.
+- Next: agree on M0 and first parser vertical slice.
+
+Future entries should be short, evidence-based, and link decisions/tests rather than duplicate them.

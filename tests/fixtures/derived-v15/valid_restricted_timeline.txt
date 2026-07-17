@@ -1,0 +1,8 @@
+# DERIVED EDGE-CASE FIXTURE.
+# Purpose: define two-turn entry into a restricted destination.
+nb_drones: 1
+start_hub: start 0 0
+hub: restricted_hub 1 0 [zone=restricted]
+end_hub: goal 2 0
+connection: start-restricted_hub
+connection: restricted_hub-goal

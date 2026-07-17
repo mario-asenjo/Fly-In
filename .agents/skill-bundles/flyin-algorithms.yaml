@@ -1,0 +1,8 @@
+name: flyin-algorithms
+description: Validate and optimize Fly-In pathfinding and scheduling.
+skills:
+  - flyin-algorithm-lab
+  - flyin-spec-guardian
+instruction: |
+  Validate every schedule independently. Change one measured general bottleneck at a time and
+  update the benchmark ledger with real map hashes and results.

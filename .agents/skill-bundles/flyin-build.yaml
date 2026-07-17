@@ -1,0 +1,8 @@
+name: flyin-build
+description: Implement one approved Fly-In vertical slice.
+skills:
+  - flyin-vertical-slice
+  - flyin-spec-guardian
+instruction: |
+  Work test-first, preserve boundaries, stop at the approved behavior, and finish with fresh
+  evidence plus /ponytail-review.

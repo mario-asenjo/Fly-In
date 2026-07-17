@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flyin"
+version = "0.1.0"
+description = "Capacity-aware drone routing simulator for the 42 Fly-In project"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "flake8>=7,<8",
+  "mypy>=1.15,<2",
+  "pytest>=8,<9",
+  "pytest-cov>=6,<7",
+]
+api = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.34,<1",
+]
+
+[tool.setuptools]
+package-dir = {"" = "backend/src"}
+
+[tool.setuptools.packages.find]
+where = ["backend/src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["backend/src"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["backend/src", "tests"]
+warn_unused_configs = true
+show_error_codes = true
+
+[tool.coverage.run]
+branch = true
+source = ["flyin"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
