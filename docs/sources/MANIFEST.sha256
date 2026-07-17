@@ -13,4 +13,15 @@ b8e60cc9973945ff929e6ff8988cb271594a53849edcf22b845b49118ddc7e79  maps/provided-
 294c8f38194486e92a3a605c647ba6ef876cdf278250d6c050d2bdeccd701881  maps/provided-v12-snapshot/medium_01_dead_end_trap.txt
 38d1051a8800dc3564c89d02281250a2f5d7ef84f19fb9154978358de816b39e  maps/provided-v12-snapshot/medium_02_circular_loop.txt
 53d22734262902187977b08bc659af7bddd94e8a002ce6d9f60d1f3757e5cd6f  maps/provided-v12-snapshot/medium_03_priority_puzzle.txt
+ec1dcfdbb2467ca07b5e4a71d0cdd33ec6135aa8517add053bfd4994758bcddf  maps/maps-v1.5-added-before-m0/README.md
+20ce8948f80bf529c29c7abdbfd55a6028fbc2706d9b2ddf908ea6480a6b7501  maps/maps-v1.5-added-before-m0/challenger/01_the_impossible_dream.txt
+70972368d7f799cad1eed7367f92996c726fb699ee7f2497c85179f2de94a7ca  maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt
+2df6f6180508903aea5c3b2c3c9a6d6259b79f85d35ea9ccc1d1c6e67b8b0329  maps/maps-v1.5-added-before-m0/easy/02_simple_fork.txt
+a75828c20e5c30b618127480820200552a89e0ab15f19d02941c5ef4b06cce79  maps/maps-v1.5-added-before-m0/easy/03_basic_capacity.txt
+bc4b110c79da42ef918d20fe7371c17bed9b47b8ab22fe2c6b2ff226dff43742  maps/maps-v1.5-added-before-m0/hard/01_maze_nightmare.txt
+2cf80880d0c2fe78aeebc794ef122b3bc0e399fce8e2ae8e64f49f618dca95e3  maps/maps-v1.5-added-before-m0/hard/02_capacity_hell.txt
+1f184ccba42d7e70c39bdbccaa1ede9043a6bfd6cd9efadb3ba1216e60196249  maps/maps-v1.5-added-before-m0/hard/03_ultimate_challenge.txt
+adbf174672910430231f35c84245517bbce58cc55f61c3726b5e0e6e3129cd32  maps/maps-v1.5-added-before-m0/medium/01_dead_end_trap.txt
+2b6022175f4e1614a7890f70b7db17e0d6c037125889db05c63c1cd4d4239a81  maps/maps-v1.5-added-before-m0/medium/02_circular_loop.txt
+d3c94c9d9225adef49d38dec64dc56f7b5d34f0d9a10f900132087412186dae1  maps/maps-v1.5-added-before-m0/medium/03_priority_puzzle.txt
 

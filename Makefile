@@ -1,20 +1,33 @@
-.PHONY: install quality test type lint context
+.PHONY: install run debug clean lint lint-strict test context quality
 
 UV_RUN = uv run --extra dev
+PYTHON = $(UV_RUN) python
 
 install:
 	uv sync --extra dev
 
-test:
-	$(UV_RUN) pytest
+run:
+	$(PYTHON) -m flyin
 
-type:
-	$(UV_RUN) mypy .
+debug:
+	$(PYTHON) -m pdb -m flyin
+
+clean:
+	rm -rf .pytest_cache .mypy_cache .coverage htmlcov build dist backend/src/flyin.egg-info
+	find . -type d -name __pycache__ -prune -exec rm -rf {} +
 
 lint:
 	$(UV_RUN) flake8 .
+	$(UV_RUN) mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+
+lint-strict:
+	$(UV_RUN) flake8 .
+	$(UV_RUN) mypy . --strict
+
+test:
+	$(UV_RUN) pytest
 
 context:
-	$(UV_RUN) python scripts/validate-context.py
+	$(PYTHON) scripts/validate-context.py
 
-quality: context lint type test
+quality: context lint test

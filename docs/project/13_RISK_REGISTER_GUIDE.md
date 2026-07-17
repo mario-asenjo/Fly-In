@@ -5,11 +5,11 @@ owner, and status. A risk is not a vague concern; it must identify a future cond
 
 ## Initial high-value risks
 
-### R1 - Stale official maps
+### R1 - Official map replacement
 
-The snapshot conflicts with 1.5 drone counts. Trigger: implementation/benchmark begins before
-fresh attachments arrive. Mitigation: immutable snapshot, derived fixtures, provenance, replace
-before final benchmark evidence.
+The owner confirmed `maps/maps-v1.5-added-before-m0/` as the official 1.5 package on 2026-07-17.
+Trigger: a newer verified package arrives. Mitigation: preserve the current hash manifest, add a
+named snapshot, then update provenance, fixtures, and benchmark evidence together.
 
 ### R2 - Ambiguous restricted transit
 

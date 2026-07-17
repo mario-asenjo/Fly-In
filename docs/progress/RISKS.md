@@ -2,7 +2,7 @@
 
 | ID | Risk | Probability | Impact | Trigger | Mitigation | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| R1 | v1.2 map snapshot differs from 1.5 | High | High | Final benchmark uses old counts | Refresh official maps; derived fixtures/provenance meanwhile | ACTIVE |
+| R1 | Official maps change or are replaced | Low | High | New verified package arrives | Preserve current package hash; add a named snapshot and update benchmarks/provenance together | CONTROLLED |
 | R2 | Restricted transit/output ambiguity | Medium | High | Conflicting example/evaluator behavior | Explicit timeline/tests; seek clarification | ACTIVE |
 | R3 | Valid planner misses hard targets | Medium | High | M5 benchmark gaps | Baseline, profile, bottleneck/fleet allocation | WATCH |
 | R4 | API/UI/broker begins before mandatory core | Medium | High | Framework commit before M6 | Roadmap gates + Ponytail audit | CONTROLLED |

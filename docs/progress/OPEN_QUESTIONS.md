@@ -11,9 +11,9 @@
 | Q7 | Exact output text for a drone in restricted transit | Proposed directed `origin-destination` | Yes if sample/moulinette exists | OPEN |
 | Q8 | Exact turn/link reservation window for restricted traversal | Enter link on turn t, arrive on t+1; reserve safely | Validate against examples/evaluator | OPEN |
 | Q9 | Can start/end specify `zone=blocked/restricted/priority`? | Terminal role wins; consider rejecting blocked | Yes before edge-case lock | OPEN |
-| Q10 | Official v1.5 maps differ from supplied snapshot? | Yes for at least two counts; refresh package | Yes/download required | OPEN |
+| Q10 | Official v1.5 maps differ from supplied snapshot? | Yes; `maps/maps-v1.5-added-before-m0/` is the official 1.5 package | User confirmation, 2026-07-17 | RESOLVED |
 | Q11 | Challenger record is 41 in map README vs 45 in subject/rubric | 45 is official evaluation reference; 41 is stronger informal target | No | RESOLVED |
-| Q12 | Actual team 42 logins | Unknown | Ask user | OPEN |
+| Q12 | Actual team 42 logins | `masenjo` | User confirmation, 2026-07-17 | RESOLVED |
 | Q13 | Must an invalid terminal `max_drones` value be ignored or rejected syntactically? | Require valid positive-integer syntax, then ignore its capacity effect | Yes before parser lock | OPEN |
 
 When resolving, add the source/evidence and move the durable engineering decision into an ADR or

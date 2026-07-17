@@ -34,11 +34,11 @@ NAME_RE = re.compile(r"^name:\s*([a-z0-9-]+)\s*$", re.MULTILINE)
 
 
 def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+    """Hash repository content despite Git line-ending checkout conversion."""
+    content = path.read_bytes()
+    if path.suffix.lower() in {".md", ".sha256", ".txt"}:
+        content = content.replace(bytes((13, 10)), bytes((10,)))
+    return hashlib.sha256(content).hexdigest()
 
 
 def validate_required(errors: list[str]) -> None:

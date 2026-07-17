@@ -59,9 +59,9 @@ The included maps are retained as a v1.2 snapshot, at the user's request:
 | `medium_03_priority_puzzle.txt` | 4 drones | 5 drones |
 | `README_maps.md` Challenger record | 41 turns | 45 turns |
 
-Do not edit the snapshot. Replace it with fresh official attachments when available and retain
-the old copy only if historical provenance remains useful. Until then, derived v1.5 fixtures
-may change only `nb_drones` and must say so in their comments.
+Do not edit either snapshot. `maps/maps-v1.5-added-before-m0/` is the confirmed official 1.5
+package; retain the v1.2 copy only for historical provenance. Derived v1.5 fixtures may change
+only `nb_drones` and must say so in their comments.
 
 ## Compatibility policy
 

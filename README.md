@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by <login1>, <login2>.*
+*This project has been created as part of the 42 curriculum by masenjo.*
 
 # Fly-In
 
@@ -11,9 +11,8 @@ Hermes maintains continuity between sessions.
 
 ## Start here
 
-1. Replace `<login1>, <login2>` on the first line when the team is confirmed.
-2. Install and configure Hermes Agent.
-3. From this repository, run:
+1. Install and configure Hermes Agent.
+2. From this repository, run:
 
    ```bash
    bash scripts/setup-hermes.sh
@@ -44,9 +43,10 @@ When sources disagree, use this order:
 
 1. `docs/sources/flyin_1.5.pdf` - current normative subject.
 2. `docs/sources/Intra-Projects-Fly-in-Edit.pdf` - actual evaluation rubric.
-3. `maps/provided-v12-snapshot/` - provisional topology/input fixtures; known to be stale.
-4. `docs/sources/fly-in_1.2.pdf` - historical comparison only.
-5. `maps/provided-v12-snapshot/README_maps.md` - non-normative helper documentation.
+3. `maps/maps-v1.5-added-before-m0/` - official Fly-In 1.5 map package.
+4. `maps/provided-v12-snapshot/` - historical v1.2 comparison snapshot.
+5. `docs/sources/fly-in_1.2.pdf` - historical comparison only.
+6. `maps/provided-v12-snapshot/README_maps.md` - non-normative historical helper documentation.
 
 Never silently resolve a contradiction. Record it in
 [docs/progress/OPEN_QUESTIONS.md](docs/progress/OPEN_QUESTIONS.md), choose the safest
@@ -96,7 +96,8 @@ type safety, tests, security, accessibility, or explicit project decisions.
 | `docs/progress/` | Current state, session ledger, risks, benchmarks, open questions |
 | `docs/prompts/` | First-session, normal-session, review, and handoff prompts |
 | `docs/sources/` | Supplied subjects and evaluation sheet |
-| `maps/provided-v12-snapshot/` | Old supplied maps, retained unchanged |
+| `maps/maps-v1.5-added-before-m0/` | Official Fly-In 1.5 maps, retained unchanged |
+| `maps/provided-v12-snapshot/` | Historical v1.2 maps, retained unchanged |
 | `tests/fixtures/derived-v15/` | Clearly marked local fixtures for v1.5 benchmark assumptions |
 | `backend/` | Mandatory Python implementation and later API |
 | `frontend/` | React UI, created only in the UI phase |
