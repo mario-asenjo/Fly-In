@@ -29,3 +29,33 @@ def test_parses_the_smallest_valid_linear_map() -> None:
 
     with pytest.raises(FrozenInstanceError):
         setattr(parsed_map, "drone_count", 2)
+
+
+def test_parses_regular_hubs_and_multiple_connections() -> None:
+    parsed_map = MapParser().parse(
+        "\n".join(
+            (
+                "nb_drones: 4",
+                "start_hub: start 0 0",
+                "hub: alpha 1 -1",
+                "hub: beta 2 1",
+                "end_hub: end 3 0",
+                "connection: start-alpha",
+                "connection: alpha-beta",
+                "connection: beta-end",
+            )
+        )
+    )
+
+    alpha, beta = parsed_map.hubs
+    first, second, third = parsed_map.connections
+
+    assert parsed_map.drone_count == 4
+    assert (alpha.name, alpha.x, alpha.y) == ("alpha", 1, -1)
+    assert (beta.name, beta.x, beta.y) == ("beta", 2, 1)
+    assert first.left is parsed_map.start
+    assert first.right is alpha
+    assert second.left is alpha
+    assert second.right is beta
+    assert third.left is beta
+    assert third.right is parsed_map.end

@@ -1,5 +1,17 @@
 # Session log
 
+## 2026-07-25 - M1.2 regular hubs and multiple connections
+
+- Added one wider but coherent RED example with two regular hubs, three connections, four drones,
+  and a negative coordinate; the M1.1 fixed four-line parser failed on the extra declarations.
+- Extended `ParsedMap` with immutable regular hubs and changed `MapParser` to process valid
+  declarations in source order, resolving connection names through one shared zone dictionary.
+- Preserved M1.1 behavior and deliberately excluded comments, metadata, formal errors, duplicate
+  rules, bidirectional identity, pathfinding, simulation, and CLI concerns.
+- Independent Ponytail full review accepted the diff without blocking or requested changes.
+- Verified both parser tests, context validation, `flake8`, and `mypy --strict`.
+- Next: approve M1.3 for blanks/full-line comments plus physical source-line tracking.
+
 ## 2026-07-25 - M1.1 smallest linear-map parser
 
 - Started from updated `main` and preserved the existing acceptance test as the TDD red contract:

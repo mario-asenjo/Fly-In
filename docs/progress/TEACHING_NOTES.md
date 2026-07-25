@@ -1,5 +1,42 @@
 # Teaching notes ledger
 
+## M1.2 - Regular hubs and multiple connections
+
+### Problem
+
+Replace the fixed four-line parser with a parser for valid maps containing any number of regular
+hubs and connections, without introducing the later validation/error system.
+
+### Example input and observable result
+
+Four drones, start, hubs `alpha` and `beta`, end, and the three declarations `start-alpha`,
+`alpha-beta`, and `beta-end` produce two ordered regular hubs and three ordered connections. Every
+connection endpoint is the same `Zone` object stored by the parsed map.
+
+### Flow through classes/modules
+
+`MapParser.parse()` separates the drone-count line from declaration lines, then walks declarations
+once. Zone declarations create a `Zone`, append regular hubs when applicable, and register every
+zone by name. A later connection looks up both names in that dictionary and stores references to
+the existing objects. Mutable lists are local construction tools; `ParsedMap` receives tuples.
+
+### Invariant and complexity
+
+A valid connection can only resolve zones already declared in the input, so parsed connections do
+not contain detached names or duplicate `Zone` copies. Hub and connection order follows source
+order deterministically. For source length `n`, parsing is O(n) expected time with dictionary
+lookups and O(n) space across split lines, zone lookup, hubs, connections, and the immutable result.
+
+### Test and deliberate non-goals
+
+`test_parses_regular_hubs_and_multiple_connections` proves multiple drones, two regular hubs,
+integer coordinates including a negative value, three connections, source order, and object
+identity. Comments, metadata, stable errors, duplicate rules, undirected equality, graph behavior,
+and adapters remain later slices.
+
+Learner check pending: explain why `zones` is a dictionary while `hubs` and `connections` preserve
+ordered tuples in the returned map.
+
 ## M1.1 - Smallest linear-map parser
 
 ### Problem

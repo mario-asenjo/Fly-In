@@ -27,4 +27,5 @@ class ParsedMap:
     drone_count: int
     start: Zone
     end: Zone
+    hubs: tuple[Zone, ...]
     connections: tuple[Connection, ...]
