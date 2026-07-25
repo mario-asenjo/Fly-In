@@ -3,7 +3,7 @@
 | ID | Question | Current interpretation | Needs staff confirmation? | Status |
 | --- | --- | --- | --- | --- |
 | Q1 | Subject says drone count is first line, maps start with comments | First significant line after blanks/comments | Only if evaluator rejects | OPEN |
-| Q2 | Are inline comments supported or only full-line comments? | Support if unambiguous; test/document | Low priority | OPEN |
+| Q2 | Are inline comments supported or only full-line comments? | Support `#` comments after declarations | User approval and tests, 2026-07-25 | RESOLVED |
 | Q3 | Are unknown metadata keys invalid? | Reject with line-aware error | Useful if official invalid fixtures clarify | OPEN |
 | Q4 | Are duplicate metadata keys invalid? | Reject | No unless contradicted | OPEN |
 | Q5 | Are connection self-loops legal? | Reject | Useful before final parser lock | OPEN |

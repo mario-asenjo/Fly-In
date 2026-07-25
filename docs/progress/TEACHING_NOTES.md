@@ -1,5 +1,43 @@
 # Teaching notes ledger
 
+## M1.5-M1.6 - Structural identity and undirected duplicates
+
+### Problem and observable behavior
+
+A map cannot contain several starts/ends, reuse a zone name, connect to a later/unknown zone, or
+declare the same physical link twice in either direction. Inline comments should not alter parsing
+or physical diagnostics. Each invalid declaration now raises `MapParseError` at its physical line;
+missing terminals fail at the physical end of input.
+
+### Flow and involved classes
+
+`MapParser` strips the suffix beginning at `#`, then keeps the original line number for every
+remaining declaration. One `dict[str, Zone]` acts as the symbol table for global name uniqueness and
+prior-definition lookup. One `set[tuple[str, str]]` records physical links. `Connection` preserves
+directed `left`/`right` objects but exposes a sorted `identity` pair for undirected comparisons.
+
+### Invariants and complexity
+
+There is exactly one start and end; every zone name is registered once; both connection endpoints
+already exist; and each unordered connection identity appears once. Dictionary/set operations are
+expected O(1), so the parser remains O(n + sum(k_i log k_i)) including metadata canonicalization,
+with O(n) space.
+
+### Example and tests
+
+After `connection: start-end`, both another `start-end` and `end-start` fail on their own physical
+line because they share identity `("end", "start")`. Parameterized tests cover duplicate terminals,
+duplicate names, later endpoints, missing terminals, exact/reversed links, and inline comments.
+All previous acceptance tests and all ten official maps remain green.
+
+### Deliberate non-goals
+
+Self-loops, zone/color interpretation, effective zone/link capacities, terminal unlimited behavior,
+metadata validity, stable error codes, graph adjacency, pathfinding, and simulation remain later.
+
+Learner check pending: explain why traversal direction and physical connection identity are related
+but different concepts, and why the parser uses both a dictionary and a set.
+
 ## M1.3-M1.4 - Significant lines and canonical raw metadata
 
 ### Problem
