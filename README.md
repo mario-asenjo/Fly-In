@@ -120,7 +120,8 @@ Before a slice is called complete:
 
 ## Current state
 
-No production code has been implemented. The first engineering milestone is the executable
-contract for parsing the smallest valid linear map. See
+The first parser slice represents and parses the smallest valid comment-free linear map. Regular
+hubs, comments, metadata, malformed-input diagnostics, pathfinding, simulation, and the real CLI
+remain deliberately unimplemented. See
 [docs/project/05_ROADMAP.md](docs/project/05_ROADMAP.md) and
 [docs/progress/CURRENT.md](docs/progress/CURRENT.md).

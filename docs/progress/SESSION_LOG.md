@@ -1,5 +1,18 @@
 # Session log
 
+## 2026-07-25 - M1.1 smallest linear-map parser
+
+- Started from updated `main` and preserved the existing acceptance test as the TDD red contract:
+  collection failed because `flyin.parsing` did not exist.
+- Added immutable typed domain objects and the smallest `MapParser.parse()` implementation for one
+  drone count, start, end, and connection; no parser error model or later grammar was introduced.
+- Ponytail review strengthened the same acceptance test to prove coordinates, endpoint object
+  references, the one-connection tuple, and immutable parsed state without expanding grammar scope.
+- Ponytail also confirmed two deliberate deferrals already placed by the roadmap: strict prefix
+  errors in M1.9 and canonical undirected connection identity in M1.6.
+- Verified the focused test, full pytest suite, context validation, `flake8`, and `mypy --strict`.
+- Next: approve one M1.2 red example for a regular hub, multiple connections, and coordinates.
+
 ## 2026-07-17 - Subject Makefile compliance and official-map confirmation
 
 - Re-read Fly-In 1.5 §III.2 directly: `install`, `run`, `debug`, `clean`, `lint`, and optional
