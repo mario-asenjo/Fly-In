@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-25
 - Current milestone: M1 - Parser vertical slices
-- Production implementation: M1.1 parses and represents the smallest comment-free linear map
-- Mandatory completion: M0 and parser slice M1.1 are complete; later parser behavior is not started
+- Production implementation: M1.2 parses terminals, regular hubs, and multiple connections
+- Mandatory completion: M0 plus parser slices M1.1-M1.2 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -18,23 +18,26 @@
 - The first comment-free minimal-map acceptance test originated as the intentional M0 red contract.
 - M1.1 turns that contract green with immutable typed `Zone`, `Connection`, and `ParsedMap`
   objects plus `MapParser.parse()` for one drone count, start, end, and connection.
+- M1.2 supports any number of regular hubs and valid prior-defined connections while preserving
+  source order, coordinates, and shared `Zone` object identity across the parsed map.
 - The focused test, full pytest suite, `flake8`, and `mypy --strict` pass.
 
 ## Next smallest slice
 
-Define and approve M1.2 with one failing acceptance example for a regular hub and connections
-that reference it, then implement only:
+Define and approve M1.3 as one coherent input-normalization slice:
 
-- regular `hub:` parsing;
-- multiple zones and connections;
-- explicit coordinate assertions for all parsed zone roles.
+- ignore blank and full-line comment lines anywhere;
+- preserve each significant line's physical 1-based source number;
+- prove a later parser error can report the physical rather than filtered line number without
+  implementing the complete malformed-input taxonomy.
 
-Keep comments, metadata, malformed-input handling, pathfinding, simulation, and CLI out of M1.2.
+Keep inline comments, metadata, complete malformed-input handling, pathfinding, simulation, and CLI
+out of M1.3.
 Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers
 
-None. The parser milestone remains intentionally incomplete beyond the proven M1.1 grammar.
+None. The parser milestone remains intentionally incomplete beyond the proven M1.2 grammar.
 
 ## Required context for next session
 
