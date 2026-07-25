@@ -120,8 +120,8 @@ Before a slice is called complete:
 
 ## Current state
 
-The parser represents terminals, regular hubs, coordinates, and multiple connections from valid
-comment-free maps. Comments, metadata, malformed-input diagnostics, pathfinding, simulation, and
-the real CLI remain deliberately unimplemented. See
+The parser represents terminals, regular hubs, coordinates, multiple connections, full-line
+comments/blanks, and canonical raw metadata from valid maps. Metadata semantics, the complete error
+model, pathfinding, simulation, and the real CLI remain deliberately unimplemented. See
 [docs/project/05_ROADMAP.md](docs/project/05_ROADMAP.md) and
 [docs/progress/CURRENT.md](docs/progress/CURRENT.md).
