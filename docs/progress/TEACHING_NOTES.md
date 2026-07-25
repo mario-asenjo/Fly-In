@@ -1,5 +1,44 @@
 # Teaching notes ledger
 
+## M1.3-M1.4 - Significant lines and canonical raw metadata
+
+### Problem
+
+Official maps start with comments, contain blanks, and attach optional bracketed `key=value`
+metadata in arbitrary tag order. Filtering those lines must not destroy the physical line number
+needed by diagnostics, and parsing metadata must not prematurely decide zone/capacity semantics.
+
+### Example input and observable result
+
+A title comment and blank precede `nb_drones`; comments/blanks also appear among declarations.
+`[max_drones=2 color=blue]` and `[color=blue max_drones=2]` produce the same canonical immutable
+metadata tuple. A declaration on physical line 5 with an unknown prefix raises `MapParseError`
+whose `line_number` remains 5 after ignored lines are filtered.
+
+### Flow through classes/modules
+
+`MapParser.parse()` enumerates physical lines before stripping and filtering blanks/full-line
+comments. It keeps `(line_number, text)` pairs for significant lines, classifies each exact prefix,
+and delegates bracket splitting to `_split_metadata()`. Valid tokens become sorted `(key, value)`
+pairs stored immutably on `Zone` or `Connection`; absence of a block yields `()`.
+
+### Invariant and complexity
+
+Ignoring input lines never renumbers diagnostics, and metadata equality is independent of source
+tag order. Metadata remains raw source information: later slices interpret `zone`, `color`,
+`max_drones`, and `max_link_capacity`. For source length `n` and `k_i` tags in each block, parsing
+costs O(n + sum(k_i log k_i)) time due to canonical sorting and O(n) space.
+
+### Tests and deliberate non-goals
+
+The new valid test proves comments/blanks, first significant drone declaration, canonical metadata,
+empty defaults, and zone/link metadata. The error test proves a physical line survives filtering.
+Inline comments, unknown/duplicate metadata validation, zone-type enums, effective capacities,
+terminal capacity ignore semantics, duplicate names/connections, and full error codes remain later.
+
+Learner check pending: explain why line numbers are captured before filtering and why raw metadata
+is canonicalized now but not interpreted yet.
+
 ## M1.2 - Regular hubs and multiple connections
 
 ### Problem

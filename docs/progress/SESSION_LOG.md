@@ -1,5 +1,19 @@
 # Session log
 
+## 2026-07-25 - M1.3-M1.4 significant lines and raw metadata
+
+- Combined two adjacent parser concerns into one coherent slice: blanks/full-line comments with
+  physical line tracking, then valid raw metadata tokenization/default/canonical order.
+- Added public `MapParseError.line_number`, immutable raw metadata tuples on zones/connections, and
+  exact declaration classification; semantic zone/color/capacity interpretation stays deferred.
+- Proved comments before `nb_drones`, blanks between declarations, metadata in different orders,
+  empty metadata defaults, connection metadata, and physical line 5 for an unknown declaration.
+- Verified four tests, all local gates, and direct parsing of official easy maps 01 and 02.
+- Independent Ponytail full review accepted the slice without blocking changes; malformed empty
+  keys/values, empty/multiple blocks, and the complete metadata error matrix remain deferred to
+  M1.9 rather than receiving partial validation here.
+- Next: approve M1.5 for terminal/name uniqueness and prior-defined connection endpoints.
+
 ## 2026-07-25 - M1.2 regular hubs and multiple connections
 
 - Added one wider but coherent RED example with two regular hubs, three connections, four drones,

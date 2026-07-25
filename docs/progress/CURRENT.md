@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-25
 - Current milestone: M1 - Parser vertical slices
-- Production implementation: M1.2 parses terminals, regular hubs, and multiple connections
-- Mandatory completion: M0 plus parser slices M1.1-M1.2 are complete
+- Production implementation: M1.4 parses significant lines and canonical raw metadata
+- Mandatory completion: M0 plus parser slices M1.1-M1.4 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -20,24 +20,28 @@
   objects plus `MapParser.parse()` for one drone count, start, end, and connection.
 - M1.2 supports any number of regular hubs and valid prior-defined connections while preserving
   source order, coordinates, and shared `Zone` object identity across the parsed map.
+- M1.3 ignores blanks/full-line comments and preserves physical source lines in `MapParseError`.
+- M1.4 stores immutable canonical `key=value` metadata on zones/connections, with empty metadata as
+  the default and tag order proven irrelevant; metadata semantics remain deliberately deferred.
+- Official easy maps 01 and 02 parse through this boundary in direct local verification.
 - The focused test, full pytest suite, `flake8`, and `mypy --strict` pass.
 
 ## Next smallest slice
 
-Define and approve M1.3 as one coherent input-normalization slice:
+Define and approve M1.5 as one coherent structural-integrity slice:
 
-- ignore blank and full-line comment lines anywhere;
-- preserve each significant line's physical 1-based source number;
-- prove a later parser error can report the physical rather than filtered line number without
-  implementing the complete malformed-input taxonomy.
+- require exactly one start and one end;
+- reject duplicate zone names;
+- reject connections whose endpoints were not defined earlier;
+- report each failure with `MapParseError` and its physical line.
 
-Keep inline comments, metadata, complete malformed-input handling, pathfinding, simulation, and CLI
-out of M1.3.
+Keep duplicate/reversed/self connections, metadata semantics, complete malformed-input handling,
+pathfinding, simulation, and CLI out of M1.5.
 Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers
 
-None. The parser milestone remains intentionally incomplete beyond the proven M1.2 grammar.
+None. The parser milestone remains intentionally incomplete beyond the proven M1.4 grammar.
 
 ## Required context for next session
 

@@ -2,7 +2,7 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from flyin.parsing import MapParser
+from flyin.parsing import MapParseError, MapParser
 
 
 def test_parses_the_smallest_valid_linear_map() -> None:
@@ -59,3 +59,54 @@ def test_parses_regular_hubs_and_multiple_connections() -> None:
     assert second.right is beta
     assert third.left is beta
     assert third.right is parsed_map.end
+
+
+def test_ignores_comments_and_blanks_and_parses_ordered_metadata() -> None:
+    parsed_map = MapParser().parse(
+        "\n".join(
+            (
+                "# map title",
+                "",
+                "nb_drones: 2",
+                "# zones",
+                "start_hub: start 0 0 [color=green]",
+                "hub: alpha 1 0 [max_drones=2 color=blue]",
+                "",
+                "hub: beta 2 0 [color=blue max_drones=2]",
+                "end_hub: end 3 0",
+                "# links",
+                "connection: start-alpha [max_link_capacity=3]",
+                "connection: alpha-beta",
+                "connection: beta-end",
+            )
+        )
+    )
+
+    alpha, beta = parsed_map.hubs
+    first, second, third = parsed_map.connections
+
+    assert parsed_map.start.metadata == (("color", "green"),)
+    assert alpha.metadata == beta.metadata == (
+        ("color", "blue"),
+        ("max_drones", "2"),
+    )
+    assert parsed_map.end.metadata == ()
+    assert first.metadata == (("max_link_capacity", "3"),)
+    assert second.metadata == third.metadata == ()
+
+
+def test_reports_the_physical_line_for_an_unknown_declaration() -> None:
+    source = "\n".join(
+        (
+            "# title",
+            "",
+            "nb_drones: 1",
+            "start_hub: start 0 0",
+            "unknown: surprise",
+        )
+    )
+
+    with pytest.raises(MapParseError) as caught:
+        MapParser().parse(source)
+
+    assert caught.value.line_number == 5

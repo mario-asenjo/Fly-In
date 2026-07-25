@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+Metadata = tuple[tuple[str, str], ...]
+
 
 @dataclass(frozen=True, slots=True)
 class Zone:
@@ -10,6 +12,7 @@ class Zone:
     name: str
     x: int
     y: int
+    metadata: Metadata = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,6 +21,7 @@ class Connection:
 
     left: Zone
     right: Zone
+    metadata: Metadata = ()
 
 
 @dataclass(frozen=True, slots=True)
