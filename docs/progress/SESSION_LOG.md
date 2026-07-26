@@ -1,5 +1,19 @@
 # Session log
 
+## 2026-07-26 - M2.4-M2.5 exact A* and priority tie-breaks
+
+- Added `AStarPathfinder.shortest_path()` and immutable `Route` results for one-drone weighted
+  routes over the existing `TraversableGraph`.
+- The A* implementation uses stdlib `heapq`, destination costs, reverse-hop `h`, and a
+  `use_heuristic=False` path that behaves as the Dijkstra-equivalent oracle for tests.
+- Tests prove exact A* matches the zero-heuristic oracle, a fewer-hop restricted route can lose to a
+  lower-cost normal route, disconnected maps raise `NoRouteError`, priority wins only on equal cost,
+  and priority cannot override a cheaper route.
+- Kept multi-path allocation, scheduling, simulation, CLI output, and visualization out of this
+  slice.
+- TDD RED was the expected missing `AStarPathfinder` import. GREEN has 73 tests, raw Flake8, mypy,
+  and context validation.
+
 ## 2026-07-26 - M2.1-M2.3 graph foundation and A* heuristic
 
 - Added `flyin.pathfinding` with a custom `TraversableGraph` projection over `ParsedMap` physical
