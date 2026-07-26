@@ -1,5 +1,19 @@
 # Session log
 
+## 2026-07-26 - M2.6 pathfinding closure matrix
+
+- Closed the M2 one-drone pathfinding matrix with tests for official linear input, fork tie-breaks,
+  restricted weighted costs, priority-only tie-breaks, blocked/disconnected no-route, loops, and
+  lateral dead-end handling.
+- Added a defensive A* expansion guard: neighbors absent from `ReverseHopDistances` are skipped
+  before `hops_from()` is called, so a missing heuristic row cannot abort an otherwise valid route.
+- Added a supervisor-requested regression around a route with a lateral branch. Under the current
+  undirected graph contract a physically connected branch can normally reach back to the route, so
+  the exact guard is also protected with a focused monkeypatched heuristic-table test.
+- Kept simulation, capacity reservations, multiple candidate paths, CLI formatting, and visualization
+  out of M2. M3 starts from the immutable `Route` result.
+- Fresh gates passed with 77 tests, raw Flake8, mypy, and context validation.
+
 ## 2026-07-26 - M2.4-M2.5 exact A* and priority tie-breaks
 
 - Added `AStarPathfinder.shortest_path()` and immutable `Route` results for one-drone weighted
