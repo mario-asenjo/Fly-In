@@ -1,5 +1,40 @@
 # Teaching notes ledger
 
+## M2.6 - Pathfinding closure and dead-branch guard
+
+### Problem and observable behavior
+
+M2 needed to prove the full one-drone pathfinding matrix before simulation. A supervisor also noted
+that A* should not fail just because a candidate neighbor lacks a reverse-hop entry while another
+valid route exists. The observable behavior is simple: unreachable branches are ignored, while true
+no-route maps still raise `NoRouteError`.
+
+### Flow and involved classes
+
+`AStarPathfinder` already receives a `ReverseHopDistances` table. During expansion it now checks
+`can_reach_end(destination)` before calculating `hops_from(destination)`. Reachable neighbors proceed
+through the same `heapq` ranking; unreachable neighbors are not queued. The returned `Route` remains
+the seam for M3 simulation.
+
+### Invariant and complexity
+
+The guard does not change optimality because any skipped neighbor has no path to `end` according to
+the same reverse BFS table that powers the heuristic. The complexity stays O((V + E) log V) for A*
+plus O(V + E) for reverse BFS; the guard is an O(1) dictionary membership check per considered edge.
+
+### Example and tests
+
+The closure suite covers official linear input, a lexicographic fork, restricted weighted choice,
+priority-only tie-breaks, priority not overriding lower cost, blocked/disconnected maps, loops, and a
+lateral branch. Because Fly-In connections are bidirectional, a physically connected lateral branch
+can normally reach back to the route; the exact missing-heuristic guard is therefore protected with a
+small monkeypatched heuristic-table regression in `tests/test_astar_pathfinding.py`.
+
+### Deliberate non-goals
+
+M2 ends at one immutable route. It still does not schedule multiple drones, reserve capacity, emit
+turn stdout, or produce visualization. Those begin in M3+.
+
 ## M2.4-M2.5 - Exact A* route and deterministic priority
 
 ### Problem and observable behavior

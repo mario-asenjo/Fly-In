@@ -59,7 +59,9 @@ Implementation boundary:
   matches Dijkstra-style behavior on small fixtures.
 - M2.4 introduced the `heapq` A* loop and route reconstruction.
 - M2.5 added priority/tie-break ranking without changing shortest-cost correctness.
-- M2.6 closes coverage with a fixture matrix and official/derived-map evidence before simulation.
+- M2.6 closed coverage with a fixture matrix and official/derived-map evidence before simulation.
+  Expansion skips neighbors absent from the reverse-hop table before calculating `h`; those neighbors
+  cannot improve a route to `end` and must not abort otherwise valid search.
 
 Minimum tests before trusting A*:
 

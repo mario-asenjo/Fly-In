@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-26
 - Current milestone: M2 - Custom graph and path correctness
-- Production implementation: M2.4-M2.5 add exact A* routes and deterministic priority tie-breaks
-- Mandatory completion: M0, parser slices M1.1-M1.9, and graph/path slices M2.1-M2.5 are complete
+- Production implementation: M2.6 closes the one-drone pathfinding matrix
+- Mandatory completion: M0, parser slices M1.1-M1.9, and graph/path slices M2.1-M2.6 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -52,18 +52,20 @@
   `h = 0` as a Dijkstra-equivalent oracle covered by tests.
 - M2.5 keeps priority as a deterministic tie-break for equal-cost routes only; tests prove priority
   cannot override a lower-cost route.
+- M2.6 covers the one-drone matrix with linear official input, fork tie-breaks, restricted costs,
+  priority tie-breaks, blocked/disconnected maps, loop safety, and dead-end/lateral-branch handling.
+- A* expansion now skips neighbors absent from the reverse-hop table before calculating `h`, keeping
+  heuristic lookup failures away from otherwise valid routes.
 
 ## Next smallest slice
 
-Begin M2.6 with the M2 closure matrix and documentation pass:
+Begin M3 with the deterministic simulation engine:
 
-- prove the complete one-drone fixture matrix: linear, fork, restricted, priority, blocked, loop,
-  and dead-end;
-- include at least one relevant official v1.5 map or provenance-commented derived fixture;
-- document A* complexity/trade-offs and why coordinate heuristics stay rejected;
-- update M2 umbrella evidence and prepare M3 simulation as the next phase.
+- define the explicit drone state machine;
+- apply one deterministic turn transition for a known one-drone route;
+- keep evaluator stdout formatting separate until the simulator emits enough facts to format safely.
 
-Keep multi-path allocation, scheduling, simulation, and CLI output out of M2.6.
+Keep capacity-aware scheduling, optimization, API/UI, and visualization out of the first M3 slice.
 Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers

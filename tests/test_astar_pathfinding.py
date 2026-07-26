@@ -4,10 +4,25 @@ import pytest
 
 from flyin.domain import ParsedMap
 from flyin.parsing import MapParser
-from flyin.pathfinding import AStarPathfinder, NoRouteError
+from flyin.pathfinding import (
+    AStarPathfinder,
+    NoRouteError,
+    ReverseHopDistances,
+)
 
 PROJECT_ROOT = Path(__file__).parents[1]
 OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+
+
+class _MissingDeadBranchHops:
+    def can_reach_end(self, zone: object) -> bool:
+        return str(getattr(zone, "name")) != "dead"
+
+    def hops_from(self, zone: object) -> int:
+        name = str(getattr(zone, "name"))
+        if name == "dead":
+            raise NoRouteError("dead cannot reach end")
+        return 0 if name == "end" else 1
 
 
 def _parse(lines: tuple[str, ...]) -> ParsedMap:
@@ -67,6 +82,53 @@ def test_astar_reports_disconnected_route_before_scheduling() -> None:
         AStarPathfinder.shortest_path(parsed_map)
 
 
+def test_astar_ignores_reachable_dead_branch_when_route_exists() -> None:
+    parsed_map = _parse(
+        (
+            "nb_drones: 1",
+            "start_hub: start 0 0",
+            "hub: safe 1 0",
+            "hub: dead 1 1",
+            "end_hub: end 2 0",
+            "connection: start-dead",
+            "connection: start-safe",
+            "connection: safe-end",
+        )
+    )
+
+    route = AStarPathfinder.shortest_path(parsed_map)
+
+    assert route.zone_names == ("start", "safe", "end")
+    assert route.cost == 2
+
+
+def test_astar_skips_neighbors_missing_from_heuristic_table(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    parsed_map = _parse(
+        (
+            "nb_drones: 1",
+            "start_hub: start 0 0",
+            "hub: safe 1 0",
+            "hub: dead 1 1",
+            "end_hub: end 2 0",
+            "connection: start-dead",
+            "connection: start-safe",
+            "connection: safe-end",
+        )
+    )
+    monkeypatch.setattr(
+        ReverseHopDistances,
+        "to_end",
+        lambda *_args: _MissingDeadBranchHops(),
+    )
+
+    route = AStarPathfinder.shortest_path(parsed_map)
+
+    assert route.zone_names == ("start", "safe", "end")
+    assert route.cost == 2
+
+
 def test_astar_prefers_priority_only_for_equal_total_cost() -> None:
     parsed_map = _parse(
         (
@@ -96,6 +158,27 @@ def test_astar_prefers_priority_only_for_equal_total_cost() -> None:
     assert first.priority_score == second.priority_score
 
 
+def test_astar_uses_lexicographic_fork_tie_break() -> None:
+    parsed_map = _parse(
+        (
+            "nb_drones: 1",
+            "start_hub: start 0 0",
+            "hub: alpha 1 0",
+            "hub: beta 1 1",
+            "end_hub: end 2 0",
+            "connection: start-beta",
+            "connection: beta-end",
+            "connection: start-alpha",
+            "connection: alpha-end",
+        )
+    )
+
+    route = AStarPathfinder.shortest_path(parsed_map)
+
+    assert route.zone_names == ("start", "alpha", "end")
+    assert route.cost == 2
+
+
 def test_astar_does_not_let_priority_override_lower_cost() -> None:
     parsed_map = _parse(
         (
@@ -118,6 +201,30 @@ def test_astar_does_not_let_priority_override_lower_cost() -> None:
     assert route.zone_names == ("start", "normal", "end")
     assert route.cost == 2
     assert route.priority_score == 0
+
+
+def test_astar_handles_loop_and_matches_zero_heuristic() -> None:
+    parsed_map = _parse(
+        (
+            "nb_drones: 1",
+            "start_hub: start 0 0",
+            "hub: alpha 1 0",
+            "hub: beta 1 1",
+            "end_hub: end 2 0",
+            "connection: start-alpha",
+            "connection: alpha-beta",
+            "connection: beta-start",
+            "connection: alpha-end",
+        )
+    )
+
+    route = AStarPathfinder.shortest_path(parsed_map)
+    zero_route = AStarPathfinder.shortest_path(parsed_map, use_heuristic=False)
+
+    assert route.zone_names == ("start", "alpha", "end")
+    assert route.cost == 2
+    assert route.zone_names == zero_route.zone_names
+    assert route.cost == zero_route.cost
 
 
 def test_astar_routes_the_actual_official_linear_map() -> None:
