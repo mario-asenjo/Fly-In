@@ -23,6 +23,51 @@ Find one weighted shortest path and pipeline all drones through it.
 - Weakness: ignores parallel paths and may fail benchmarks.
 - Use: M2/M3 correctness baseline.
 
+## M2 pathfinding choice - exact A*
+
+Use A* for the one-drone M2 path decision, but keep it exact rather than heuristic-only:
+
+- `g`: accumulated movement cost, where each edge cost is based on the destination zone.
+- `h`: reverse BFS hop distance from the current zone to the end, computed on the traversable
+  unweighted graph with blocked zones excluded.
+- `f = g + h` and a deterministic tie-break tuple decide heap order.
+- Python stdlib `heapq` is enough; no graph/pathfinding dependency is allowed.
+
+Viability notes:
+
+- The hop-distance heuristic is admissible because every remaining move costs at least one turn.
+- It is consistent because adjacent hop distances differ by at most one and all movement costs are
+  at least one.
+- Coordinate distance is intentionally rejected as the default heuristic: map coordinates do not
+  constrain edge length, so Euclidean/Manhattan distance can overestimate and break optimality.
+- If `h = 0`, the same implementation degenerates to Dijkstra. Keep that as the debug fallback or
+  test oracle if the heuristic ever becomes suspicious.
+- A* still finds only one best path; path diversity and fleet allocation remain M4/M5 concerns.
+
+Planned deterministic ordering:
+
+1. Lowest `f`.
+2. Lowest `g` for stable shortest-cost behavior.
+3. Higher priority-score only when total route cost is otherwise equivalent.
+4. Lexicographic zone/path key as the final deterministic fallback.
+
+Implementation boundary:
+
+- M2.1 builds only the traversable graph; it does not compute heuristics or paths.
+- M2.2 can reuse reverse BFS as the reachability proof and store hop distances to the end.
+- M2.3 turns that hop-distance table into the public heuristic contract and verifies `h = 0`
+  matches Dijkstra-style behavior on small fixtures.
+- M2.4 introduces the `heapq` A* loop and route reconstruction.
+- M2.5 adds priority/tie-break ranking without changing shortest-cost correctness.
+
+Minimum tests before trusting A*:
+
+- blocked zones are absent from both adjacency and reverse-hop distances;
+- a disconnected end produces a clear no-route result before heap search runs forever;
+- a restricted shortcut with fewer hops loses to a normal route with lower destination cost;
+- a priority route wins only when total cost is tied;
+- the same map parsed twice returns the same route and cost.
+
 ## Baseline B - several simple candidate paths
 
 Generate a bounded deterministic set of loop-free paths, then evaluate cost and bottleneck.

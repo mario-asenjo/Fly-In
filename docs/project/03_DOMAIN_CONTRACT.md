@@ -83,6 +83,10 @@ Invariants:
   - restricted: 2;
   - blocked: infinite/not traversable.
 - Priority is a preference, not permission to choose a slower global plan blindly.
+- A* is allowed for one-drone pathfinding if it remains exact: the heuristic must never
+  overestimate remaining destination-weighted cost. Coordinates alone are not a safe heuristic
+  because one long coordinate jump can still cost one turn. The planned heuristic is reverse BFS
+  hop distance to the end over traversable edges, with blocked zones excluded.
 
 ## Drone state machine
 

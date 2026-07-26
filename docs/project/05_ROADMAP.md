@@ -43,8 +43,8 @@ Deliverables:
 
 - Traversable adjacency without graph libraries.
 - Reachability/disconnected handling.
-- BFS for baseline topology behavior.
-- Weighted shortest path for destination costs.
+- Reverse BFS hop-distance table for reachability and an admissible A* heuristic.
+- A* weighted shortest path for destination costs, implemented with `heapq` only.
 - Deterministic priority/tie-break policy.
 - Complexity documentation.
 

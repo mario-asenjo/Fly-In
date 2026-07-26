@@ -14,5 +14,6 @@
 | 2026-07-26 | Reject unknown/duplicate metadata and self-connections at parser lock | Domain contract + M1.9 tests |
 | 2026-07-26 | Ignore terminal `max_drones` values without numeric validation | Fly-In 1.5 VII.4 + M1.9 test |
 | 2026-07-26 | Run literal `flake8 .` with no Flake8 configuration file | Fly-In 1.5 III.2 + raw gate |
+| 2026-07-26 | Use exact A* for M2 one-drone pathfinding with reverse-BFS hop heuristic | Algorithm design space + M2 planning issues |
 
 Append concise accepted decisions here. Detailed rationale belongs in ADRs.
