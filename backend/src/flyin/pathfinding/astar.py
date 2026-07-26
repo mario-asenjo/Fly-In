@@ -112,6 +112,8 @@ class AStarPathfinder:
 
             for traversal in graph.neighbors(current.zone):
                 destination = traversal.destination
+                if not hops.can_reach_end(destination):
+                    continue
                 movement_cost = cls._movement_cost(destination)
                 new_cost = current.cost + movement_cost
                 known_cost = best_cost_by_zone.get(destination.name)
