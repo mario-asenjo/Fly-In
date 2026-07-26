@@ -2,11 +2,12 @@
 
 # Fly-In
 
-Starter repository for the Fly-In 1.5 project and its Hermes-assisted development workflow.
+Incremental Fly-In 1.5 implementation with an object-oriented, typed domain core and a
+Hermes-assisted development workflow.
 
-This archive deliberately contains project context, source snapshots, agent skills, plans,
-quality gates, and empty implementation areas. It does not contain a generated solution.
-The objective is to let the learner implement and understand every mandatory part while
+The repository contains immutable source snapshots, project decisions, quality gates, tests, and
+the completed M1 map parser. Routing, scheduling, simulation, visualization, and the evaluator CLI
+will continue in small, test-first vertical slices.
 Hermes maintains continuity between sessions.
 
 ## Start here
@@ -120,9 +121,9 @@ Before a slice is called complete:
 
 ## Current state
 
-The parser represents terminals, typed regular hubs, colors, effective zone/link capacities,
-structurally valid undirected connections, comments, and canonical raw metadata. The complete
-malformed-input error model, pathfinding, simulation, and the real CLI remain deliberately
-unimplemented. See
+The M1 parser is complete. It accepts optional comments before the drone declaration, validates
+the full map grammar, reports stable line-aware errors, and produces typed immutable terminals,
+hubs, metadata, and undirected connections. Pathfinding, simulation, and the real CLI remain
+deliberately unimplemented. See
 [docs/project/05_ROADMAP.md](docs/project/05_ROADMAP.md) and
 [docs/progress/CURRENT.md](docs/progress/CURRENT.md).

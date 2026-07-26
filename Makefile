@@ -1,5 +1,7 @@
 .PHONY: install run debug clean lint lint-strict test context quality
 
+UV_ENV = $(abspath ../.flyin-venv)
+export UV_PROJECT_ENVIRONMENT = $(UV_ENV)
 UV_RUN = uv run --extra dev
 PYTHON = $(UV_RUN) python
 
@@ -13,7 +15,8 @@ debug:
 	$(PYTHON) -m pdb -m flyin
 
 clean:
-	rm -rf .pytest_cache .mypy_cache .coverage htmlcov build dist backend/src/flyin.egg-info
+	rm -rf .venv .pytest_cache .mypy_cache .coverage htmlcov build dist
+	rm -rf backend/src/flyin.egg-info
 	find . -type d -name __pycache__ -prune -exec rm -rf {} +
 
 lint:

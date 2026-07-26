@@ -1,12 +1,38 @@
 # Session log
 
+## 2026-07-26 - M1.9 parser lock and raw Flake8 compliance
+
+- Added an explicit two-variant regression proving that a leading title comment is optional:
+  `nb_drones` may be the first physical line or the first significant line after comments.
+- Added stable `MapParseErrorCode` values plus physical line, human cause, and a declaration excerpt
+  bounded to 120 characters.
+- Locked validation for empty/invalid drone counts, field counts, integer coordinates, names,
+  balanced non-empty metadata blocks, `key=value` tokens, supported/unique keys, types, capacities,
+  prior endpoints, duplicate undirected links, and self-connections.
+- Re-read Fly-In 1.5 VII.4 and resolved Q13 literally: terminal `max_drones` remains raw metadata but
+  its value is not validated numerically and never changes unlimited effective capacity.
+- Resolved Q1/Q3/Q4/Q5/Q9/Q13 and retained graph, route, disconnected-map, and movement concerns for
+  M2 and later milestones.
+- Removed `.flake8`, adapted Python lines to the default 79-character standard, and moved the uv
+  environment outside the repository so the mandatory literal `flake8 .` command runs unconfigured
+  without traversing third-party packages.
+- TDD RED was the expected missing `MapParseErrorCode` import. GREEN has 64 tests, context validation,
+  raw Flake8, mypy strict, diff checking, and all ten official maps passing.
+- Initial Ponytail review found that Python rejects conversions above 4300 digits before the parser
+  could wrap them. Drone count, coordinates, regular capacity, and link capacity now convert inside
+  guarded boundaries and have permanent line-aware regression tests.
+- Follow-up Ponytail verdict: `ACEPTAR`, with the oversized-integer blocker resolved, all 19 public
+  error codes explicitly exercised, all ten official maps under permanent regression, raw Flake8
+  confirmed, and no new blocker.
+- M1 is complete. The next bounded slice is M2.1 custom undirected adjacency without pathfinding.
+
 ## 2026-07-26 - M1.7-M1.8 metadata semantics and official-map regression
 
 - Added typed `ZoneType` values for normal, blocked, restricted, and priority zones plus optional
   color projection from preserved raw metadata.
 - Added default/explicit positive capacities for regular zones and connections.
-- Added explicit `CapacityLimit.UNLIMITED` for start/end while retaining and syntax-validating their
-  declared `max_drones` metadata according to ADR-0004 and the current Q13 interpretation.
+- Added explicit `CapacityLimit.UNLIMITED` for start/end while retaining their declared
+  `max_drones` metadata according to ADR-0004; M1.9 later locked the ignored-value rule.
 - Kept terminal effective type normal under the current Q9 interpretation; raw `zone` metadata is
   retained for source fidelity pending parser lock.
 - Added a provenance-commented derived fixture covering every type/capacity rule.
@@ -20,7 +46,7 @@
   provenance. The fixture now declares blocked metadata on start, the test proves effective normal
   plus raw retention, and its header records source, assumption, and purpose. Follow-up verdict:
   `ACEPTAR`, with both findings resolved and no new blocker.
-- M1.9 remains deliberately separate as the final malformed-input and stable-error taxonomy slice.
+- M1.9 remained a separate malformed-input and stable-error taxonomy slice and is now complete.
 
 ## 2026-07-25 - M1.5-M1.6 structural integrity and inline comments
 

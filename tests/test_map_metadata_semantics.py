@@ -11,7 +11,9 @@ OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
 
 
 def test_interprets_zone_color_and_effective_capacities() -> None:
-    source = (FIXTURES / "valid_zone_semantics.txt").read_text(encoding="utf-8")
+    source = (FIXTURES / "valid_zone_semantics.txt").read_text(
+        encoding="utf-8"
+    )
 
     parsed_map = MapParser().parse(source)
 
@@ -85,6 +87,18 @@ def test_parses_the_actual_official_map_with_its_leading_comment() -> None:
     assert capacities == (1, 1, 1)
 
 
+def test_parses_all_ten_official_maps_without_modifying_them() -> None:
+    paths = tuple(sorted(OFFICIAL_MAPS.glob("*/*.txt")))
+
+    assert len(paths) == 10
+    for path in paths:
+        source = path.read_text(encoding="utf-8")
+        parsed_map = MapParser().parse(source)
+
+        assert parsed_map.start.capacity is CapacityLimit.UNLIMITED
+        assert parsed_map.end.capacity is CapacityLimit.UNLIMITED
+
+
 @pytest.mark.parametrize(
     ("source", "expected_line", "expected_cause"),
     (
@@ -101,21 +115,13 @@ def test_parses_the_actual_official_map_with_its_leading_comment() -> None:
             "invalid zone type: teleport",
         ),
         (
-            (FIXTURES / "invalid_zero_capacity.txt").read_text(encoding="utf-8"),
+            (FIXTURES / "invalid_zero_capacity.txt").read_text(
+                encoding="utf-8"
+            ),
             5,
             "max_drones must be a positive integer",
         ),
-        (
-            "\n".join(
-                (
-                    "nb_drones: 1",
-                    "start_hub: start 0 0 [max_drones=0]",
-                    "end_hub: goal 1 0",
-                )
-            ),
-            2,
-            "max_drones must be a positive integer",
-        ),
+
         (
             "\n".join(
                 (

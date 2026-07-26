@@ -35,7 +35,8 @@ Invariants:
 - Default type is `normal`.
 - Default regular-zone capacity is one.
 - Explicit capacity is a positive integer.
-- Start and end capacity is unlimited. Parsed `max_drones` on them is ignored, not rejected.
+- Start and end capacity is unlimited. A non-empty raw `max_drones` value on them is preserved but
+  ignored without numeric validation, as required by Fly-In 1.5 section VII.4.
 - Color is optional, defaults to none, and accepts any valid single-word value.
 - Metadata tag order is irrelevant.
 - **DECISION**: preserve source metadata needed for visualization, but keep effective terminal

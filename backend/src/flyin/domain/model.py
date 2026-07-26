@@ -48,7 +48,7 @@ class Connection:
 
     @property
     def identity(self) -> tuple[str, str]:
-        """Return an order-independent identity while preserving traversal endpoints."""
+        """Return sorted endpoint names for use as an undirected key."""
         names = (self.left.name, self.right.name)
         return names if names[0] <= names[1] else (names[1], names[0])
 
