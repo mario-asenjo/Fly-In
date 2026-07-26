@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-26
 - Current milestone: M2 - Custom graph and path correctness
-- Production implementation: M2.1-M2.3 build traversable adjacency, reachability, and reverse-hop heuristic
-- Mandatory completion: M0, parser slices M1.1-M1.9, and graph slices M2.1-M2.3 are complete
+- Production implementation: M2.4-M2.5 add exact A* routes and deterministic priority tie-breaks
+- Mandatory completion: M0, parser slices M1.1-M1.9, and graph/path slices M2.1-M2.5 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -48,17 +48,22 @@
   lookup errors or looping.
 - M2.3 computes reverse BFS hop distances to the end as the planned admissible A* heuristic; blocked
   and dead-end zones are absent from the reachable table.
+- M2.4 uses stdlib `heapq` for exact one-drone A* pathfinding, with destination movement costs and
+  `h = 0` as a Dijkstra-equivalent oracle covered by tests.
+- M2.5 keeps priority as a deterministic tie-break for equal-cost routes only; tests prove priority
+  cannot override a lower-cost route.
 
 ## Next smallest slice
 
-Begin M2.4-M2.5 with exact A* pathfinding and deterministic route ranking:
+Begin M2.6 with the M2 closure matrix and documentation pass:
 
-- implement the `heapq` A* loop over the existing `TraversableGraph`;
-- use destination movement costs: normal/priority 1, restricted 2, blocked unreachable;
-- use `ReverseHopDistances` as the admissible heuristic and keep `h = 0` as the test/debug oracle;
-- lock deterministic priority/tie-break behavior without letting priority choose a worse-cost route.
+- prove the complete one-drone fixture matrix: linear, fork, restricted, priority, blocked, loop,
+  and dead-end;
+- include at least one relevant official v1.5 map or provenance-commented derived fixture;
+- document A* complexity/trade-offs and why coordinate heuristics stay rejected;
+- update M2 umbrella evidence and prepare M3 simulation as the next phase.
 
-Keep multi-path allocation, scheduling, simulation, and CLI output out of M2.4-M2.5.
+Keep multi-path allocation, scheduling, simulation, and CLI output out of M2.6.
 Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers

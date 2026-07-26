@@ -1,5 +1,43 @@
 # Teaching notes ledger
 
+## M2.4-M2.5 - Exact A* route and deterministic priority
+
+### Problem and observable behavior
+
+One drone now needs a concrete best path, not only reachability. A route with fewer edges is not
+always better because movement cost comes from the destination zone: entering a restricted zone costs
+two, while normal and priority destinations cost one. Priority is a preference only after total cost
+is tied.
+
+### Flow and involved classes
+
+`AStarPathfinder.shortest_path(parsed_map)` builds the existing `TraversableGraph`, computes
+`ReverseHopDistances` to the end, and pushes `_QueueItem` entries into a stdlib `heapq`. Each entry
+tracks accumulated cost `g`, estimated total `f = g + h`, the current zone, physical connections, and
+the path so far. A successful result is an immutable `Route` with zones, connections, total cost,
+priority score, and `zone_names` for tests/adapters.
+
+### Invariant and complexity
+
+A* remains exact because the reverse-hop heuristic never overestimates remaining destination cost;
+`use_heuristic=False` is kept as a Dijkstra-equivalent oracle. The search continues past the first
+goal while queued candidates can still tie the best cost, so a priority route can win only among
+equal-cost routes. Worst-case path search is O((V + E) log V), plus the O(V + E) reverse BFS.
+
+### Example and tests
+
+A three-edge route through two restricted hubs costs `2 + 2 + 1 = 5`, so it loses to a four-edge
+normal route costing `4`. Between `start-normal-end` and `start-priority-end`, both cost two, so the
+priority route wins. `tests/test_astar_pathfinding.py` proves weighted choice, zero-heuristic oracle
+agreement, disconnected `NoRouteError`, deterministic repeatability, and priority not overriding a
+cheaper route.
+
+### Deliberate non-goals
+
+M2.4-M2.5 still find one best route only. They do not generate multiple candidate paths, allocate a
+fleet, reserve capacities, simulate turns, or format evaluator stdout. Those remain M2.6 hardening
+and M3+.
+
 ## M2.1-M2.3 - Traversable graph and reverse-hop A* heuristic
 
 ### Problem and observable behavior

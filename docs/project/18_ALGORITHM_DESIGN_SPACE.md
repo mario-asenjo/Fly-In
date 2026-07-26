@@ -57,8 +57,9 @@ Implementation boundary:
 - M2.2 can reuse reverse BFS as the reachability proof and store hop distances to the end.
 - M2.3 turns that hop-distance table into the public heuristic contract and verifies `h = 0`
   matches Dijkstra-style behavior on small fixtures.
-- M2.4 introduces the `heapq` A* loop and route reconstruction.
-- M2.5 adds priority/tie-break ranking without changing shortest-cost correctness.
+- M2.4 introduced the `heapq` A* loop and route reconstruction.
+- M2.5 added priority/tie-break ranking without changing shortest-cost correctness.
+- M2.6 closes coverage with a fixture matrix and official/derived-map evidence before simulation.
 
 Minimum tests before trusting A*:
 

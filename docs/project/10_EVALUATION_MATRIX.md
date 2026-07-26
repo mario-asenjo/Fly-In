@@ -12,12 +12,12 @@ Only mark `EVIDENCED` with a test, command, file, or demonstrated output.
 | Parser valid input | Drone count, zone prefixes, connections, defaults, optional comments | M1.1-M1.9 tests + permanent official easy 01 input + all 10 official maps | EVIDENCED |
 | Parser errors | Malformed, invalid types, missing terminals, capacity, duplicates | M1.9 full matrix with stable code, physical line, cause, and excerpt | EVIDENCED |
 | Zone occupancy | Default/explicit capacity, start/end unlimited, same-turn releases | M1.8 typed/default/unlimited parsing; later validator/simulator tests | IN_PROGRESS |
-| Movement cost | Normal/priority 1, restricted 2, blocked inaccessible | State-transition tests | NOT_STARTED |
+| Movement cost | Normal/priority 1, restricted 2, blocked inaccessible | M2.4 A* route-cost tests; later state-transition tests | IN_PROGRESS |
 | Link capacity | Default/explicit, simultaneous enforcement | M1.8 default/explicit parsing; later reservation tests | IN_PROGRESS |
 | Visualization | Clear positions/movement/colors/capacity | Terminal demo then React | NOT_STARTED |
 | Basic scenarios | Single/multiple/maps/output/stationary omission | CLI integration tests | NOT_STARTED |
 | Termination | Stop exactly after all delivered | CLI/simulator test | NOT_STARTED |
-| Valid paths | Linear/multiple/bottleneck/types | M2.1-M2.3 graph reachability; later A*/validator tests | IN_PROGRESS |
+| Valid paths | Linear/multiple/bottleneck/types | M2.1-M2.5 graph/A* tests; later full validator tests | IN_PROGRESS |
 | Conflicts | Competition/simultaneous/restricted | Scheduler tests | NOT_STARTED |
 | Efficiency | 10+ drones, complex graphs, reasonable compute | Benchmark report | NOT_STARTED |
 | Explanation | Complexity, design, capacity/optimization trade-offs | README + defense notes | NOT_STARTED |
