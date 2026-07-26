@@ -16,9 +16,9 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    env:
-      UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/flyin-venv
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - run: uv run --extra dev flake8 .
+        env:
+          UV_PROJECT_ENVIRONMENT: ${{ runner.temp }}/flyin-venv
