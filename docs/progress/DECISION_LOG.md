@@ -9,5 +9,6 @@
 | 2026-07-10 | Terminal capacity represented explicitly as unlimited | ADR-0004 |
 | 2026-07-10 | Official Ponytail plugin in full mode supervises minimalism | ADR-0005 |
 | 2026-07-10 | Supplied maps stored unchanged as v1.2 snapshot | User instruction + source hierarchy |
+| 2026-07-25 | Support full-line and inline `#` comments while preserving physical lines | User approval + M1.5 tests |
 
 Append concise accepted decisions here. Detailed rationale belongs in ADRs.

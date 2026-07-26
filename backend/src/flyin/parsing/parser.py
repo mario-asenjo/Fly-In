@@ -17,10 +17,11 @@ class MapParser:
 
     def parse(self, source: str) -> ParsedMap:
         """Parse significant lines, raw metadata, zones, and connections."""
+        physical_lines = source.splitlines()
         significant_lines = [
             (line_number, stripped)
-            for line_number, line in enumerate(source.splitlines(), start=1)
-            if (stripped := line.strip()) and not stripped.startswith("#")
+            for line_number, line in enumerate(physical_lines, start=1)
+            if (stripped := line.partition("#")[0].strip())
         ]
         (drone_line_number, drone_line), *declaration_lines = significant_lines
         if not drone_line.startswith("nb_drones: "):
@@ -29,32 +30,43 @@ class MapParser:
         zones: dict[str, Zone] = {}
         hubs: list[Zone] = []
         connections: list[Connection] = []
+        connection_identities: set[tuple[str, str]] = set()
         start: Zone | None = None
         end: Zone | None = None
 
         for line_number, line in declaration_lines:
             if line.startswith("start_hub: "):
+                if start is not None:
+                    raise MapParseError(line_number, "duplicate start_hub")
                 start = self._parse_zone(line_number, line, "start_hub: ")
-                zones[start.name] = start
+                self._register_zone(line_number, start, zones)
             elif line.startswith("end_hub: "):
+                if end is not None:
+                    raise MapParseError(line_number, "duplicate end_hub")
                 end = self._parse_zone(line_number, line, "end_hub: ")
-                zones[end.name] = end
+                self._register_zone(line_number, end, zones)
             elif line.startswith("hub: "):
                 hub = self._parse_zone(line_number, line, "hub: ")
+                self._register_zone(line_number, hub, zones)
                 hubs.append(hub)
-                zones[hub.name] = hub
             elif line.startswith("connection: "):
-                structural, metadata = self._split_metadata(line_number, line)
-                left_name, right_name = structural.removeprefix(
-                    "connection: "
-                ).split("-")
-                connections.append(
-                    Connection(zones[left_name], zones[right_name], metadata)
-                )
+                connection = self._parse_connection(line_number, line, zones)
+                if connection.identity in connection_identities:
+                    left_name, right_name = connection.identity
+                    raise MapParseError(
+                        line_number,
+                        f"duplicate connection: {left_name}-{right_name}",
+                    )
+                connection_identities.add(connection.identity)
+                connections.append(connection)
             else:
                 raise MapParseError(line_number, "unknown declaration")
 
-        assert start is not None and end is not None
+        eof_line_number = max(1, len(physical_lines))
+        if start is None:
+            raise MapParseError(eof_line_number, "missing start_hub")
+        if end is None:
+            raise MapParseError(eof_line_number, "missing end_hub")
         return ParsedMap(
             drone_count=drone_count,
             start=start,
@@ -62,6 +74,35 @@ class MapParser:
             hubs=tuple(hubs),
             connections=tuple(connections),
         )
+
+    @staticmethod
+    def _register_zone(
+        line_number: int,
+        zone: Zone,
+        zones: dict[str, Zone],
+    ) -> None:
+        if zone.name in zones:
+            raise MapParseError(
+                line_number,
+                f"duplicate zone name: {zone.name}",
+            )
+        zones[zone.name] = zone
+
+    @staticmethod
+    def _parse_connection(
+        line_number: int,
+        line: str,
+        zones: dict[str, Zone],
+    ) -> Connection:
+        structural, metadata = MapParser._split_metadata(line_number, line)
+        left_name, right_name = structural.removeprefix("connection: ").split("-")
+        for zone_name in (left_name, right_name):
+            if zone_name not in zones:
+                raise MapParseError(
+                    line_number,
+                    f"unknown connection zone: {zone_name}",
+                )
+        return Connection(zones[left_name], zones[right_name], metadata)
 
     @staticmethod
     def _parse_zone(line_number: int, line: str, prefix: str) -> Zone:

@@ -1,5 +1,22 @@
 # Session log
 
+## 2026-07-25 - M1.5-M1.6 structural integrity and inline comments
+
+- Combined adjacent cross-line constraints: exactly one start/end, globally unique zone names,
+  prior-defined connection endpoints, and exact/reversed undirected connection duplicates.
+- Added `Connection.identity` as a canonical unordered name pair while retaining directed
+  `left`/`right` references for future traversal/output.
+- Replaced terminal assertions and endpoint `KeyError` leakage with physical-line `MapParseError`.
+- Supported inline `#` comments through the existing significant-line normalization and resolved Q2
+  following explicit user approval.
+- TDD RED produced ten expected failures; GREEN has twelve tests, strict gates, and all ten official
+  v1.5 maps parsing successfully.
+- Independent Ponytail full review accepted the slice without blocking changes. It deferred the
+  syntax-versus-duplicate terminal error precedence to M1.9 and accepted centralized name coverage
+  through `_register_zone()` without testing every role permutation.
+- Deliberately deferred self-loops, metadata semantics, zone/color interpretation, effective
+  capacities, and stable complete error codes.
+
 ## 2026-07-25 - M1.3-M1.4 significant lines and raw metadata
 
 - Combined two adjacent parser concerns into one coherent slice: blanks/full-line comments with

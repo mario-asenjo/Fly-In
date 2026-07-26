@@ -9,8 +9,8 @@ Only mark `EVIDENCED` with a test, command, file, or demonstrated output.
 | OOP | Proper separation/encapsulation, justified inheritance only | Package design + explanation | NOT_STARTED |
 | Type safety | `mypy .` no errors/full hints | CI/local command log | NOT_STARTED |
 | Custom graph | No forbidden graph library; explain implementation | Dependency audit + graph tests | NOT_STARTED |
-| Parser valid input | Drone count, zone prefixes, connections, defaults, comments | M1.1-M1.2 topology + M1.3 comments/blanks + M1.4 raw metadata/default/order tests | IN_PROGRESS |
-| Parser errors | Malformed, invalid types, missing terminals, capacity, duplicates | Error matrix tests | NOT_STARTED |
+| Parser valid input | Drone count, zone prefixes, connections, defaults, comments | M1.1-M1.4 topology/metadata + M1.5 inline comments + all 10 official maps | IN_PROGRESS |
+| Parser errors | Malformed, invalid types, missing terminals, capacity, duplicates | M1.5 terminal/name/endpoint errors + M1.6 exact/reversed duplicates; later full matrix | IN_PROGRESS |
 | Zone occupancy | Default/explicit capacity, start/end unlimited, same-turn releases | Validator/simulator tests | NOT_STARTED |
 | Movement cost | Normal/priority 1, restricted 2, blocked inaccessible | State-transition tests | NOT_STARTED |
 | Link capacity | Default/explicit, simultaneous enforcement | Reservation tests | NOT_STARTED |

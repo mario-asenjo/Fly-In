@@ -23,6 +23,12 @@ class Connection:
     right: Zone
     metadata: Metadata = ()
 
+    @property
+    def identity(self) -> tuple[str, str]:
+        """Return an order-independent identity while preserving traversal endpoints."""
+        names = (self.left.name, self.right.name)
+        return names if names[0] <= names[1] else (names[1], names[0])
+
 
 @dataclass(frozen=True, slots=True)
 class ParsedMap:

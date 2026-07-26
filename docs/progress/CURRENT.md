@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-25
 - Current milestone: M1 - Parser vertical slices
-- Production implementation: M1.4 parses significant lines and canonical raw metadata
-- Mandatory completion: M0 plus parser slices M1.1-M1.4 are complete
+- Production implementation: M1.6 validates structural identity and undirected connection uniqueness
+- Mandatory completion: M0 plus parser slices M1.1-M1.6 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -23,25 +23,31 @@
 - M1.3 ignores blanks/full-line comments and preserves physical source lines in `MapParseError`.
 - M1.4 stores immutable canonical `key=value` metadata on zones/connections, with empty metadata as
   the default and tag order proven irrelevant; metadata semantics remain deliberately deferred.
-- Official easy maps 01 and 02 parse through this boundary in direct local verification.
+- M1.5 requires unique terminals/names and prior-defined connection endpoints with physical-line
+  `MapParseError` diagnostics.
+- M1.6 rejects exact and reversed duplicate connections through canonical unordered identity while
+  preserving directed `left`/`right` endpoints.
+- Inline `#` comments are supported by the same physical-line normalization used for full comments.
+- All ten official v1.5 maps parse through this boundary in direct local verification.
 - The focused test, full pytest suite, `flake8`, and `mypy --strict` pass.
 
 ## Next smallest slice
 
-Define and approve M1.5 as one coherent structural-integrity slice:
+Define and approve M1.7-M1.8 as one coherent metadata-semantics slice:
 
-- require exactly one start and one end;
-- reject duplicate zone names;
-- reject connections whose endpoints were not defined earlier;
-- report each failure with `MapParseError` and its physical line.
+- interpret `zone` into an explicit normal/blocked/restricted/priority type;
+- expose optional color without using it for authoritative routing;
+- interpret default/explicit regular-zone and connection capacities;
+- represent terminal effective capacity as unlimited while retaining ignored declared metadata;
+- validate the supported metadata values with physical-line errors.
 
-Keep duplicate/reversed/self connections, metadata semantics, complete malformed-input handling,
-pathfinding, simulation, and CLI out of M1.5.
+Keep pathfinding, adjacency filtering, movement cost, simulation, scheduling, and CLI out of this
+parser/domain slice. Decide the self-loop policy before parser lock.
 Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers
 
-None. The parser milestone remains intentionally incomplete beyond the proven M1.4 grammar.
+None. The parser milestone remains intentionally incomplete beyond the proven M1.6 grammar.
 
 ## Required context for next session
 

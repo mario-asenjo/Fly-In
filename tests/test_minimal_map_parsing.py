@@ -26,6 +26,7 @@ def test_parses_the_smallest_valid_linear_map() -> None:
 
     assert connection.left is parsed_map.start
     assert connection.right is parsed_map.end
+    assert connection.identity == ("end", "start")
 
     with pytest.raises(FrozenInstanceError):
         setattr(parsed_map, "drone_count", 2)
@@ -67,9 +68,9 @@ def test_ignores_comments_and_blanks_and_parses_ordered_metadata() -> None:
             (
                 "# map title",
                 "",
-                "nb_drones: 2",
+                "nb_drones: 2 # fleet size",
                 "# zones",
-                "start_hub: start 0 0 [color=green]",
+                "start_hub: start 0 0 [color=green] # departure",
                 "hub: alpha 1 0 [max_drones=2 color=blue]",
                 "",
                 "hub: beta 2 0 [color=blue max_drones=2]",
@@ -77,7 +78,7 @@ def test_ignores_comments_and_blanks_and_parses_ordered_metadata() -> None:
                 "# links",
                 "connection: start-alpha [max_link_capacity=3]",
                 "connection: alpha-beta",
-                "connection: beta-end",
+                "connection: beta-end # final link",
             )
         )
     )
@@ -110,3 +111,101 @@ def test_reports_the_physical_line_for_an_unknown_declaration() -> None:
         MapParser().parse(source)
 
     assert caught.value.line_number == 5
+
+
+@pytest.mark.parametrize(
+    ("source", "expected_line", "expected_cause"),
+    (
+        (
+            "\n".join(
+                (
+                    "nb_drones: 1",
+                    "start_hub: start 0 0",
+                    "start_hub: other 1 0",
+                    "end_hub: end 2 0",
+                )
+            ),
+            3,
+            "duplicate start_hub",
+        ),
+        (
+            "\n".join(
+                (
+                    "nb_drones: 1",
+                    "start_hub: start 0 0",
+                    "end_hub: end 1 0",
+                    "end_hub: other 2 0",
+                )
+            ),
+            4,
+            "duplicate end_hub",
+        ),
+        (
+            "\n".join(
+                (
+                    "nb_drones: 1",
+                    "start_hub: start 0 0",
+                    "hub: start 1 0",
+                    "end_hub: end 2 0",
+                )
+            ),
+            3,
+            "duplicate zone name: start",
+        ),
+        (
+            "\n".join(
+                (
+                    "nb_drones: 1",
+                    "start_hub: start 0 0",
+                    "end_hub: end 2 0",
+                    "connection: start-later",
+                    "hub: later 1 0",
+                )
+            ),
+            4,
+            "unknown connection zone: later",
+        ),
+        (
+            "\n".join(("nb_drones: 1", "end_hub: end 1 0")),
+            2,
+            "missing start_hub",
+        ),
+        (
+            "\n".join(("nb_drones: 1", "start_hub: start 0 0")),
+            2,
+            "missing end_hub",
+        ),
+    ),
+)
+def test_rejects_invalid_map_structure(
+    source: str,
+    expected_line: int,
+    expected_cause: str,
+) -> None:
+    with pytest.raises(MapParseError) as caught:
+        MapParser().parse(source)
+
+    assert caught.value.line_number == expected_line
+    assert caught.value.cause == expected_cause
+
+
+@pytest.mark.parametrize(
+    "duplicate",
+    ("connection: start-end", "connection: end-start"),
+)
+def test_rejects_duplicate_undirected_connections(duplicate: str) -> None:
+    source = "\n".join(
+        (
+            "nb_drones: 1",
+            "start_hub: start 0 0",
+            "end_hub: end 1 0",
+            "connection: start-end",
+            duplicate,
+        )
+    )
+
+    with pytest.raises(MapParseError) as caught:
+        MapParser().parse(source)
+
+    assert caught.value.line_number == 5
+    assert caught.value.cause == "duplicate connection: end-start"
