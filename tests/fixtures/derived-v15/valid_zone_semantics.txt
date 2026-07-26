@@ -1,0 +1,16 @@
+# DERIVED VALID FIXTURE.
+# Provenance: derived from Fly-In 1.5 metadata rules and ADR-0004; no official map was modified.
+# Assumption: terminal role overrides valid non-normal zone metadata while preserving its raw value.
+# Purpose: exercise every zone type, color, effective capacity, and terminal-capacity ignore.
+nb_drones: 3
+start_hub: start 0 0 [zone=blocked color=green max_drones=1]
+hub: normal 1 0
+hub: blocked 2 0 [zone=blocked color=black max_drones=2]
+hub: restricted 3 0 [zone=restricted color=orange]
+hub: priority 4 0 [zone=priority color=gold max_drones=3]
+end_hub: goal 5 0 [color=red max_drones=1]
+connection: start-normal [max_link_capacity=2]
+connection: normal-blocked
+connection: blocked-restricted [max_link_capacity=3]
+connection: restricted-priority
+connection: priority-goal

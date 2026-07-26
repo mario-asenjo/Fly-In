@@ -1,5 +1,21 @@
 """Fly-In domain types."""
 
-from flyin.domain.model import Connection, Metadata, ParsedMap, Zone
+from flyin.domain.model import (
+    CapacityLimit,
+    Connection,
+    EffectiveCapacity,
+    Metadata,
+    ParsedMap,
+    Zone,
+    ZoneType,
+)
 
-__all__ = ["Connection", "Metadata", "ParsedMap", "Zone"]
+__all__ = [
+    "CapacityLimit",
+    "Connection",
+    "EffectiveCapacity",
+    "Metadata",
+    "ParsedMap",
+    "Zone",
+    "ZoneType",
+]

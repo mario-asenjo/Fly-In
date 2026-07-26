@@ -9,11 +9,11 @@ Only mark `EVIDENCED` with a test, command, file, or demonstrated output.
 | OOP | Proper separation/encapsulation, justified inheritance only | Package design + explanation | NOT_STARTED |
 | Type safety | `mypy .` no errors/full hints | CI/local command log | NOT_STARTED |
 | Custom graph | No forbidden graph library; explain implementation | Dependency audit + graph tests | NOT_STARTED |
-| Parser valid input | Drone count, zone prefixes, connections, defaults, comments | M1.1-M1.4 topology/metadata + M1.5 inline comments + all 10 official maps | IN_PROGRESS |
-| Parser errors | Malformed, invalid types, missing terminals, capacity, duplicates | M1.5 terminal/name/endpoint errors + M1.6 exact/reversed duplicates; later full matrix | IN_PROGRESS |
-| Zone occupancy | Default/explicit capacity, start/end unlimited, same-turn releases | Validator/simulator tests | NOT_STARTED |
+| Parser valid input | Drone count, zone prefixes, connections, defaults, comments | M1.1-M1.8 tests + permanent official easy 01 input + all 10 official maps | IN_PROGRESS |
+| Parser errors | Malformed, invalid types, missing terminals, capacity, duplicates | M1.5-M1.6 structure + M1.7 type + M1.8 capacity errors; M1.9 full matrix | IN_PROGRESS |
+| Zone occupancy | Default/explicit capacity, start/end unlimited, same-turn releases | M1.8 typed/default/unlimited parsing; later validator/simulator tests | IN_PROGRESS |
 | Movement cost | Normal/priority 1, restricted 2, blocked inaccessible | State-transition tests | NOT_STARTED |
-| Link capacity | Default/explicit, simultaneous enforcement | Reservation tests | NOT_STARTED |
+| Link capacity | Default/explicit, simultaneous enforcement | M1.8 default/explicit parsing; later reservation tests | IN_PROGRESS |
 | Visualization | Clear positions/movement/colors/capacity | Terminal demo then React | NOT_STARTED |
 | Basic scenarios | Single/multiple/maps/output/stationary omission | CLI integration tests | NOT_STARTED |
 | Termination | Stop exactly after all delivered | CLI/simulator test | NOT_STARTED |

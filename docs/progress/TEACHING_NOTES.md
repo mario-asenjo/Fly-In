@@ -1,5 +1,45 @@
 # Teaching notes ledger
 
+## M1.7-M1.8 - Typed metadata and effective capacities
+
+### Problem and observable behavior
+
+Raw `key=value` pairs preserve source fidelity but cannot safely drive routing or scheduling. The
+parser now projects supported valid metadata into typed, immutable domain fields: zone behavior,
+color, regular-zone capacity, link capacity, and explicit unlimited terminal capacity.
+
+### Flow and involved classes
+
+`MapParser` still produces canonical raw `Metadata`, then converts `zone` to `ZoneType`, projects
+`color`, and parses positive capacities. `Zone` stores both raw metadata and effective fields.
+`Connection` stores raw metadata and effective link capacity. `CapacityLimit.UNLIMITED` makes the
+terminal rule explicit instead of inventing a large numeric sentinel or coupling it to drone count.
+
+### Invariants and complexity
+
+Regular zones and links default to capacity one; explicit values are positive integers. Start/end
+remain unlimited even when a valid `max_drones` declaration is retained. Zone type defaults to
+normal and is one of four enum values. Each metadata projection scans only the small canonical tuple,
+so parsing remains linear in declarations apart from the existing per-block metadata sort.
+
+### Official and derived examples
+
+The permanent official-map test reads `easy/01_linear_path.txt`, asserts its first line is the real
+title comment, then passes the complete unmodified text to `MapParser.parse()`. This proves file I/O
+can stay outside the parser while real leading comments are accepted. A provenance-commented derived
+fixture separately covers blocked/restricted/priority types, colors, explicit capacities, defaults,
+and ignored terminal capacity declarations.
+
+### Tests and non-goals
+
+Tests cover every zone enum, optional/default color, zone/link defaults and explicit values,
+terminal unlimited state, raw metadata retention, invalid types, zero/non-numeric capacities, and
+official text input. M1.9 malformed syntax/error codes, graph adjacency, movement costs, occupancy
+enforcement, pathfinding, simulation, and CLI remain out of scope.
+
+Learner check pending: explain the difference between declared metadata and effective domain state,
+and why unlimited is an enum state rather than an arbitrarily large integer.
+
 ## M1.5-M1.6 - Structural identity and undirected duplicates
 
 ### Problem and observable behavior

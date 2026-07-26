@@ -1,5 +1,27 @@
 # Session log
 
+## 2026-07-26 - M1.7-M1.8 metadata semantics and official-map regression
+
+- Added typed `ZoneType` values for normal, blocked, restricted, and priority zones plus optional
+  color projection from preserved raw metadata.
+- Added default/explicit positive capacities for regular zones and connections.
+- Added explicit `CapacityLimit.UNLIMITED` for start/end while retaining and syntax-validating their
+  declared `max_drones` metadata according to ADR-0004 and the current Q13 interpretation.
+- Kept terminal effective type normal under the current Q9 interpretation; raw `zone` metadata is
+  retained for source fidelity pending parser lock.
+- Added a provenance-commented derived fixture covering every type/capacity rule.
+- Added a permanent test that reads official v1.5 easy 01 as text, proves its first line is the title
+  comment, and passes that unmodified content to `MapParser.parse()`.
+- TDD RED was the expected missing `CapacityLimit` import. GREEN has eighteen tests and strict gates.
+- All ten official maps parse semantically: 130 regular hubs, 180 links, 32 restricted hubs,
+  20 priority hubs, 55 explicit zone capacities above one, and 26 link capacities above one; every
+  terminal has unlimited effective capacity.
+- Initial Ponytail full review requested explicit Q9 regression coverage and stronger derived-fixture
+  provenance. The fixture now declares blocked metadata on start, the test proves effective normal
+  plus raw retention, and its header records source, assumption, and purpose. Follow-up verdict:
+  `ACEPTAR`, with both findings resolved and no new blocker.
+- M1.9 remains deliberately separate as the final malformed-input and stable-error taxonomy slice.
+
 ## 2026-07-25 - M1.5-M1.6 structural integrity and inline comments
 
 - Combined adjacent cross-line constraints: exactly one start/end, globally unique zone names,
