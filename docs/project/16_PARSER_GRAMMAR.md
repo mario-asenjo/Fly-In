@@ -34,7 +34,7 @@ fields and is prohibited inside names.
 Keep lexical/syntax errors distinct from semantic/domain errors when useful, but expose one stable
 user error shape.
 
-## Proposed stable error codes
+## Stable error codes
 
 | Code | Example |
 | --- | --- |
@@ -61,7 +61,6 @@ every punctuation mark unless the CLI contract promises exact prose.
 
 ## Terminal capacity nuance
 
-Parse positive-integer syntax when `max_drones` appears on start/end, then ignore it for effective
-capacity. The subject says metadata is ignored and not a validation error; an unresolved edge case
-is whether a syntactically invalid value should also be ignored. Safest current interpretation:
-metadata syntax remains valid, but its valid numeric value has no capacity effect.
+When `max_drones` appears on start/end, preserve its non-empty raw `key=value` token but do not
+validate the value numerically. Fly-In 1.5 section VII.4 says the metadata is ignored and is not a
+validation error. Effective terminal capacity is always unlimited.

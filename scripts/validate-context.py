@@ -102,7 +102,12 @@ def validate_links(errors: list[str]) -> None:
                 resolved.relative_to(ROOT)
             except ValueError:
                 relative = str(path.relative_to(ROOT))
-                message = "link escapes repository: " + relative + " -> " + target
+                message = (
+                    "link escapes repository: "
+                    + relative
+                    + " -> "
+                    + target
+                )
                 errors.append(message)
                 continue
             if not resolved.exists():

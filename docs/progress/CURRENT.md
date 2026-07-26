@@ -1,9 +1,9 @@
 # Current project state
 
 - Last updated: 2026-07-26
-- Current milestone: M1 - Parser vertical slices
-- Production implementation: M1.8 interprets zone metadata and effective capacities
-- Mandatory completion: M0 plus parser slices M1.1-M1.8 are complete
+- Current milestone: M1 - Parser complete
+- Production implementation: M1.9 locks valid input and stable parser errors
+- Mandatory completion: M0 plus parser slices M1.1-M1.9 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -34,29 +34,35 @@
   start/end effective capacity explicitly as unlimited while retaining ignored declarations.
 - A permanent integration test feeds the actual official easy 01 file content, including its first
   title-comment line, into the text parser; all ten official maps also pass semantic verification.
-- The focused test, full pytest suite, `flake8`, and `mypy --strict` pass.
+- A named regression proves the title comment is optional: `nb_drones` may be the first physical
+  line or the first significant line after comments.
+- M1.9 validates the complete malformed-input matrix and exposes stable `MapParseErrorCode`,
+  physical line, human-readable cause, and a bounded declaration excerpt.
+- Terminal `max_drones` is preserved raw but ignored without numeric validation, exactly as Fly-In
+  1.5 section VII.4 requires; effective terminal capacity remains unlimited.
+- The repository has no Flake8 configuration file. The literal subject command `flake8 .` passes
+  with Flake8's default 79-character rule, as do pytest and `mypy --strict`.
 
 ## Next smallest slice
 
-Complete M1.9 as the parser-lock slice:
+Begin M2.1 with the smallest custom undirected graph slice:
 
-- expose stable error codes, physical line, cause, and safe excerpt;
-- reject empty/malformed drone counts, fields, coordinates, names, and metadata blocks;
-- reject unknown/duplicate metadata and self-connections under the current strict policy;
-- preserve all M1.1-M1.8 behavior and official-map compatibility;
-- explicitly record remaining Q1/Q3/Q4/Q5/Q9/Q13 interpretations before parser lock.
+- build adjacency from `ParsedMap.connections` without a graph library;
+- preserve canonical physical connection identity and source endpoint objects;
+- exclude blocked zones from traversable adjacency while retaining them in parsed map data;
+- prove one linear valid route and one blocked route boundary without adding pathfinding yet.
 
-Keep pathfinding, adjacency filtering, movement cost, simulation, scheduling, and CLI out of M1.9.
+Keep shortest-path search, movement cost, scheduling, simulation, and CLI out of M2.1.
 Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers
 
-None. M1 is one bounded malformed-input/error-taxonomy slice from completion.
+None. M1 is complete and parser interpretations are locked and documented.
 
 ## Required context for next session
 
 - `AGENTS.md`
 - `docs/project/02_SOURCE_OF_TRUTH.md`
 - Parser parts of `docs/project/03_DOMAIN_CONTRACT.md`
-- `docs/project/05_ROADMAP.md` M0/M1
+- `docs/project/05_ROADMAP.md` M2
 - `docs/progress/OPEN_QUESTIONS.md`

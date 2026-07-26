@@ -1,5 +1,46 @@
 # Teaching notes ledger
 
+## M1.9 - Parser lock and stable errors
+
+### Problem and observable behavior
+
+A parser must reject invalid input deliberately instead of leaking `ValueError`, accepting typos,
+or changing behavior based on tag order. The first physical line may be an optional comment; the
+first significant line must be `nb_drones: <positive_integer>`.
+
+### Flow and involved classes
+
+`MapParser` first keeps physical line numbers while removing comments and blanks. It then validates
+the drone declaration, classifies each declaration, separates one trailing metadata block, validates
+tokens and local values, and finally applies cross-line map invariants. `MapParseErrorCode` gives
+callers a stable category. `MapParseError` carries that code, line, cause, and a bounded excerpt.
+
+### Invariants and complexity
+
+Metadata keys are supported and unique for their declaration context; coordinates are integers;
+regular capacities are positive; names exclude spaces and dashes; endpoints already exist; and an
+undirected physical connection occurs once and never links a zone to itself. Terminal `max_drones`
+is raw diagnostic metadata only, so its value is not numerically validated and effective capacity
+remains unlimited. Parsing remains O(n + sum(k_i log k_i)) time and O(n) space.
+
+### Examples and tests
+
+Both `nb_drones: 1` and `# optional title` followed by `nb_drones: 1` parse. A line such as
+`hub: bad 1 0 [color=red color=blue]` raises `DUPLICATE_METADATA` on that physical line. A terminal
+`[max_drones=invalid]` is retained raw without limiting occupancy, following Fly-In 1.5 VII.4.
+Sixty-four tests cover valid input, malformed syntax, oversized integers, stable errors, both
+comment variants, and regressions from M1.1-M1.8; all ten official maps remain compatible.
+
+### Flake8 and connection identity
+
+There is no Flake8 configuration file. The Makefile executes the subject's literal `flake8 .`
+command against the default 79-character standard while uv keeps dependencies outside the tree.
+`Connection.left` and `right` preserve source endpoint order. `identity` sorts only their names to
+create one undirected lookup key, so `a-b` and `b-a` compare as the same physical connection.
+
+Learner check pending: explain why error code and prose are separate, and why endpoint source order
+must coexist with an order-independent physical connection key.
+
 ## M1.7-M1.8 - Typed metadata and effective capacities
 
 ### Problem and observable behavior
@@ -18,7 +59,7 @@ terminal rule explicit instead of inventing a large numeric sentinel or coupling
 ### Invariants and complexity
 
 Regular zones and links default to capacity one; explicit values are positive integers. Start/end
-remain unlimited even when a valid `max_drones` declaration is retained. Zone type defaults to
+remain unlimited when a `max_drones` declaration is retained. Zone type defaults to
 normal and is one of four enum values. Each metadata projection scans only the small canonical tuple,
 so parsing remains linear in declarations apart from the existing per-block metadata sort.
 
@@ -33,9 +74,9 @@ and ignored terminal capacity declarations.
 ### Tests and non-goals
 
 Tests cover every zone enum, optional/default color, zone/link defaults and explicit values,
-terminal unlimited state, raw metadata retention, invalid types, zero/non-numeric capacities, and
-official text input. M1.9 malformed syntax/error codes, graph adjacency, movement costs, occupancy
-enforcement, pathfinding, simulation, and CLI remain out of scope.
+terminal unlimited state, raw metadata retention, invalid types, zero/non-numeric regular
+capacities, and official text input. M1.9 later completed malformed syntax and stable errors; graph
+adjacency, movement costs, occupancy enforcement, pathfinding, simulation, and CLI remain out.
 
 Learner check pending: explain the difference between declared metadata and effective domain state,
 and why unlimited is an enum state rather than an arbitrarily large integer.
