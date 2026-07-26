@@ -1,8 +1,27 @@
 """Core map types for the Fly-In domain."""
 
 from dataclasses import dataclass
+from enum import StrEnum
 
 Metadata = tuple[tuple[str, str], ...]
+
+
+class ZoneType(StrEnum):
+    """The effective routing behavior of a zone."""
+
+    NORMAL = "normal"
+    BLOCKED = "blocked"
+    RESTRICTED = "restricted"
+    PRIORITY = "priority"
+
+
+class CapacityLimit(StrEnum):
+    """A non-numeric effective capacity state."""
+
+    UNLIMITED = "unlimited"
+
+
+EffectiveCapacity = int | CapacityLimit
 
 
 @dataclass(frozen=True, slots=True)
@@ -13,6 +32,9 @@ class Zone:
     x: int
     y: int
     metadata: Metadata = ()
+    zone_type: ZoneType = ZoneType.NORMAL
+    color: str | None = None
+    capacity: EffectiveCapacity = 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -22,6 +44,7 @@ class Connection:
     left: Zone
     right: Zone
     metadata: Metadata = ()
+    capacity: int = 1
 
     @property
     def identity(self) -> tuple[str, str]:

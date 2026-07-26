@@ -1,9 +1,9 @@
 # Current project state
 
-- Last updated: 2026-07-25
+- Last updated: 2026-07-26
 - Current milestone: M1 - Parser vertical slices
-- Production implementation: M1.6 validates structural identity and undirected connection uniqueness
-- Mandatory completion: M0 plus parser slices M1.1-M1.6 are complete
+- Production implementation: M1.8 interprets zone metadata and effective capacities
+- Mandatory completion: M0 plus parser slices M1.1-M1.8 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -28,26 +28,30 @@
 - M1.6 rejects exact and reversed duplicate connections through canonical unordered identity while
   preserving directed `left`/`right` endpoints.
 - Inline `#` comments are supported by the same physical-line normalization used for full comments.
-- All ten official v1.5 maps parse through this boundary in direct local verification.
+- M1.7 exposes typed normal/blocked/restricted/priority zones and optional colors while preserving
+  canonical raw metadata.
+- M1.8 applies positive default/explicit capacities to regular zones and links, and represents
+  start/end effective capacity explicitly as unlimited while retaining ignored declarations.
+- A permanent integration test feeds the actual official easy 01 file content, including its first
+  title-comment line, into the text parser; all ten official maps also pass semantic verification.
 - The focused test, full pytest suite, `flake8`, and `mypy --strict` pass.
 
 ## Next smallest slice
 
-Define and approve M1.7-M1.8 as one coherent metadata-semantics slice:
+Complete M1.9 as the parser-lock slice:
 
-- interpret `zone` into an explicit normal/blocked/restricted/priority type;
-- expose optional color without using it for authoritative routing;
-- interpret default/explicit regular-zone and connection capacities;
-- represent terminal effective capacity as unlimited while retaining ignored declared metadata;
-- validate the supported metadata values with physical-line errors.
+- expose stable error codes, physical line, cause, and safe excerpt;
+- reject empty/malformed drone counts, fields, coordinates, names, and metadata blocks;
+- reject unknown/duplicate metadata and self-connections under the current strict policy;
+- preserve all M1.1-M1.8 behavior and official-map compatibility;
+- explicitly record remaining Q1/Q3/Q4/Q5/Q9/Q13 interpretations before parser lock.
 
-Keep pathfinding, adjacency filtering, movement cost, simulation, scheduling, and CLI out of this
-parser/domain slice. Decide the self-loop policy before parser lock.
+Keep pathfinding, adjacency filtering, movement cost, simulation, scheduling, and CLI out of M1.9.
 Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers
 
-None. The parser milestone remains intentionally incomplete beyond the proven M1.6 grammar.
+None. M1 is one bounded malformed-input/error-taxonomy slice from completion.
 
 ## Required context for next session
 

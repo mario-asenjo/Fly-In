@@ -1,6 +1,13 @@
 """Parser for the currently supported Fly-In map contract."""
 
-from flyin.domain import Connection, Metadata, ParsedMap, Zone
+from flyin.domain import (
+    CapacityLimit,
+    Connection,
+    Metadata,
+    ParsedMap,
+    Zone,
+    ZoneType,
+)
 
 
 class MapParseError(ValueError):
@@ -38,12 +45,22 @@ class MapParser:
             if line.startswith("start_hub: "):
                 if start is not None:
                     raise MapParseError(line_number, "duplicate start_hub")
-                start = self._parse_zone(line_number, line, "start_hub: ")
+                start = self._parse_zone(
+                    line_number,
+                    line,
+                    "start_hub: ",
+                    is_terminal=True,
+                )
                 self._register_zone(line_number, start, zones)
             elif line.startswith("end_hub: "):
                 if end is not None:
                     raise MapParseError(line_number, "duplicate end_hub")
-                end = self._parse_zone(line_number, line, "end_hub: ")
+                end = self._parse_zone(
+                    line_number,
+                    line,
+                    "end_hub: ",
+                    is_terminal=True,
+                )
                 self._register_zone(line_number, end, zones)
             elif line.startswith("hub: "):
                 hub = self._parse_zone(line_number, line, "hub: ")
@@ -102,13 +119,80 @@ class MapParser:
                     line_number,
                     f"unknown connection zone: {zone_name}",
                 )
-        return Connection(zones[left_name], zones[right_name], metadata)
+        capacity = MapParser._parse_capacity(
+            line_number,
+            metadata,
+            "max_link_capacity",
+        )
+        return Connection(
+            zones[left_name],
+            zones[right_name],
+            metadata,
+            capacity,
+        )
 
     @staticmethod
-    def _parse_zone(line_number: int, line: str, prefix: str) -> Zone:
+    def _parse_zone(
+        line_number: int,
+        line: str,
+        prefix: str,
+        is_terminal: bool = False,
+    ) -> Zone:
         structural, metadata = MapParser._split_metadata(line_number, line)
         name, x, y = structural.removeprefix(prefix).split()
-        return Zone(name, int(x), int(y), metadata)
+        zone_type = MapParser._parse_zone_type(line_number, metadata)
+        declared_capacity = MapParser._parse_capacity(
+            line_number,
+            metadata,
+            "max_drones",
+        )
+        effective_zone_type = ZoneType.NORMAL if is_terminal else zone_type
+        effective_capacity = (
+            CapacityLimit.UNLIMITED if is_terminal else declared_capacity
+        )
+        return Zone(
+            name,
+            int(x),
+            int(y),
+            metadata,
+            effective_zone_type,
+            dict(metadata).get("color"),
+            effective_capacity,
+        )
+
+    @staticmethod
+    def _parse_zone_type(line_number: int, metadata: Metadata) -> ZoneType:
+        raw_zone_type = dict(metadata).get("zone", ZoneType.NORMAL)
+        try:
+            return ZoneType(raw_zone_type)
+        except ValueError as error:
+            raise MapParseError(
+                line_number,
+                f"invalid zone type: {raw_zone_type}",
+            ) from error
+
+    @staticmethod
+    def _parse_capacity(
+        line_number: int,
+        metadata: Metadata,
+        key: str,
+    ) -> int:
+        raw_capacity = dict(metadata).get(key)
+        if raw_capacity is None:
+            return 1
+        try:
+            capacity = int(raw_capacity)
+        except ValueError as error:
+            raise MapParseError(
+                line_number,
+                f"{key} must be a positive integer",
+            ) from error
+        if capacity <= 0:
+            raise MapParseError(
+                line_number,
+                f"{key} must be a positive integer",
+            )
+        return capacity
 
     @staticmethod
     def _split_metadata(line_number: int, line: str) -> tuple[str, Metadata]:
