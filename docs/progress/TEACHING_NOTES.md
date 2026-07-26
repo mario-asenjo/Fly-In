@@ -1,5 +1,42 @@
 # Teaching notes ledger
 
+## M2.1-M2.3 - Traversable graph and reverse-hop A* heuristic
+
+### Problem and observable behavior
+
+The parser preserves every valid zone and connection, but pathfinding needs a separate view that
+answers “where can a drone legally go?” Blocked zones stay in parsed map data for diagnostics and
+future visualization, but they are not traversable. Disconnected starts must fail clearly instead of
+letting a planner loop forever.
+
+### Flow and involved classes
+
+`MapParser` still returns a `ParsedMap`. `TraversableGraph.from_parsed_map()` projects that map into
+deterministic undirected adjacency: every physical connection contributes two traversals unless one
+endpoint is blocked. A `Traversal` carries the destination `Zone` and the original `Connection`, so
+future path output can still recover the physical link. `ReverseHopDistances.to_end()` then runs
+reverse BFS from the end over this graph and stores remaining hop counts.
+
+### Invariant and complexity
+
+Blocked zones have no traversable neighbors, but their `Zone` objects remain in `ParsedMap.hubs`.
+Connection source identity is preserved: traversing `start -> alpha` and `alpha -> start` refers to
+the same physical `Connection`. Graph construction is O(V + E) time and space. Reverse BFS is also
+O(V + E), and its hop count is an admissible A* heuristic because each remaining move costs at
+least one turn.
+
+### Example and tests
+
+For `start-alpha-end`, the reverse-hop table is `end=0`, `alpha=1`, and `start=2`. If the only path
+from start to end passes through `hub: blocked ... [zone=blocked]`, `start` is absent from the table
+and `hops_from(start)` raises `NoRouteError`. `tests/test_traversable_graph.py` covers bidirectional
+adjacency, blocked exclusion, reachable hop counts, and blocked/dead-end no-route behavior.
+
+### Deliberate non-goals
+
+M2.1-M2.3 do not choose a weighted route, reconstruct a path, rank priority zones, schedule several
+drones, simulate turns, or print evaluator stdout. Those remain M2.4-M2.5 and M3+.
+
 ## M1.9 - Parser lock and stable errors
 
 ### Problem and observable behavior

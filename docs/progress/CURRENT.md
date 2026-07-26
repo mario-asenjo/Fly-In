@@ -1,9 +1,9 @@
 # Current project state
 
 - Last updated: 2026-07-26
-- Current milestone: M1 - Parser complete
-- Production implementation: M1.9 locks valid input and stable parser errors
-- Mandatory completion: M0 plus parser slices M1.1-M1.9 are complete
+- Current milestone: M2 - Custom graph and path correctness
+- Production implementation: M2.1-M2.3 build traversable adjacency, reachability, and reverse-hop heuristic
+- Mandatory completion: M0, parser slices M1.1-M1.9, and graph slices M2.1-M2.3 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -42,17 +42,23 @@
   1.5 section VII.4 requires; effective terminal capacity remains unlimited.
 - The repository has no Flake8 configuration file. The literal subject command `flake8 .` passes
   with Flake8's default 79-character rule, as do pytest and `mypy --strict`.
+- M2.1 builds a custom undirected traversable graph from parsed physical connections without a graph
+  library while excluding blocked zones from adjacency.
+- M2.2 exposes a clear no-route boundary for disconnected/blocked maps rather than leaking raw
+  lookup errors or looping.
+- M2.3 computes reverse BFS hop distances to the end as the planned admissible A* heuristic; blocked
+  and dead-end zones are absent from the reachable table.
 
 ## Next smallest slice
 
-Begin M2.1 with the smallest custom undirected graph slice:
+Begin M2.4-M2.5 with exact A* pathfinding and deterministic route ranking:
 
-- build adjacency from `ParsedMap.connections` without a graph library;
-- preserve canonical physical connection identity and source endpoint objects;
-- exclude blocked zones from traversable adjacency while retaining them in parsed map data;
-- prove one linear valid route and one blocked route boundary without adding pathfinding yet.
+- implement the `heapq` A* loop over the existing `TraversableGraph`;
+- use destination movement costs: normal/priority 1, restricted 2, blocked unreachable;
+- use `ReverseHopDistances` as the admissible heuristic and keep `h = 0` as the test/debug oracle;
+- lock deterministic priority/tie-break behavior without letting priority choose a worse-cost route.
 
-Keep shortest-path search, movement cost, scheduling, simulation, and CLI out of M2.1.
+Keep multi-path allocation, scheduling, simulation, and CLI output out of M2.4-M2.5.
 Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers
@@ -63,6 +69,6 @@ None. M1 is complete and parser interpretations are locked and documented.
 
 - `AGENTS.md`
 - `docs/project/02_SOURCE_OF_TRUTH.md`
-- Parser parts of `docs/project/03_DOMAIN_CONTRACT.md`
+- Graph/pathfinding parts of `docs/project/03_DOMAIN_CONTRACT.md`
 - `docs/project/05_ROADMAP.md` M2
 - `docs/progress/OPEN_QUESTIONS.md`

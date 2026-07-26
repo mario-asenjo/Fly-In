@@ -1,5 +1,29 @@
 # Session log
 
+## 2026-07-26 - M2.1-M2.3 graph foundation and A* heuristic
+
+- Added `flyin.pathfinding` with a custom `TraversableGraph` projection over `ParsedMap` physical
+  connections; the graph is bidirectional, deterministic, and excludes blocked zones from adjacency.
+- Added `ReverseHopDistances.to_end()` using reverse BFS from the end hub. It proves reachability,
+  returns a clear `NoRouteError` for unreachable starts/dead ends, and provides the planned
+  admissible A* heuristic for M2.4.
+- Kept weighted A*, priority ranking, path reconstruction, scheduling, simulation, CLI output, and
+  visualization out of this slice.
+- TDD RED was the expected missing `flyin.pathfinding` module. GREEN has focused graph tests for
+  bidirectional adjacency, blocked exclusion, reachability hops, and blocked/dead-end no-route.
+- Fresh gates passed with 68 tests, raw Flake8, mypy, and context validation.
+
+## 2026-07-26 - M2 A* planning breakdown
+
+- Analyzed A* viability for Fly-In M2. It is acceptable if used as an exact shortest-path
+  algorithm, not as a speculative optimizer.
+- Rejected coordinate-distance heuristics because Fly-In edges are explicit and a long coordinate
+  jump can still cost one turn, so Euclidean/Manhattan distance can overestimate.
+- Chose reverse BFS hop distance over traversable edges as the planned admissible/consistent
+  heuristic; `h = 0` remains the Dijkstra-equivalent fallback for debugging.
+- Updated the M2 roadmap, graph contract, algorithm design notes, decision log, and GitHub M2
+  issues/project to reflect A* as the weighted one-drone pathfinding approach.
+
 ## 2026-07-26 - M1.9 parser lock and raw Flake8 compliance
 
 - Added an explicit two-variant regression proving that a leading title comment is optional:
