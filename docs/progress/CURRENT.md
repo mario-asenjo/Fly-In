@@ -1,8 +1,9 @@
 # Current project state
 
 - Last updated: 2026-07-26
-- Current milestone: M2 - Custom graph and path correctness
-- Production implementation: M2.6 closes the one-drone pathfinding matrix
+- Current milestone: M3 - Deterministic simulation engine
+- Production implementation: M3.1-M3.3 adds typed drone snapshots, normal-turn simulation, and
+  evaluator-safe turn formatting
 - Mandatory completion: M0, parser slices M1.1-M1.9, and graph/path slices M2.1-M2.6 are complete
 - API/UI/EDA implementation: intentionally not started
 
@@ -56,26 +57,28 @@
   priority tie-breaks, blocked/disconnected maps, loop safety, and dead-end/lateral-branch handling.
 - A* expansion now skips neighbors absent from the reverse-hop table before calculating `h`, keeping
   heuristic lookup failures away from otherwise valid routes.
+- M3.1 introduces explicit `Drone` objects with `AtZone`, `InTransit`, and `Delivered` location
+  states, plus immutable `SimulationState.initial()` snapshots with stable one-based drone IDs.
+- M3.2 applies a deterministic atomic one-turn transition for known normal/priority routes and
+  moves drones reaching the end into `Delivered` so later turns emit no extra facts for them.
+- M3.3 formats completed movement facts as evaluator-safe `D<ID>-<zone>` tokens ordered by drone ID,
+  without wiring the temporary CLI stdout yet.
 
 ## Next smallest slice
 
-Begin M3 with the deterministic simulation engine:
-
-- define the explicit drone state machine;
-- apply one deterministic turn transition for a known one-drone route;
-- keep evaluator stdout formatting separate until the simulator emits enough facts to format safely.
-
-Keep capacity-aware scheduling, optimization, API/UI, and visualization out of the first M3 slice.
-Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
+Continue M3 with #29: restricted two-turn transit and mandatory arrival. Keep independent schedule
+validation (#30), capacity-aware scheduling, optimization, API/UI, and visualization out of that
+slice. Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers
 
-None. M1 is complete and parser interpretations are locked and documented.
+None. M2 is complete and parser/pathfinding interpretations are locked and documented.
 
 ## Required context for next session
 
 - `AGENTS.md`
 - `docs/project/02_SOURCE_OF_TRUTH.md`
-- Graph/pathfinding parts of `docs/project/03_DOMAIN_CONTRACT.md`
-- `docs/project/05_ROADMAP.md` M2
+- Drone state, turn semantics, restricted movement, capacity invariants, and output sections of
+  `docs/project/03_DOMAIN_CONTRACT.md`
+- `docs/project/05_ROADMAP.md` M3
 - `docs/progress/OPEN_QUESTIONS.md`
