@@ -72,11 +72,6 @@ class MovementFact:
     origin: Zone
     destination: Zone
 
-    @property
-    def token(self) -> str:
-        """Return the mandatory stdout token for a zone arrival."""
-        return f"D{self.drone_id}-{self.destination.name}"
-
 
 @dataclass(frozen=True, slots=True)
 class TransitFact:
@@ -86,11 +81,6 @@ class TransitFact:
     connection: Connection
     origin: Zone
     destination: Zone
-
-    @property
-    def token(self) -> str:
-        """Return the proposed directed in-transit token."""
-        return f"D{self.drone_id}-{self.origin.name}-{self.destination.name}"
 
 
 TurnFact = MovementFact | TransitFact
