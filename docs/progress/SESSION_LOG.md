@@ -1,5 +1,18 @@
 # Session log
 
+## 2026-07-27 - M4-B link and restricted reservation scheduler
+
+- Extended `KnownRouteScheduler` with per-turn link-capacity reservations using the connection's
+  unordered physical identity, so capacity is shared by both traversal directions.
+- Added scheduler regressions for default link capacity queuing, explicit `max_link_capacity > 1`,
+  opposite-direction traversals over the same physical link, and same-arrival restricted destination
+  reservations.
+- Resolved Q6 as a project decision: link capacity is aggregated across both directions. Q8 remains
+  open only for evaluator confirmation of the exact restricted link-occupancy window during transit;
+  M4-B covers destination capacity reservation for restricted arrivals.
+- Kept multiple candidate paths, route allocation, strategic waiting, deadlock handling, benchmark
+  optimization, CLI wiring, API/UI, and visualization out of this slice.
+
 ## 2026-07-27 - M4-A regular-zone capacity scheduler
 
 - Added `flyin.scheduling.KnownRouteScheduler` as the first capacity-aware scheduling seam over

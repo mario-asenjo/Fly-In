@@ -2,7 +2,7 @@
 
 from typing import Mapping
 
-from flyin.domain import CapacityLimit, ParsedMap, Zone
+from flyin.domain import CapacityLimit, Connection, ParsedMap, Zone, ZoneType
 from flyin.pathfinding import Route
 from flyin.simulation import (
     AtZone,
@@ -46,6 +46,8 @@ class KnownRouteScheduler:
         routes_by_drone_id: Mapping[int, Route],
     ) -> dict[int, Route]:
         occupancy = cls._regular_zone_occupancy(state)
+        link_usage: dict[tuple[str, str], int] = {}
+        restricted_arrivals: dict[str, int] = {}
         selected: dict[int, Route] = {}
         for drone in cls._departure_order(state, routes_by_drone_id):
             if not isinstance(drone.location, AtZone):
@@ -53,13 +55,28 @@ class KnownRouteScheduler:
                 selected[drone.identifier] = route
                 continue
             route = routes_by_drone_id[drone.identifier]
-            next_zone = cls._next_zone(route, drone.location.zone)
-            if next_zone is None:
+            next_step = cls._next_step(route, drone.location.zone)
+            if next_step is None:
                 continue
+            next_zone, connection = next_step
             if not cls._has_destination_capacity(state, next_zone, occupancy):
                 continue
+            if not cls._has_link_capacity(connection, link_usage):
+                continue
+            if not cls._has_restricted_arrival_capacity(
+                next_zone,
+                restricted_arrivals,
+            ):
+                continue
             cls._release_origin_capacity(state, drone.location.zone, occupancy)
-            cls._reserve_destination_capacity(state, next_zone, occupancy)
+            cls._count_link_use(link_usage, connection)
+            if next_zone.zone_type is ZoneType.RESTRICTED:
+                cls._reserve_restricted_arrival(
+                    next_zone,
+                    restricted_arrivals,
+                )
+            else:
+                cls._reserve_destination_capacity(state, next_zone, occupancy)
             selected[drone.identifier] = route
         return selected
 
@@ -105,10 +122,13 @@ class KnownRouteScheduler:
         return 0
 
     @staticmethod
-    def _next_zone(route: Route, current_zone: Zone) -> Zone | None:
+    def _next_step(
+        route: Route,
+        current_zone: Zone,
+    ) -> tuple[Zone, Connection] | None:
         for index, zone in enumerate(route.zones[:-1]):
             if zone.name == current_zone.name:
-                return route.zones[index + 1]
+                return route.zones[index + 1], route.connections[index]
         return None
 
     @staticmethod
@@ -135,7 +155,28 @@ class KnownRouteScheduler:
             return True
         if destination.capacity is CapacityLimit.UNLIMITED:
             return True
+        if destination.zone_type is ZoneType.RESTRICTED:
+            return True
         return occupancy.get(destination.name, 0) < destination.capacity
+
+    @staticmethod
+    def _has_link_capacity(
+        connection: Connection,
+        link_usage: Mapping[tuple[str, str], int],
+    ) -> bool:
+        return link_usage.get(connection.identity, 0) < connection.capacity
+
+    @staticmethod
+    def _has_restricted_arrival_capacity(
+        destination: Zone,
+        restricted_arrivals: Mapping[str, int],
+    ) -> bool:
+        if destination.zone_type is not ZoneType.RESTRICTED:
+            return True
+        if destination.capacity is CapacityLimit.UNLIMITED:
+            return True
+        reserved_arrivals = restricted_arrivals.get(destination.name, 0)
+        return reserved_arrivals < destination.capacity
 
     @staticmethod
     def _release_origin_capacity(
@@ -156,3 +197,21 @@ class KnownRouteScheduler:
         if destination.name in (state.start.name, state.end.name):
             return
         occupancy[destination.name] = occupancy.get(destination.name, 0) + 1
+
+    @staticmethod
+    def _count_link_use(
+        link_usage: dict[tuple[str, str], int],
+        connection: Connection,
+    ) -> None:
+        link_usage[connection.identity] = (
+            link_usage.get(connection.identity, 0) + 1
+        )
+
+    @staticmethod
+    def _reserve_restricted_arrival(
+        destination: Zone,
+        restricted_arrivals: dict[str, int],
+    ) -> None:
+        restricted_arrivals[destination.name] = (
+            restricted_arrivals.get(destination.name, 0) + 1
+        )
