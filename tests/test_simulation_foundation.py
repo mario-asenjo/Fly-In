@@ -4,6 +4,7 @@ from flyin.pathfinding import AStarPathfinder
 from flyin.simulation import (
     AtZone,
     Delivered,
+    InTransit,
     MovementFact,
     SimulationEngine,
     SimulationState,
@@ -121,6 +122,62 @@ def test_priority_destination_advances_in_one_turn() -> None:
     drone = result.state.drone_by_id(1)
     assert isinstance(drone.location, AtZone)
     assert drone.location.zone.name == "priority"
+
+
+def test_restricted_destination_uses_transit_then_forced_arrival() -> None:
+    parsed_map = _parse(
+        (
+            "nb_drones: 1",
+            "start_hub: start 0 0",
+            "hub: restricted 1 0 [zone=restricted]",
+            "end_hub: end 2 0",
+            "connection: start-restricted",
+            "connection: restricted-end",
+        )
+    )
+    route = AStarPathfinder.shortest_path(parsed_map)
+    state = SimulationState.initial(parsed_map)
+
+    departure = SimulationEngine.advance_one_turn(state, {1: route})
+    in_flight = departure.state.drone_by_id(1).location
+    arrival = SimulationEngine.advance_one_turn(departure.state, {1: route})
+
+    assert isinstance(in_flight, InTransit)
+    assert in_flight.origin.name == "start"
+    assert in_flight.destination.name == "restricted"
+    assert in_flight.connection.identity == ("restricted", "start")
+    assert in_flight.arrival_turn == 2
+    assert format_turn(departure.facts) == "D1-start-restricted"
+    assert format_turn(arrival.facts) == "D1-restricted"
+    arrived = arrival.state.drone_by_id(1).location
+    assert isinstance(arrived, AtZone)
+    assert arrived.zone.name == "restricted"
+
+
+def test_restricted_arrival_does_not_depart_again_in_same_turn() -> None:
+    parsed_map = _parse(
+        (
+            "nb_drones: 1",
+            "start_hub: start 0 0",
+            "hub: restricted 1 0 [zone=restricted]",
+            "end_hub: end 2 0",
+            "connection: start-restricted",
+            "connection: restricted-end",
+        )
+    )
+    route = AStarPathfinder.shortest_path(parsed_map)
+    departure = SimulationEngine.advance_one_turn(
+        SimulationState.initial(parsed_map),
+        {1: route},
+    )
+
+    arrival = SimulationEngine.advance_one_turn(departure.state, {1: route})
+    delivered = SimulationEngine.advance_one_turn(arrival.state, {1: route})
+
+    assert format_turn(arrival.facts) == "D1-restricted"
+    assert isinstance(arrival.state.drone_by_id(1).location, AtZone)
+    assert format_turn(delivered.facts) == "D1-end"
+    assert isinstance(delivered.state.drone_by_id(1).location, Delivered)
 
 
 def test_delivered_drones_are_removed_from_future_turn_facts() -> None:

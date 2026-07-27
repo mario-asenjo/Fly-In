@@ -1,9 +1,9 @@
 # Current project state
 
-- Last updated: 2026-07-26
+- Last updated: 2026-07-27
 - Current milestone: M3 - Deterministic simulation engine
-- Production implementation: M3.1-M3.3 adds typed drone snapshots, normal-turn simulation, and
-  evaluator-safe turn formatting
+- Production implementation: M3.4 adds restricted two-turn transit and mandatory arrival on top of
+  typed drone snapshots, normal-turn simulation, and evaluator-safe turn formatting
 - Mandatory completion: M0, parser slices M1.1-M1.9, and graph/path slices M2.1-M2.6 are complete
 - API/UI/EDA implementation: intentionally not started
 
@@ -63,12 +63,15 @@
   moves drones reaching the end into `Delivered` so later turns emit no extra facts for them.
 - M3.3 formats completed movement facts as evaluator-safe `D<ID>-<zone>` tokens ordered by drone ID,
   without wiring the temporary CLI stdout yet.
+- M3.4 moves drones entering restricted destinations into `InTransit` for one turn, emits the
+  directed proposed token `D<ID>-<origin>-<destination>`, and forces arrival on the following turn
+  before the route can continue.
 
 ## Next smallest slice
 
-Continue M3 with #29: restricted two-turn transit and mandatory arrival. Keep independent schedule
-validation (#30), capacity-aware scheduling, optimization, API/UI, and visualization out of that
-slice. Replace the temporary `python -m flyin` message only when a real CLI adapter exists.
+Continue M3 with #30: independent schedule validator for known schedules and per-turn invariants.
+Keep capacity-aware scheduling, optimization, API/UI, and visualization out of that slice. Replace
+the temporary `python -m flyin` message only when a real CLI adapter exists.
 
 ## Active blockers
 

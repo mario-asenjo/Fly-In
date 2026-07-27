@@ -1,5 +1,17 @@
 # Session log
 
+## 2026-07-27 - M3.4 restricted transit
+
+- Implemented restricted destination movement as a two-turn transition: departure enters
+  `InTransit`, emits the proposed directed connection token, and stores the mandatory next-turn
+  arrival.
+- The following turn forces arrival to `AtZone` or `Delivered`; the drone does not depart again in
+  the same turn even if a remaining route exists.
+- Kept capacity-aware future reservations, independent schedule validation, route allocation,
+  optimization, CLI wiring, API/UI, and visualization out of this slice.
+- TDD RED was the existing `NotImplementedError` for restricted transit. GREEN has 84 tests, raw
+  Flake8, mypy, and context validation clean.
+
 ## 2026-07-26 - M3.1-M3.3 simulation foundation
 
 - Added `flyin.simulation` with explicit `Drone` objects and `AtZone`, `InTransit`, and `Delivered`
