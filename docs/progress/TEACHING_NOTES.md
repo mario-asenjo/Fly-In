@@ -1,5 +1,43 @@
 # Teaching notes ledger
 
+## M3.1-M3.3 - Drone state, normal turns, and formatter
+
+### Problem and observable behavior
+
+M2 returns a `Route`, but the project still needed a deterministic simulation seam before any
+capacity-aware scheduler. This slice proves the first observable turn flow: create drones at the
+start hub, advance them one normal/priority step along known routes, mark arrivals at the end as
+delivered, and format only movement tokens such as `D1-middle`.
+
+### Flow and involved classes
+
+`SimulationState.initial(parsed_map)` creates one `Drone` per parsed drone count with stable IDs
+starting at one. A drone carries exactly one location object: `AtZone`, `InTransit`, or `Delivered`.
+`SimulationEngine.advance_one_turn(state, routes_by_drone_id)` reads the whole input snapshot,
+builds the next drone tuple and `MovementFact` tuple, then returns a `TurnResult`; it does not mutate
+the previous state. `format_turn()` sorts facts by drone ID and joins their mandatory tokens.
+
+### Invariant and complexity
+
+The active invariant is state exclusivity: a drone cannot be both at a zone and delivered. The turn
+transition is atomic at the slice boundary because all facts are derived from the input state before
+the returned `SimulationState` is exposed. For D drones and route length L, this simple route lookup
+is O(D * L), which is fine for this pre-scheduler seam; M4 can optimize once route allocation exists.
+
+### Example and tests
+
+For `start-middle-end`, turn one emits `D1-middle` and leaves the drone at `middle`; turn two emits
+`D1-end` and stores the drone as `Delivered`; turn three emits an empty fact tuple. With two drones,
+facts are formatted as `D1-first D2-second` even when route input order is `{2: ..., 1: ...}`.
+`tests/test_simulation_foundation.py` protects the initial snapshot, atomic transition, priority as a
+one-turn destination, delivered omission, and formatter ordering.
+
+### Deliberate non-goals
+
+Restricted two-turn transit is deliberately blocked until #29. This slice also does not validate
+external schedules, reserve capacities, choose fleet routes, optimize benchmarks, wire CLI stdout,
+or add API/UI/visualization.
+
 ## M2.6 - Pathfinding closure and dead-branch guard
 
 ### Problem and observable behavior

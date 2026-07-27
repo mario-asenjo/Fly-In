@@ -1,5 +1,30 @@
 # Session log
 
+## 2026-07-26 - M3.1-M3.3 simulation foundation
+
+- Added `flyin.simulation` with explicit `Drone` objects and `AtZone`, `InTransit`, and `Delivered`
+  location states. The initial snapshot creates stable one-based drone IDs at the start hub.
+- Added an atomic normal-turn transition for known routes: it plans from the input state, returns a
+  new `SimulationState`, emits ordered movement facts, and marks end arrivals as `Delivered`.
+- Added evaluator-safe `format_turn()` output for zone movement tokens only; the CLI still stays
+  unwired until a real adapter slice.
+- Kept restricted two-turn transit, capacity-aware scheduling, independent validation, optimization,
+  API/UI, and visualization out of this batch.
+- TDD RED was the expected missing `flyin.simulation` import. GREEN has 82 tests, raw Flake8, and
+  mypy clean.
+
+## 2026-07-26 - M3 planning and GitHub project sync
+
+- Re-verified repository state after M2.6: branch `feat/m2-pathfinding-closure` matches origin with
+  no source diff before planning changes.
+- Fresh gates pass: `make test` runs 77 tests green; `make lint` runs raw Flake8 plus mypy clean.
+- Confirmed M2 is functionally closed and corrected stale Project statuses for closed M2 work.
+- Broke M3 into GitHub issues #26-#31 under umbrella #3 and moved #26 plus #3 to In Progress;
+  #27-#31 remain Todo.
+- Recommended next implementation batch: #26 + #27 + #28, keeping restricted transit, independent
+  validation, capacity-aware scheduling, optimization, API/UI, and visualization outside the first
+  M3 slice.
+
 ## 2026-07-26 - M2.6 pathfinding closure matrix
 
 - Closed the M2 one-drone pathfinding matrix with tests for official linear input, fork tie-breaks,
