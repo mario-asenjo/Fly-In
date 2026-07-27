@@ -17,5 +17,6 @@
 | 2026-07-26 | Run literal `flake8 .` with no Flake8 configuration file | Fly-In 1.5 III.2 + raw gate |
 | 2026-07-26 | Use exact A* for M2 one-drone pathfinding with reverse-BFS hop heuristic | Algorithm design space + M2 planning issues |
 | 2026-07-27 | Use directed `origin-destination` as the internal restricted in-transit token pending evaluator evidence | M3.4 tests + Q7 |
+| 2026-07-27 | Treat undirected link capacity as shared across both traversal directions | M4-B scheduler regression + Q6 |
 
 Append concise accepted decisions here. Detailed rationale belongs in ADRs.

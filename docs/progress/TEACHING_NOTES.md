@@ -1,5 +1,44 @@
 # Teaching notes ledger
 
+## M4-B - Link and restricted arrival reservations
+
+### Problem and observable behavior
+
+M4-A made zone occupancy safe, but a valid schedule can still overuse a physical connection or send
+too many drones toward the same restricted hub for the same forced arrival turn. M4-B adds those two
+reservation checks before a known-route departure is allowed.
+
+### Flow and involved classes
+
+`KnownRouteScheduler` still chooses a subset of routed drones and lets `SimulationEngine` apply the
+turn. During selection it now also counts each selected departure's `Connection.identity`; that key is
+unordered, so `left -> right` and `right -> left` consume the same physical capacity. For restricted
+destinations, the scheduler reserves next-arrival destination capacity instead of counting the drone
+as occupying the hub immediately.
+
+### Invariant and complexity
+
+For every scheduled turn, selected departures must satisfy both `link_usage <= max_link_capacity` and
+the existing post-turn zone occupancy invariant. Same-turn restricted departures reserve their future
+arrival slot so two drones cannot target a capacity-one restricted hub for the same arrival turn. The
+known-route scheduler remains O(D * L) per turn, with small O(E_t + R_t) reservation dictionaries for
+the selected departures in that turn.
+
+### Example and tests
+
+If two drones have room in a capacity-two `middle` hub but the `start-middle` link is default capacity
+one, only `D1-middle` moves on turn one. If two drones try to traverse `left-right` in opposite
+directions, the shared link identity also permits only one traversal unless `max_link_capacity=2`.
+For `start-restricted-end` with two drones and restricted capacity one, the second drone may depart
+only for a distinct arrival slot. `tests/test_capacity_scheduler.py` validates all schedules through
+`ScheduleValidator`.
+
+### Deliberate non-goals
+
+This slice does not generate multiple paths, allocate drones across routes, optimize makespan,
+prevent every possible deadlock, or settle the evaluator-specific restricted link occupancy window
+while a drone is in transit; Q8 remains open for that last detail.
+
 ## M4-A - Regular-zone capacity scheduler
 
 ### Problem and observable behavior

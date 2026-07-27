@@ -7,9 +7,9 @@
 | Q3 | Are unknown metadata keys invalid? | Reject with line-aware error so typos cannot silently alter behavior | Parser-lock decision, 2026-07-26 | RESOLVED |
 | Q4 | Are duplicate metadata keys invalid? | Reject because tag order must not determine effective semantics | Parser-lock decision, 2026-07-26 | RESOLVED |
 | Q5 | Are connection self-loops legal? | Reject as invalid topology under the strict parser policy | Parser-lock decision, 2026-07-26 | RESOLVED |
-| Q6 | Does undirected link capacity aggregate both directions? | Yes, shared physical connection | Useful before scheduler lock | OPEN |
+| Q6 | Does undirected link capacity aggregate both directions? | Yes, shared physical connection; scheduler and validator use the unordered connection identity for both directions | M4-B scheduler regression, 2026-07-27 | RESOLVED |
 | Q7 | Exact output text for a drone in restricted transit | M3.4 internally uses directed `origin-destination`, e.g. `D1-start-restricted`; still compare with evaluator samples if found | Yes if sample/moulinette exists | OPEN |
-| Q8 | Exact turn/link reservation window for restricted traversal | M3.4 locks simulator timeline: enter link on turn t and arrive on t+1; M4 still needs capacity reservation tests | Validate capacity behavior against examples/evaluator | OPEN |
+| Q8 | Exact turn/link reservation window for restricted traversal | M3.4 locks simulator timeline: enter link on turn t and arrive on t+1; M4-B reserves destination capacity for same-arrival restricted departures, but exact link occupancy during transit still needs evaluator/sample confirmation | Validate link-window behavior against examples/evaluator | OPEN |
 | Q9 | Can start/end specify `zone=blocked/restricted/priority`? | Preserve valid metadata and normalize effective behavior to normal/unlimited; application/CLI/API should warn that terminal zone types are logically invalid, not hard-fail parser input | Parser-lock decision + regression test; warning seam deferred to application/adapters | RESOLVED |
 | Q10 | Official v1.5 maps differ from supplied snapshot? | Yes; `maps/maps-v1.5-added-before-m0/` is the official 1.5 package | User confirmation, 2026-07-17 | RESOLVED |
 | Q11 | Challenger record is 41 in map README vs 45 in subject/rubric | 45 is official evaluation reference; 41 is stronger informal target | No | RESOLVED |
