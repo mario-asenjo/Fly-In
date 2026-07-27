@@ -37,6 +37,11 @@ Invariants:
 - Explicit capacity is a positive integer.
 - Start and end capacity is unlimited. A non-empty raw `max_drones` value on them is preserved but
   ignored without numeric validation, as required by Fly-In 1.5 section VII.4.
+- **INTERPRETATION**: terminal zones should not be effectively `blocked`, `restricted`, or
+  `priority`, because that conflicts with their roles as unlimited origin/delivery sinks. If a valid
+  terminal `zone=<type>` tag is present, preserve the raw metadata, normalize effective behavior to
+  `normal`/unlimited, and expose a non-fatal application/adaptor warning rather than rejecting the
+  map in the text parser.
 - Color is optional, defaults to none, and accepts any valid single-word value.
 - Metadata tag order is irrelevant.
 - **DECISION**: preserve source metadata needed for visualization, but keep effective terminal

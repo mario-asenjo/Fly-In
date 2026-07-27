@@ -1,9 +1,9 @@
 """Fly-In map parsing boundary."""
 
-from flyin.parsing.parser import (
+from flyin.parsing.errors import (
     MapParseError,
     MapParseErrorCode,
-    MapParser,
 )
+from flyin.parsing.parser import MapParser
 
 __all__ = ["MapParseError", "MapParseErrorCode", "MapParser"]

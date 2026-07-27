@@ -12,7 +12,7 @@ Only mark `EVIDENCED` with a test, command, file, or demonstrated output.
 | Parser valid input | Drone count, zone prefixes, connections, defaults, optional comments | M1.1-M1.9 tests + permanent official easy 01 input + all 10 official maps | EVIDENCED |
 | Parser errors | Malformed, invalid types, missing terminals, capacity, duplicates | M1.9 full matrix with stable code, physical line, cause, and excerpt | EVIDENCED |
 | Zone occupancy | Default/explicit capacity, start/end unlimited, same-turn releases | M1.8 typed/default/unlimited parsing; later validator/simulator tests | IN_PROGRESS |
-| Movement cost | Normal/priority 1, restricted 2, blocked inaccessible | M2.4-M2.6 A* route-cost tests; later state-transition tests | IN_PROGRESS |
+| Movement cost | Normal/priority 1, restricted 2, blocked inaccessible | M2.4-M2.6 A* route-cost tests plus M3.4 restricted two-turn state-transition tests | EVIDENCED |
 | Link capacity | Default/explicit, simultaneous enforcement | M1.8 default/explicit parsing; later reservation tests | IN_PROGRESS |
 | Visualization | Clear positions/movement/colors/capacity | Terminal demo then React | NOT_STARTED |
 | Basic scenarios | Single/multiple/maps/output/stationary omission | CLI integration tests | NOT_STARTED |

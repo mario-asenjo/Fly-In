@@ -1,5 +1,41 @@
 # Teaching notes ledger
 
+## M3.4 - Restricted two-turn transit
+
+### Problem and observable behavior
+
+Restricted destinations cost two turns. A drone cannot appear in a restricted hub on the same turn it
+departs; it first occupies an in-flight state and emits a connection token, then it must arrive on the
+next turn. This slice makes that timeline explicit without adding the M4 capacity scheduler.
+
+### Flow and involved classes
+
+`simulation.model` keeps the immutable drone states and turn facts, `simulation.engine` handles
+departures plus due in-flight arrivals, and `simulation.formatting` owns evaluator-safe token
+joining. When a known route's next destination has `ZoneType.RESTRICTED`, the drone becomes
+`InTransit(connection, origin, destination, arrival_turn)`. The emitted `TransitFact` formats as the
+current internal proposal `D<ID>-<origin>-<destination>`. On the following turn, the same drone is
+forced to `AtZone` for the restricted hub, and a regular `MovementFact` emits `D<ID>-<zone>`.
+
+### Invariant and complexity
+
+The key invariant is that an in-flight restricted drone has exactly one required arrival turn and
+cannot wait on the connection or also depart onward in that same turn. Complexity remains O(D * L)
+for D drones and route length L in this pre-scheduler seam.
+
+### Example and tests
+
+For `start-restricted-end`, turn one emits `D1-start-restricted` and stores `arrival_turn == 2`;
+turn two emits `D1-restricted` and leaves the drone at the restricted hub; turn three can then emit
+`D1-end`. `tests/test_simulation_foundation.py` covers departure, forced arrival, connection identity,
+arrival turn, and no same-turn onward departure.
+
+### Deliberate non-goals
+
+This slice does not reserve future capacity, validate external schedules, choose routes for multiple
+drones, optimize benchmarks, wire CLI stdout, or settle evaluator confirmation for the in-transit
+token spelling beyond the documented internal convention.
+
 ## M3.1-M3.3 - Drone state, normal turns, and formatter
 
 ### Problem and observable behavior
