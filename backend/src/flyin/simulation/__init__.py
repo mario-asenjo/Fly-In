@@ -14,6 +14,12 @@ from flyin.simulation.model import (
     TurnFact,
     TurnResult,
 )
+from flyin.simulation.runner import simulate_known_routes
+from flyin.simulation.validation import (
+    ScheduleValidationError,
+    ScheduleValidationResult,
+    ScheduleValidator,
+)
 
 __all__ = [
     "AtZone",
@@ -22,10 +28,14 @@ __all__ = [
     "DroneLocation",
     "InTransit",
     "MovementFact",
+    "ScheduleValidationError",
+    "ScheduleValidationResult",
+    "ScheduleValidator",
     "SimulationEngine",
     "SimulationState",
     "TransitFact",
     "TurnFact",
     "TurnResult",
     "format_turn",
+    "simulate_known_routes",
 ]

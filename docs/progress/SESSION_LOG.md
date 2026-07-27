@@ -1,5 +1,19 @@
 # Session log
 
+## 2026-07-27 - M3.5-M3.6 validation and known-route output closure
+
+- Added an independent `ScheduleValidator` for emitted turn facts. It replays schedules from the
+  parsed initial state and reports stable errors for illegal movement, blocked entry, zone overflow,
+  undirected link overflow, delivered-drone movement, unknown/duplicate drone facts, and missing
+  restricted arrivals.
+- Added `simulate_known_routes()` for the M3 stdout seam over already-known routes: it advances the
+  deterministic engine until all drones are delivered and returns exact evaluator-style movement
+  lines without wiring the temporary CLI adapter yet.
+- Combined #30 and #31 because both share the same schedule/fact/output seam and stay below the M4
+  scheduler boundary.
+- TDD RED was the expected missing `ScheduleValidator` import. GREEN has focused schedule validation
+  tests plus full pytest, raw Flake8, mypy, and context validation clean.
+
 ## 2026-07-27 - M3.4 restricted transit
 
 - Implemented restricted destination movement as a two-turn transition: departure enters

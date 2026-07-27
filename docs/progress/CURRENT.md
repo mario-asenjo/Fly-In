@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-27
 - Current milestone: M3 - Deterministic simulation engine
-- Production implementation: M3.4 adds restricted two-turn transit and mandatory arrival on top of
-  typed drone snapshots, normal-turn simulation, and evaluator-safe turn formatting
+- Production implementation: M3 is functionally complete through independent schedule validation
+  and exact evaluator-style output for known routes
 - Mandatory completion: M0, parser slices M1.1-M1.9, and graph/path slices M2.1-M2.6 are complete
 - API/UI/EDA implementation: intentionally not started
 
@@ -66,16 +66,22 @@
 - M3.4 moves drones entering restricted destinations into `InTransit` for one turn, emits the
   directed proposed token `D<ID>-<origin>-<destination>`, and forces arrival on the following turn
   before the route can continue.
+- M3.5 adds an independent `ScheduleValidator` for emitted turn facts, checking illegal moves,
+  blocked traversal, per-turn zone/link capacity, delivered-drone immobility, and mandatory
+  restricted arrivals without reusing the scheduler/engine decision path.
+- M3.6 adds `simulate_known_routes()` as the known-route output seam: it advances deterministic
+  routes until every drone is delivered and returns exact evaluator-style movement lines.
 
 ## Next smallest slice
 
-Continue M3 with #30: independent schedule validator for known schedules and per-turn invariants.
-Keep capacity-aware scheduling, optimization, API/UI, and visualization out of that slice. Replace
-the temporary `python -m flyin` message only when a real CLI adapter exists.
+Start M4 with the smallest capacity-aware scheduler behavior. Keep benchmark optimization, API/UI,
+and visualization out of the first M4 slice. Replace the temporary `python -m flyin` message only
+when a real CLI adapter exists.
 
 ## Active blockers
 
-None. M2 is complete and parser/pathfinding interpretations are locked and documented.
+None. M3 deterministic known-route simulation is complete; M4 capacity-aware route allocation and
+strategic waiting are intentionally not started.
 
 ## Required context for next session
 

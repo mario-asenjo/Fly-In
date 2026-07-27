@@ -11,13 +11,13 @@ Only mark `EVIDENCED` with a test, command, file, or demonstrated output.
 | Custom graph | No forbidden graph library; explain implementation | M2.1-M2.6 graph/A* tests and teaching notes | EVIDENCED |
 | Parser valid input | Drone count, zone prefixes, connections, defaults, optional comments | M1.1-M1.9 tests + permanent official easy 01 input + all 10 official maps | EVIDENCED |
 | Parser errors | Malformed, invalid types, missing terminals, capacity, duplicates | M1.9 full matrix with stable code, physical line, cause, and excerpt | EVIDENCED |
-| Zone occupancy | Default/explicit capacity, start/end unlimited, same-turn releases | M1.8 typed/default/unlimited parsing; later validator/simulator tests | IN_PROGRESS |
+| Zone occupancy | Default/explicit capacity, start/end unlimited, same-turn releases | M1.8 parsing plus M3.5 validator overflow tests | EVIDENCED |
 | Movement cost | Normal/priority 1, restricted 2, blocked inaccessible | M2.4-M2.6 A* route-cost tests plus M3.4 restricted two-turn state-transition tests | EVIDENCED |
-| Link capacity | Default/explicit, simultaneous enforcement | M1.8 default/explicit parsing; later reservation tests | IN_PROGRESS |
+| Link capacity | Default/explicit, simultaneous enforcement | M1.8 parsing plus M3.5 validator undirected overflow tests | EVIDENCED |
 | Visualization | Clear positions/movement/colors/capacity | Terminal demo then React | NOT_STARTED |
-| Basic scenarios | Single/multiple/maps/output/stationary omission | CLI integration tests | NOT_STARTED |
-| Termination | Stop exactly after all delivered | CLI/simulator test | NOT_STARTED |
-| Valid paths | Linear/multiple/bottleneck/types | M2.1-M2.6 graph/A* matrix; later full validator tests | IN_PROGRESS |
+| Basic scenarios | Single/multiple/maps/output/stationary omission | M3.6 known-route exact output tests; later CLI integration tests | IN_PROGRESS |
+| Termination | Stop exactly after all delivered | M3.6 known-route output closure test | EVIDENCED |
+| Valid paths | Linear/multiple/bottleneck/types | M2.1-M2.6 graph/A* matrix plus M3.5 validator tests | EVIDENCED |
 | Conflicts | Competition/simultaneous/restricted | Scheduler tests | NOT_STARTED |
 | Efficiency | 10+ drones, complex graphs, reasonable compute | Benchmark report | NOT_STARTED |
 | Explanation | Complexity, design, capacity/optimization trade-offs | README + defense notes | NOT_STARTED |

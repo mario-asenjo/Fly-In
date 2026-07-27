@@ -1,5 +1,43 @@
 # Teaching notes ledger
 
+## M3.5-M3.6 - Schedule validation and known-route output closure
+
+### Problem and observable behavior
+
+The simulator can now emit turn facts, but future schedulers need an independent judge. A produced or
+fixture schedule must be replayed from the parsed initial state and rejected if it violates movement,
+capacity, delivery, or restricted-arrival invariants. The milestone also needs exact evaluator-style
+lines for known routes.
+
+### Flow and involved classes
+
+`ScheduleValidator.validate(parsed_map, turns)` consumes tuples of `MovementFact`/`TransitFact`; it
+does not call `SimulationEngine`, so it can catch engine or scheduler bugs later. It builds its own
+drone-location table from the parsed map, applies one emitted turn at a time, counts undirected link
+usage, checks post-turn regular-zone occupancy, and tracks due restricted arrivals.
+`simulate_known_routes(parsed_map, routes_by_drone_id)` remains a small M3 closure seam: it uses the
+deterministic engine and `format_turn()` to return exact stdout lines for already-known routes.
+
+### Invariant and complexity
+
+Every drone has at most one fact per turn, legal facts must follow physical non-blocked connections,
+restricted destinations must be represented by `TransitFact` before mandatory next-turn arrival, and
+delivered drones cannot move again. Validation is O(T * (D + F + Z + E)) for T turns, D drones, F
+facts per turn, Z occupied zones, and E connections scanned for capacity lookup.
+
+### Example and tests
+
+For `start-restricted-end`, known-route output is exactly `D1-start-restricted`, `D1-restricted`,
+then `D1-end`. `tests/test_schedule_validation.py` also validates a two-drone fork schedule and
+rejects non-adjacent moves, blocked destinations, zone overflows, link overflows, and missing
+restricted arrivals.
+
+### Deliberate non-goals
+
+This does not choose routes, wait strategically, optimize benchmark turns, reserve restricted future
+capacity beyond the explicit schedule replay, or wire real file-based CLI/API adapters. Those belong
+to M4+.
+
 ## M3.4 - Restricted two-turn transit
 
 ### Problem and observable behavior
