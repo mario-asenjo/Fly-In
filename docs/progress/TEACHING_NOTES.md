@@ -1,5 +1,40 @@
 # Teaching notes ledger
 
+## M4-A - Regular-zone capacity scheduler
+
+### Problem and observable behavior
+
+M3 can replay known routes, but if every drone moves immediately then two drones can overfill a
+default-capacity hub. M4-A introduces the first scheduler behavior: a drone waits when entering a
+regular zone would exceed capacity, and waiting drones produce no evaluator token for that turn.
+
+### Flow and involved classes
+
+`KnownRouteScheduler.schedule_known_routes(parsed_map, routes_by_drone_id)` starts from
+`SimulationState.initial()`, chooses which routed drones may move this turn, then delegates the actual
+state transition and fact creation to `SimulationEngine.advance_one_turn()`. It returns tuples of
+`TurnFact`; `format_turn()` remains the only place that turns facts into stdout text.
+
+### Invariant and complexity
+
+For this slice, the protected invariant is regular-zone post-turn occupancy. Start and end are still
+unlimited. The scheduler processes drones farther along their route before upstream drones so an
+outgoing drone releases a capacity-one hub in the same turn another drone enters it. With D drones and
+route length L, each turn is O(D * L); this deliberate M4-A ceiling can be improved only if official
+benchmark measurements later require it.
+
+### Example and tests
+
+For two drones on `start-middle-end`, the schedule is `D1-middle`, then `D1-end D2-middle`, then
+`D2-end`. For a three-drone map with `middle [max_drones=2]` and matching link capacities, two drones
+can enter `middle` together. `tests/test_capacity_scheduler.py` validates every produced schedule
+through `ScheduleValidator`.
+
+### Deliberate non-goals
+
+This slice does not plan link capacity, reserve future restricted arrivals, generate multiple
+candidate paths, optimize benchmark makespan, detect deadlocks, or wire CLI/API/UI adapters.
+
 ## M3.5-M3.6 - Schedule validation and known-route output closure
 
 ### Problem and observable behavior

@@ -1,10 +1,11 @@
 # Current project state
 
 - Last updated: 2026-07-27
-- Current milestone: M3 - Deterministic simulation engine
-- Production implementation: M3 is functionally complete through independent schedule validation
-  and exact evaluator-style output for known routes
-- Mandatory completion: M0, parser slices M1.1-M1.9, and graph/path slices M2.1-M2.6 are complete
+- Current milestone: M4 - Capacity-aware scheduler
+- Production implementation: M4-A adds a known-route scheduler that respects regular
+  zone capacity, same-turn outgoing release, and explicit `max_drones > 1`
+- Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
+  deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
 
 ## Verified completed
@@ -71,17 +72,23 @@
   restricted arrivals without reusing the scheduler/engine decision path.
 - M3.6 adds `simulate_known_routes()` as the known-route output seam: it advances deterministic
   routes until every drone is delivered and returns exact evaluator-style movement lines.
+- M4.1-M4.2 add `KnownRouteScheduler.schedule_known_routes()` as the first capacity-aware
+  scheduling seam over precomputed routes. It queues drones for default single-capacity regular
+  zones, orders downstream departures before upstream entries so same-turn release is usable, omits
+  waiting drones from stdout facts, supports explicit regular-zone capacity above one, and produces
+  schedules accepted by `ScheduleValidator`.
 
 ## Next smallest slice
 
-Start M4 with the smallest capacity-aware scheduler behavior. Keep benchmark optimization, API/UI,
-and visualization out of the first M4 slice. Replace the temporary `python -m flyin` message only
-when a real CLI adapter exists.
+Continue M4 with link-capacity reservation semantics: default shared undirected connection capacity,
+`max_link_capacity > 1`, and then restricted future-arrival reservations. Keep benchmark
+optimization, API/UI, and visualization out of M4 correctness slices.
 
 ## Active blockers
 
-None. M3 deterministic known-route simulation is complete; M4 capacity-aware route allocation and
-strategic waiting are intentionally not started.
+None. M4-A regular-zone capacity scheduling is underway; link-capacity reservation, restricted
+future reservations, multi-path allocation, strategic waiting, deadlock handling, and benchmark
+optimization remain intentionally deferred.
 
 ## Required context for next session
 
@@ -89,5 +96,5 @@ strategic waiting are intentionally not started.
 - `docs/project/02_SOURCE_OF_TRUTH.md`
 - Drone state, turn semantics, restricted movement, capacity invariants, and output sections of
   `docs/project/03_DOMAIN_CONTRACT.md`
-- `docs/project/05_ROADMAP.md` M3
+- `docs/project/05_ROADMAP.md` M4
 - `docs/progress/OPEN_QUESTIONS.md`

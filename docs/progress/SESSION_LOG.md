@@ -1,5 +1,18 @@
 # Session log
 
+## 2026-07-27 - M4-A regular-zone capacity scheduler
+
+- Added `flyin.scheduling.KnownRouteScheduler` as the first capacity-aware scheduling seam over
+  already-selected routes. It returns turn facts, not CLI text, so future schedulers can keep using
+  the independent validator before any adapter formats stdout.
+- Covered default single-capacity queueing, waiting-drone omission, downstream-first same-turn
+  release, and explicit regular-zone `max_drones > 1`.
+- Kept link-capacity planning, restricted future reservations, candidate path generation, strategic
+  route allocation, deadlock handling, benchmark optimization, CLI wiring, API/UI, and visualization
+  out of M4-A.
+- TDD RED was the expected missing `flyin.scheduling` import. Focused GREEN has the new scheduler
+  tests validated through `ScheduleValidator`.
+
 ## 2026-07-27 - M3.5-M3.6 validation and known-route output closure
 
 - Added an independent `ScheduleValidator` for emitted turn facts. It replays schedules from the
