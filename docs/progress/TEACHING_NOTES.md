@@ -1,5 +1,41 @@
 # Teaching notes ledger
 
+## M4-C - Candidate route allocation
+
+### Problem and observable behavior
+
+A single shortest path is valid but can bottleneck all drones through one hub/link even when another
+valid branch exists. M4-C adds a correctness-first seam that discovers several simple candidate
+routes, then assigns drones deterministically across them before reusing the existing capacity-aware
+scheduler.
+
+### Flow and involved classes
+
+`CandidateRouteFinder.find_candidates()` builds a `TraversableGraph`, computes reverse reachability,
+and walks simple start-to-end routes with DFS. It sorts candidates by route cost, priority score, and
+zone names, while preserving `AStarPathfinder.shortest_path()` as candidate zero. `RouteAllocator`
+then assigns drone IDs round-robin over those candidates and calls `KnownRouteScheduler`, which is
+still responsible for legal waits, link reservations, restricted arrivals, and turn facts.
+
+### Invariant and complexity
+
+Every allocated route must be traversable, simple, deterministic, and validator-clean after
+scheduling. The DFS is intentionally bounded at the public seam by `max_routes`; it may enumerate more
+simple routes internally on dense graphs, which is acceptable for this M4 correctness slice but not a
+claimed M5 optimization strategy.
+
+### Example and tests
+
+On `start-alpha-end` plus `start-beta-end` with four drones, candidates are `(start, alpha, end)` and
+`(start, beta, end)`. Round-robin assignment lets D1/D3 use alpha and D2/D4 use beta, producing two
+parallel departures on turn one and a validator-clean three-turn schedule. Tests also prove a
+single-route bottleneck waits safely and a blocked-only map raises `NoRouteError` before scheduling.
+
+### Deliberate non-goals
+
+This is not benchmark tuning: no makespan estimator, no weighted load balancer, no deadlock solver,
+and no official-map closure yet. Those belong to #41/M5 after correctness seams exist.
+
 ## M4-B - Link and restricted arrival reservations
 
 ### Problem and observable behavior
