@@ -15,6 +15,10 @@ from flyin.simulation import (
 )
 
 
+class ScheduleDeadlockError(RuntimeError):
+    """Raised when a known-route schedule cannot make progress."""
+
+
 class KnownRouteScheduler:
     """Schedule known routes while respecting regular-zone capacity."""
 
@@ -34,10 +38,14 @@ class KnownRouteScheduler:
             selected_routes = cls._selected_routes(state, routes_by_drone_id)
             result = SimulationEngine.advance_one_turn(state, selected_routes)
             if not result.facts:
-                raise RuntimeError("capacity-aware scheduler made no progress")
+                raise ScheduleDeadlockError(
+                    "capacity-aware scheduler made no progress"
+                )
             turns.append(result.facts)
             state = result.state
-        raise RuntimeError("capacity-aware scheduler exceeded max_turns")
+        raise ScheduleDeadlockError(
+            "capacity-aware scheduler exceeded max_turns"
+        )
 
     @classmethod
     def _selected_routes(
