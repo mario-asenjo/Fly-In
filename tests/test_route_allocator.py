@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from flyin.parsing import MapParser
@@ -73,3 +75,21 @@ def test_route_allocator_reports_unsolvable_maps() -> None:
 
     with pytest.raises(NoRouteError, match="start cannot reach end"):
         RouteAllocator.schedule(parsed_map)
+
+
+def test_route_allocator_uses_shortest_valid_candidate_window() -> None:
+    project_root = Path(__file__).parents[1]
+    map_path = (
+        project_root
+        / "maps"
+        / "maps-v1.5-added-before-m0"
+        / "challenger"
+        / "01_the_impossible_dream.txt"
+    )
+    parsed_map = MapParser().parse(map_path.read_text())
+
+    schedule = RouteAllocator.schedule(parsed_map, max_routes=8)
+    validation = ScheduleValidator.validate(parsed_map, schedule)
+
+    assert validation.is_valid, validation.errors
+    assert len(schedule) == 43

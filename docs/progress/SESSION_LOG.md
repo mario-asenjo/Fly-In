@@ -1,5 +1,20 @@
 # Session log
 
+## 2026-07-28 - M5-B route metrics and makespan estimates
+
+- After PR #51 merged, updated local `main` and created `feat/m5-b-route-makespan-estimator`.
+- Removed benchmark logic from the `flyin` application package. `scripts/benchmark_official_maps.py`
+  now owns the developer benchmark dataclass, collection, records, and table rendering; application
+  code has no target/evaluation thresholds.
+- Added `RouteMetrics` for candidate route cost, priority, restricted count, min zone capacity, min
+  link capacity, and bottleneck identity.
+- Added `FleetMakespanEstimator` and `RouteWindowEstimate` to rank candidate route windows by fleet
+  load and shared capacity resources.
+- Updated `RouteAllocator` to try estimated windows and return the shortest validator-clean schedule,
+  instead of accepting the first non-deadlocking candidate window.
+- Fresh benchmark comparison vs M5-A: hard maze improves 14 -> 13, hard ultimate 29 -> 26, and
+  optional Challenger 51 -> 43. Easy and Medium remain unchanged and covered.
+
 ## 2026-07-28 - M5-A benchmark baseline
 
 - Created `feat/m5-a-benchmark-baseline` from updated `main` after PR #45 was merged.

@@ -5,9 +5,17 @@ from flyin.scheduling.known_routes import (
     KnownRouteScheduler,
     ScheduleDeadlockError,
 )
+from flyin.scheduling.metrics import (
+    FleetMakespanEstimator,
+    RouteMetrics,
+    RouteWindowEstimate,
+)
 
 __all__ = [
+    "FleetMakespanEstimator",
     "KnownRouteScheduler",
     "RouteAllocator",
+    "RouteMetrics",
+    "RouteWindowEstimate",
     "ScheduleDeadlockError",
 ]

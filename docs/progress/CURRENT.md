@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-28
 - Current milestone: M5 - Benchmark optimization
-- Production implementation: M5-A adds a reproducible benchmark runner and a fresh official-map
-  baseline before any route-allocation optimization
+- Production implementation: M5-B moves benchmarking out of the application package, adds route
+  metrics and fleet makespan estimates, and selects the shortest validator-clean candidate window
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
@@ -89,22 +89,23 @@
   has `RouteAllocator` retry smaller candidate windows when a route mix deadlocks, and permanently
   validates terminating schedules for every official v1.5 map under
   `maps/maps-v1.5-added-before-m0/`.
-- M5-A adds `flyin.benchmarking` plus `scripts/benchmark_official_maps.py` as a developer-only
-  benchmark runner. It records every official v1.5 map's drone count, turns, validator result,
-  duration, and SHA-256 without putting target/evaluation thresholds in code.
-- The fresh M5-A baseline beats the expected individual targets for all Easy, Medium, and Hard maps:
-  easy 4/4/4, medium 8/10/6, hard 14/16/29 turns. The optional Challenger map is valid but not yet
-  under the 45-turn record at 51 turns.
+- M5-A added `scripts/benchmark_official_maps.py` as a developer-only benchmark runner. M5-B keeps
+  benchmarking outside the application package; no target/evaluation thresholds live in code.
+- M5-B adds `RouteMetrics`, `RouteWindowEstimate`, and `FleetMakespanEstimator` for candidate-route
+  cost/capacity facts and deterministic route-window estimates.
+- `RouteAllocator` now ranks candidate windows by estimate and returns the shortest validator-clean
+  schedule it can produce from those windows, preserving the independent validation boundary.
+- The fresh M5-B baseline covers all expected Easy, Medium, Hard, and optional Challenger targets:
+  easy 4/4/4, medium 8/10/6, hard 13/16/26, challenger 43 turns.
 
 ## Next smallest slice
 
-Continue with M5-B (#47 + #48): add route candidate metrics and a deterministic fleet makespan
-estimator, then compare proposed allocation changes against the M5-A baseline before touching
-`RouteAllocator` behavior.
+Continue with M5-C (#49): refine allocation only if a new measured hypothesis beats the current
+validator-clean baseline without regressing official maps.
 
 ## Active blockers
 
-None for M5-A. Route-allocation optimization, API/UI, and visualization remain intentionally
+None for M5-B. Further route-allocation optimization, API/UI, and visualization remain intentionally
 deferred. Q7/Q8 restricted-transit evaluator confirmation remains open but does not block benchmark
 measurement.
 
@@ -114,5 +115,5 @@ measurement.
 - `docs/project/02_SOURCE_OF_TRUTH.md`
 - Drone state, turn semantics, restricted movement, capacity invariants, and output sections of
   `docs/project/03_DOMAIN_CONTRACT.md`
-- `docs/project/05_ROADMAP.md` M4
+- `docs/project/05_ROADMAP.md` M5
 - `docs/progress/OPEN_QUESTIONS.md`
