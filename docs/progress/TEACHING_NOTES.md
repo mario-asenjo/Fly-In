@@ -1,5 +1,43 @@
 # Teaching notes ledger
 
+## M4-D - Deadlock detection and official-map closure
+
+### Problem and observable behavior
+
+After M4-C, the allocator could choose a route mix that was locally valid but globally stuck. The
+official `hard/02_capacity_hell.txt` map exposed that failure: using all eight candidate routes caused
+the scheduler to reach a turn where no drone could legally move, even though a smaller candidate
+window had a valid schedule.
+
+### Flow and involved classes
+
+`KnownRouteScheduler.schedule_known_routes()` now raises `ScheduleDeadlockError` when a turn produces
+no facts or when `max_turns` is exhausted. `RouteAllocator.schedule()` catches that explicit boundary,
+retries with one fewer candidate route, and continues until a route window terminates or every window
+deadlocks. The actual turn transition still belongs to `SimulationEngine`, and every returned schedule
+is checked in tests by `ScheduleValidator`.
+
+### Invariant and complexity
+
+The M4 invariant is termination with a validator-clean schedule for maps the current route candidate
+set can solve. Retrying smaller candidate windows is deliberately simple: at most `max_routes`
+scheduler attempts, each bounded by `max_turns`. It is not an optimizer; it is a correctness fallback
+that avoids preserving a known-deadlocking route mix.
+
+### Example and tests
+
+For a two-drone synthetic fixture with routes `start-left-right-end` and `start-right-left-end`, both
+drones can enter opposite single-capacity hubs and then neither can swap, so the known-route scheduler
+raises `ScheduleDeadlockError`. On official `hard/02_capacity_hell.txt`, the allocator first sees the
+deadlocking eight-route window, falls back, and returns a 16-turn validator-clean schedule. A permanent
+parametrized test covers every official v1.5 map file under `maps/maps-v1.5-added-before-m0/`.
+
+### Deliberate non-goals
+
+This closes M4 correctness, not M5 performance. There is still no makespan estimator, route scoring,
+or benchmark target chasing. Q7/Q8 remain open for evaluator-specific restricted transit text/window
+confirmation.
+
 ## M4-C - Candidate route allocation
 
 ### Problem and observable behavior

@@ -4,7 +4,10 @@ from flyin.domain import ParsedMap
 from flyin.pathfinding import CandidateRouteFinder, Route
 from flyin.simulation import TurnFact
 
-from flyin.scheduling.known_routes import KnownRouteScheduler
+from flyin.scheduling.known_routes import (
+    KnownRouteScheduler,
+    ScheduleDeadlockError,
+)
 
 
 class RouteAllocator:
@@ -22,12 +25,23 @@ class RouteAllocator:
             parsed_map,
             max_routes,
         )
-        routes_by_drone_id = cls.allocate(parsed_map, candidates)
-        return KnownRouteScheduler.schedule_known_routes(
-            parsed_map,
-            routes_by_drone_id,
-            max_turns,
-        )
+        last_error: ScheduleDeadlockError | None = None
+        for route_count in range(len(candidates), 0, -1):
+            routes_by_drone_id = cls.allocate(
+                parsed_map,
+                candidates[:route_count],
+            )
+            try:
+                return KnownRouteScheduler.schedule_known_routes(
+                    parsed_map,
+                    routes_by_drone_id,
+                    max_turns,
+                )
+            except ScheduleDeadlockError as exc:
+                last_error = exc
+        if last_error is not None:
+            raise last_error
+        raise ValueError("at least one candidate route is required")
 
     @staticmethod
     def allocate(

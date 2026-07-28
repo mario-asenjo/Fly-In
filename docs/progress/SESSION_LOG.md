@@ -1,5 +1,21 @@
 # Session log
 
+## 2026-07-28 - M4-D deadlock detection and official-map closure
+
+- Verified PR #44 was merged to `origin/main`, then created `feat/m4-d-deadlock-official-closure`
+  from updated main for issue #41.
+- Ran an official-map smoke through `RouteAllocator.schedule()`. Nine maps produced valid schedules;
+  `hard/02_capacity_hell.txt` exposed a real no-progress failure when all eight candidate routes were
+  round-robin allocated together.
+- Added `ScheduleDeadlockError` as the explicit scheduler failure boundary for no-progress and
+  max-turn exhaustion, then made `RouteAllocator` retry smaller candidate windows before surfacing the
+  last deadlock.
+- Added permanent official-map closure tests: every immutable v1.5 map now parses, schedules,
+  terminates, and validates through `ScheduleValidator`. The capacity-hell regression locks the
+  fallback behavior at a validator-clean 16-turn schedule without claiming M5 optimality.
+- Kept CLI/API/UI, benchmark tuning, smarter makespan scoring, and evaluator confirmation for Q7/Q8
+  out of this final M4 correctness slice.
+
 ## 2026-07-27 - M4-C candidate route allocation
 
 - Added `CandidateRouteFinder.find_candidates()` as a bounded deterministic simple-route seam. It
