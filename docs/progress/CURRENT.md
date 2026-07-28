@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-28
 - Current milestone: M5 - Benchmark optimization
-- Production implementation: M5-B moves benchmarking out of the application package, adds route
-  metrics and fleet makespan estimates, and selects the shortest validator-clean candidate window
+- Production implementation: M5-C expands route selection from prefixes to bounded non-prefix
+  candidate combinations and keeps the official M5-B benchmark turns without regression
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
@@ -97,15 +97,20 @@
   schedule it can produce from those windows, preserving the independent validation boundary.
 - The fresh M5-B baseline covers all expected Easy, Medium, Hard, and optional Challenger targets:
   easy 4/4/4, medium 8/10/6, hard 13/16/26, challenger 43 turns.
+- M5-C addresses the correction-sheet risk that good individual routes can be bad together. The
+  allocator now evaluates bounded non-prefix route combinations, so it can choose `[R1, R3]` when
+  `[R1, R2]` shares a bottleneck. Derived tests also prove stable makespan under topology-preserving
+  zone renaming. Official benchmark turns remain easy 4/4/4, medium 8/10/6, hard 13/16/26,
+  challenger 43.
 
 ## Next smallest slice
 
-Continue with M5-C (#49): refine allocation only if a new measured hypothesis beats the current
-validator-clean baseline without regressing official maps.
+Continue with M5-D (#50): close the hard/challenger benchmark report and decide whether any further
+candidate-generation guard is worth adding before moving to API/CLI polish.
 
 ## Active blockers
 
-None for M5-B. Further route-allocation optimization, API/UI, and visualization remain intentionally
+None for M5-C. Further route-allocation optimization, API/UI, and visualization remain intentionally
 deferred. Q7/Q8 restricted-transit evaluator confirmation remains open but does not block benchmark
 measurement.
 

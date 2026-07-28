@@ -1,6 +1,7 @@
 """Route metrics and fleet makespan estimates."""
 
 from dataclasses import dataclass
+from itertools import combinations
 from math import ceil
 
 from flyin.domain import CapacityLimit, ParsedMap, Zone
@@ -72,6 +73,14 @@ class RouteWindowEstimate:
     estimated_turns: int
 
 
+@dataclass(frozen=True, slots=True)
+class RouteSelectionEstimate:
+    """Estimated turns for a concrete candidate-route selection."""
+
+    route_indices: tuple[int, ...]
+    estimated_turns: int
+
+
 class FleetMakespanEstimator:
     """Estimate useful candidate-route windows for a drone fleet."""
 
@@ -121,6 +130,50 @@ class FleetMakespanEstimator:
                 key=lambda item: (item.estimated_turns, item.route_count),
             )
         )
+
+    @classmethod
+    def ranked_route_selections(
+        cls,
+        parsed_map: ParsedMap,
+        candidates: tuple[Route, ...],
+        max_selection_size: int = 4,
+    ) -> tuple[tuple[Route, ...], ...]:
+        """Return non-prefix candidate selections ranked by estimate."""
+        estimates = tuple(
+            RouteSelectionEstimate(
+                route_indices,
+                cls._estimate_prefix(
+                    parsed_map,
+                    tuple(candidates[index] for index in route_indices),
+                ),
+            )
+            for route_indices in cls._route_index_selections(
+                len(candidates),
+                max_selection_size,
+            )
+        )
+        return tuple(
+            tuple(candidates[index] for index in estimate.route_indices)
+            for estimate in sorted(
+                estimates,
+                key=lambda item: (
+                    item.estimated_turns,
+                    len(item.route_indices),
+                    item.route_indices,
+                ),
+            )
+        )
+
+    @staticmethod
+    def _route_index_selections(
+        route_count: int,
+        max_selection_size: int,
+    ) -> tuple[tuple[int, ...], ...]:
+        limited_size = min(route_count, max_selection_size)
+        selections: list[tuple[int, ...]] = []
+        for size in range(1, limited_size + 1):
+            selections.extend(combinations(range(route_count), size))
+        return tuple(selections)
 
     @classmethod
     def _estimate_prefix(

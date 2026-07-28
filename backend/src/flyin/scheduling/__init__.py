@@ -8,6 +8,7 @@ from flyin.scheduling.known_routes import (
 from flyin.scheduling.metrics import (
     FleetMakespanEstimator,
     RouteMetrics,
+    RouteSelectionEstimate,
     RouteWindowEstimate,
 )
 
@@ -16,6 +17,7 @@ __all__ = [
     "KnownRouteScheduler",
     "RouteAllocator",
     "RouteMetrics",
+    "RouteSelectionEstimate",
     "RouteWindowEstimate",
     "ScheduleDeadlockError",
 ]
