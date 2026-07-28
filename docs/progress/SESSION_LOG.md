@@ -1,5 +1,22 @@
 # Session log
 
+## 2026-07-28 - M5-A benchmark baseline
+
+- Created `feat/m5-a-benchmark-baseline` from updated `main` after PR #45 was merged.
+- Re-read Fly-In 1.5 VII.1/VII.7 and the Intra rubric performance rows before coding. The sources
+  require throughput, multi-path distribution, strategic waiting, deadlock avoidance, and comparison
+  against targets, but do not prescribe a concrete algorithm family.
+- Added a developer benchmark seam: `flyin.benchmarking` plus `scripts/benchmark_official_maps.py`.
+  The code records map path, drone count, turns, validator result, duration, and SHA-256 only; target
+  and evaluation comparisons stay in documentation/reporting, not code.
+- Added `tests/test_benchmark_runner.py`, a smoke contract proving the runner covers every immutable
+  official v1.5 map and emits the required table columns.
+- Fresh baseline: Easy 4/4/4, Medium 8/10/6, Hard 14/16/29, and Challenger 51 turns; every row is
+  validator-clean. Easy/Medium/Hard already meet or beat their individual targets; optional
+  Challenger does not yet beat 45.
+- Updated `docs/progress/BENCHMARKS.md`, `docs/progress/CURRENT.md`, and the benchmark rows in
+  `docs/project/10_EVALUATION_MATRIX.md`.
+
 ## 2026-07-28 - M4-D deadlock detection and official-map closure
 
 - Verified PR #44 was merged to `origin/main`, then created `feat/m4-d-deadlock-official-closure`

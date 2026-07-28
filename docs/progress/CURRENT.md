@@ -1,9 +1,9 @@
 # Current project state
 
-- Last updated: 2026-07-27
-- Current milestone: M4 - Capacity-aware scheduler
-- Production implementation: M4-D closes the capacity-aware scheduler milestone with explicit
-  no-progress detection and official-map closure tests
+- Last updated: 2026-07-28
+- Current milestone: M5 - Benchmark optimization
+- Production implementation: M5-A adds a reproducible benchmark runner and a fresh official-map
+  baseline before any route-allocation optimization
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
@@ -89,16 +89,24 @@
   has `RouteAllocator` retry smaller candidate windows when a route mix deadlocks, and permanently
   validates terminating schedules for every official v1.5 map under
   `maps/maps-v1.5-added-before-m0/`.
+- M5-A adds `flyin.benchmarking` plus `scripts/benchmark_official_maps.py` as a developer-only
+  benchmark runner. It records every official v1.5 map's drone count, turns, validator result,
+  duration, and SHA-256 without putting target/evaluation thresholds in code.
+- The fresh M5-A baseline beats the expected individual targets for all Easy, Medium, and Hard maps:
+  easy 4/4/4, medium 8/10/6, hard 14/16/29 turns. The optional Challenger map is valid but not yet
+  under the 45-turn record at 51 turns.
 
 ## Next smallest slice
 
-M4 scheduler correctness is ready for PR review. After merge, continue with M5 measured optimization
-and only tune route allocation using benchmark evidence.
+Continue with M5-B (#47 + #48): add route candidate metrics and a deterministic fleet makespan
+estimator, then compare proposed allocation changes against the M5-A baseline before touching
+`RouteAllocator` behavior.
 
 ## Active blockers
 
-None. M4-D is under review; benchmark optimization, API/UI, and visualization remain intentionally
-deferred.
+None for M5-A. Route-allocation optimization, API/UI, and visualization remain intentionally
+deferred. Q7/Q8 restricted-transit evaluator confirmation remains open but does not block benchmark
+measurement.
 
 ## Required context for next session
 
