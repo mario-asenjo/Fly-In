@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-28
 - Current milestone: M5 - Benchmark optimization
-- Production implementation: M5-C expands route selection from prefixes to bounded non-prefix
-  candidate combinations and keeps the official M5-B benchmark turns without regression
+- Production implementation: M5-D closes benchmark optimization with bounded dense-map candidate
+  discovery, non-prefix route selection, final official results, and a defense report
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
@@ -102,15 +102,19 @@
   `[R1, R2]` shares a bottleneck. Derived tests also prove stable makespan under topology-preserving
   zone renaming. Official benchmark turns remain easy 4/4/4, medium 8/10/6, hard 13/16/26,
   challenger 43.
+- M5-D adds a dense layered-map regression proving candidate discovery stops at the requested route
+  bound instead of enumerating every simple route before slicing. `docs/progress/M5_CLOSURE.md`
+  explains the final benchmark strategy, why it is not map-specific overfitting, complexity ceilings,
+  and the measured upgrade path.
 
 ## Next smallest slice
 
-Continue with M5-D (#50): close the hard/challenger benchmark report and decide whether any further
-candidate-generation guard is worth adding before moving to API/CLI polish.
+M5 is complete once PR #54 is merged. Next smallest slice after merge: return to the mandatory
+evaluator-facing README/CLI/visualization closure before starting API/UI maturity work.
 
 ## Active blockers
 
-None for M5-C. Further route-allocation optimization, API/UI, and visualization remain intentionally
+None for M5-D. Further route-allocation optimization, API/UI, and visualization remain intentionally
 deferred. Q7/Q8 restricted-transit evaluator confirmation remains open but does not block benchmark
 measurement.
 
