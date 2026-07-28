@@ -1,21 +1,58 @@
 # Benchmark ledger
 
-No solver exists yet. Never add estimated/fabricated results.
+Baseline command:
 
-## Fly-In 1.5 targets
+```bash
+UV_PROJECT_ENVIRONMENT=$(pwd)/../.flyin-venv uv run --extra dev python -m scripts.benchmark_official_maps
+```
 
-| Category | Map | Drones | Target turns | Current turns | Validated | Map hash |
-| --- | --- | ---: | ---: | ---: | --- | --- |
-| Easy | Linear path | 2 | 6 | - | No | pending v1.5 refresh |
-| Easy | Simple fork | 4 | 8 | - | No | pending v1.5 refresh |
-| Easy | Basic capacity | 4 | 6 | - | No | pending v1.5 refresh |
-| Medium | Dead end trap | 5 | 12 | - | No | pending v1.5 refresh |
-| Medium | Circular loop | 6 | 15 | - | No | pending v1.5 refresh |
-| Medium | Priority puzzle | 5 | 12 | - | No | pending v1.5 refresh |
-| Hard | Maze nightmare | 8 | 30 | - | No | pending v1.5 refresh |
-| Hard | Capacity hell | 12 | 35 | - | No | pending v1.5 refresh |
-| Hard | Ultimate challenge | 15 | 45 | - | No | pending v1.5 refresh |
-| Challenger | Impossible Dream | 25 | <45 | - | No | pending v1.5 refresh |
+## Subject/rubric algorithm guidance
+
+Fly-In 1.5 does not prescribe one concrete algorithm such as Dijkstra, A*, max-flow, or genetic
+search. It defines behavioral requirements and asks the learner to explain the trade-offs:
+
+- move all drones in the fewest practical simulation turns;
+- schedule simultaneous movement to maximize throughput and avoid unnecessary delays;
+- distribute drones across multiple paths;
+- wait strategically when capacity blocks movement;
+- avoid path conflicts and deadlocks;
+- account for path length, destination movement costs, graph structure, zone capacity, and link
+  capacity;
+- stay adaptable because different topologies may need different routing strategies;
+- discuss complexity, recalculation/caching, and memory impact during defense.
+
+M5 therefore starts from measurement. Optimization changes are accepted only when the complete map
+suite remains validator-clean and the benchmark table improves or has a documented no-regression
+reason.
+
+## Fly-In 1.5 baseline: M5-A
+
+- Commit/ref: `feat/m5-a-benchmark-baseline` before route-allocation optimization.
+- Configuration: `max_routes=8`, `max_turns=1000`, deterministic scheduler/allocation, no random seed.
+- Correctness check: every row below is validated by `ScheduleValidator`.
+- Timing note: duration is environment-dependent and secondary; turns and hashes are primary.
+
+| Category | Map | Drones | Expected evaluation target | Current turns | Delta vs target | Covered now? | Validated | Duration ms | Map hash |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- | ---: | --- |
+| Easy | Linear path | 2 | 6 | 4 | -2 | Yes | Yes | 0.37 | a03b11a9b97852f299dff023f8c745e3c4e973856addeb585b7337ebad44945d |
+| Easy | Simple fork | 4 | 8 | 4 | -4 | Yes | Yes | 0.41 | 9fc3bfd1977f3bcc47baec724f4f0b041d3c52908ca0ae90ad067831ee080858 |
+| Easy | Basic capacity | 4 | 6 | 4 | -2 | Yes | Yes | 0.25 | 73f5fff2e1dae24e157995793d4f08e52a9c1caa3e4f6b510a9d70054be5f06f |
+| Medium | Dead end trap | 5 | 12 | 8 | -4 | Yes | Yes | 0.46 | bbdc6acadc227783c5390b59f8dc963717022fe6cd14a0e10f0283eb2281d65f |
+| Medium | Circular loop | 6 | 15 | 10 | -5 | Yes | Yes | 0.55 | bfcd2d64593582c151bc376d786c22f307198a3cb529cc091b125aa078206123 |
+| Medium | Priority puzzle | 5 | 12 | 6 | -6 | Yes | Yes | 0.43 | 83fb923256647bfa6e727c94738e0afd3922f2b7a9a73ce974e409def967bb94 |
+| Hard | Maze nightmare | 8 | 30 | 14 | -16 | Yes | Yes | 1.22 | cf5ef07781724d23e74f813258b6cca421ac03998bab18b1e65cb7397ae7348b |
+| Hard | Capacity hell | 12 | 35 | 16 | -19 | Yes | Yes | 2.02 | 6f7645c1c60bc2df1f40d5b77fbbcd4de98b7f81db2d6d6fbf349a6ea46b1d92 |
+| Hard | Ultimate challenge | 15 | 45 | 29 | -16 | Yes | Yes | 4.22 | 2ee0279d0c3cd1aa1aacee5546f3df535bc6d41559430096962b6144c20d1d97 |
+| Challenger | Impossible Dream | 25 | <=44 optional | 51 | +7 | No | Yes | 380.14 | c5ee3795bbfaa5911b48623100e3d32e052b12f11f1235e08c0e7c628e678e8c |
+
+## Category status
+
+| Category | Expected evaluation threshold | Current status |
+| --- | --- | --- |
+| Easy | less than 10 turns | Covered: all easy maps are 4 turns. |
+| Medium | 10-30 turns; individual targets 12/15/12 | Covered: all medium maps meet or beat individual targets. |
+| Hard | less than 60 turns; individual targets 30/35/45 | Covered: all hard maps meet or beat individual targets. |
+| Challenger | optional: beat 45 turns, meaning 44 or less | Not covered: current result is 51 turns. |
 
 ## Recording protocol
 
