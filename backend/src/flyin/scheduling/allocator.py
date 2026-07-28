@@ -8,6 +8,8 @@ from flyin.scheduling.known_routes import (
     KnownRouteScheduler,
     ScheduleDeadlockError,
 )
+from flyin.scheduling.metrics import FleetMakespanEstimator
+from flyin.simulation import ScheduleValidator
 
 
 class RouteAllocator:
@@ -26,19 +28,30 @@ class RouteAllocator:
             max_routes,
         )
         last_error: ScheduleDeadlockError | None = None
-        for route_count in range(len(candidates), 0, -1):
+        best_schedule: tuple[tuple[TurnFact, ...], ...] | None = None
+        for route_count in FleetMakespanEstimator.ranked_route_counts(
+            parsed_map,
+            candidates,
+        ):
             routes_by_drone_id = cls.allocate(
                 parsed_map,
                 candidates[:route_count],
             )
             try:
-                return KnownRouteScheduler.schedule_known_routes(
+                schedule = KnownRouteScheduler.schedule_known_routes(
                     parsed_map,
                     routes_by_drone_id,
                     max_turns,
                 )
+                validation = ScheduleValidator.validate(parsed_map, schedule)
+                if not validation.is_valid:
+                    continue
+                if best_schedule is None or len(schedule) < len(best_schedule):
+                    best_schedule = schedule
             except ScheduleDeadlockError as exc:
                 last_error = exc
+        if best_schedule is not None:
+            return best_schedule
         if last_error is not None:
             raise last_error
         raise ValueError("at least one candidate route is required")
