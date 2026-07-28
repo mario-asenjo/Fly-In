@@ -2,8 +2,8 @@
 
 - Last updated: 2026-07-27
 - Current milestone: M4 - Capacity-aware scheduler
-- Production implementation: M4-B extends the known-route scheduler with per-turn shared link
-  reservations and same-arrival restricted destination reservations
+- Production implementation: M4-C adds bounded candidate-route discovery and a minimal deterministic
+  allocator over the capacity-aware scheduler
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
@@ -81,17 +81,20 @@
   queues departures even when the destination zone has room, explicit `max_link_capacity > 1` permits
   concurrent use, reversed traversals share one undirected physical connection capacity, and
   same-turn departures into restricted destinations reserve next-arrival destination capacity.
+- M4.5-M4.6 add `CandidateRouteFinder.find_candidates()` and `RouteAllocator.schedule()`. Candidate
+  discovery returns a bounded deterministic set of simple traversable routes with A*'s exact shortest
+  route first; route allocation distributes drones round-robin over those candidates and delegates
+  turn validity, waits, and capacity enforcement to `KnownRouteScheduler` plus `ScheduleValidator`.
 
 ## Next smallest slice
 
-Continue M4 with multiple candidate paths, route allocation, and strategic waiting. Keep benchmark
+Continue M4 with deadlock prevention/detection and closure on supplied official maps. Keep benchmark
 optimization, API/UI, and visualization out of M4 correctness slices.
 
 ## Active blockers
 
-None. M4-B link and restricted destination reservations are underway; multi-path allocation,
-strategic waiting, deadlock handling, benchmark optimization, API/UI, and visualization remain
-intentionally deferred.
+None. M4-C candidate route allocation is underway; deadlock handling, official-map closure,
+benchmark optimization, API/UI, and visualization remain intentionally deferred.
 
 ## Required context for next session
 

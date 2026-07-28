@@ -1,5 +1,17 @@
 # Session log
 
+## 2026-07-27 - M4-C candidate route allocation
+
+- Added `CandidateRouteFinder.find_candidates()` as a bounded deterministic simple-route seam. It
+  excludes blocked/dead branches through `TraversableGraph` and reverse reachability, sorts by cost,
+  priority, and route names, and keeps the exact A* shortest route as the first/default candidate.
+- Added `RouteAllocator.schedule()` to assign drones over candidate routes before delegating all
+  waits, capacity reservations, restricted arrivals, and fact production to `KnownRouteScheduler`.
+- Protected route splitting across two beneficial paths, single-route bottleneck waiting, and
+  unsolvable-map reporting through public scheduler tests plus `ScheduleValidator`.
+- Deliberately used round-robin allocation and a simple DFS candidate seam; measured optimization,
+  deadlock handling, official-map closure, API/UI, and visualization remain outside this slice.
+
 ## 2026-07-27 - M4-B link and restricted reservation scheduler
 
 - Extended `KnownRouteScheduler` with per-turn link-capacity reservations using the connection's
