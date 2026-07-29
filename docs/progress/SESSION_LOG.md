@@ -16,6 +16,8 @@
   requirements. The explicit visual mode renders zones, coordinates, static capacities, source color
   metadata, endpoint-colored connections, and turn movements with known ANSI/256-color swatches from
   `MapView` / `TurnView`.
+- Added a tiny follow-up visual improvement: `color=rainbow` renders labels character-by-character
+  with a repeating ANSI palette instead of as one flat approximation.
 - Added `MetricsView` for the subject's optional secondary metrics: drones moved per turn, average
   delivery turn per drone, and total weighted path cost. The terminal view prints these without
   reparsing or adapter-side simulation.

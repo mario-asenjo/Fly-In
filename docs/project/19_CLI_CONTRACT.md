@@ -68,6 +68,7 @@ movements with known color names rendered through ANSI/256-color escape codes pl
 next to each zone. Connection text colors each endpoint with that endpoint's zone color instead of
 painting the whole edge as one color. Unknown valid single-word color values are preserved as text
 metadata even when the terminal adapter cannot map them to an ANSI code.
+The special `rainbow` visual color is rendered character-by-character with a repeating ANSI palette.
 
 It also prints the optional subject metrics already derivable from the solved schedule: drones moved
 per turn, average delivery turn per drone, and total weighted path cost. Restricted destination moves
