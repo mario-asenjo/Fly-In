@@ -1,5 +1,18 @@
 # Session log
 
+## 2026-07-28 - M5-C non-prefix route selection robustness
+
+- After PR #52 merged, updated local `main` and created `feat/m5-c-beneficial-route-allocation`.
+- Added a derived regression map where candidate routes `R1` and `R2` look cheap individually but
+  share a bottleneck; the optimal useful set is non-prefix (`R1`, `R3`, `R4`). M5-B produced 6 turns;
+  M5-C produces 4 turns and validates independently.
+- Added a metamorphic-style check: renaming zones while preserving topology keeps the same 4-turn
+  makespan, guarding against accidental name-order overfitting.
+- `RouteAllocator` now evaluates bounded non-prefix route selections ranked by the existing fleet
+  estimate, then still returns the shortest validator-clean schedule it actually measures.
+- Official map turns stay unchanged from M5-B: easy 4/4/4, medium 8/10/6, hard 13/16/26,
+  challenger 43. The M5-C value is generalization evidence, not an official-table improvement.
+
 ## 2026-07-28 - M5-B route metrics and makespan estimates
 
 - After PR #51 merged, updated local `main` and created `feat/m5-b-route-makespan-estimator`.

@@ -29,13 +29,13 @@ class RouteAllocator:
         )
         last_error: ScheduleDeadlockError | None = None
         best_schedule: tuple[tuple[TurnFact, ...], ...] | None = None
-        for route_count in FleetMakespanEstimator.ranked_route_counts(
+        for routes in FleetMakespanEstimator.ranked_route_selections(
             parsed_map,
             candidates,
         ):
             routes_by_drone_id = cls.allocate(
                 parsed_map,
-                candidates[:route_count],
+                routes,
             )
             try:
                 schedule = KnownRouteScheduler.schedule_known_routes(
