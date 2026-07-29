@@ -2,8 +2,9 @@
 
 - Last updated: 2026-07-29
 - Current milestone: M6 - Mandatory presentation and evaluation hardening
-- Production implementation: M6.1-M6.2 add the first adapter-neutral application solve service and
-  a real evaluator-safe CLI adapter over it
+- Production implementation: M6.1-M6.4 have landed the adapter-neutral application service,
+  evaluator-safe CLI adapter, optional terminal visual mode, visual metrics, rainbow labels,
+  `--capacity-info`, and README/evaluation hardening
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
@@ -114,19 +115,24 @@
 - Default CLI stdout remains evaluator-safe movement lines. `--visual` renders map zones,
   coordinates, static capacities, source colors, connections, and turn-by-turn movements from
   `MapView`/`TurnView` using ANSI/256-color swatches plus optional subject metrics from
-  `MetricsView`, while keeping diagnostics on stderr.
+  `MetricsView`, while keeping diagnostics on stderr. `color=rainbow` is rendered per letter in
+  the terminal adapter.
+- `--capacity-info` reuses validated application capacity projections and appends per-turn zone/link
+  diagnostics only when explicitly requested.
+- README and the evaluation matrix now describe the real M6 state instead of the old parser-only
+  snapshot.
 
 ## Next smallest slice
 
-Merge PR #63, then continue M6 with the remaining #57 `--capacity-info` seam on top of `MapView` /
-`TurnView`. #58 README/evaluation rehearsal can follow in the same or next iteration if the
-diagnostic diff stays small and reviewable.
+Open the M6 hardening PR for #57/#58, verify CI, then close the M6 umbrella if review accepts the
+README/evaluation evidence. After M6 is merged, the next planned coding slice is #59 M7.1 typed
+in-process events; do not start FastAPI (#60) before that event seam is proven.
 
 ## Active blockers
 
-None for #57. Further route-allocation optimization, API/UI, and React visualization remain
+None for M6 hardening. Further route-allocation optimization, API/UI, and React visualization remain
 intentionally deferred. Q7/Q8 restricted-transit evaluator confirmation remains open and should stay
-visible while CLI/output behavior is hardened.
+visible during defense and before API/event projection hardening.
 
 ## Required context for next session
 

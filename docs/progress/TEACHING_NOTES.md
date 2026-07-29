@@ -1,5 +1,42 @@
 # Teaching notes ledger
 
+## M6.3-M6.4 - Capacity diagnostics and evaluator hardening
+
+### Problem and observable behavior
+
+The visual adapter was useful, but the evaluation rubric also rehearses a `--capacity-info` change and
+the README still described the repository as parser-only. This slice makes the capacity seam real and
+updates the public defense docs without changing default evaluator stdout.
+
+### Flow and involved classes
+
+`FlyInSolver.solve_text()` now includes `TurnCapacityView` rows in `SolveResult.capacity_turns`. The
+projection is built from the completed schedule after validation, so adapters do not reparse input or
+rerun the scheduler. `flyin.adapters.cli.main()` owns the `--capacity-info` flag, and
+`format_capacity_info()` renders the human diagnostic block.
+
+### Invariant and complexity
+
+Mandatory stdout remains pure unless an explicit non-default flag is used. Capacity projection is a
+single replay over `D` drones and `T` turns plus the already parsed zones/connections, so its cost is
+small compared with route discovery and scheduling. Delivered drones are counted at the end hub for
+human diagnostics while remaining removed from authoritative scheduling.
+
+### Example and tests
+
+On a two-drone single-capacity waypoint map, the first capacity row reports `zone waypoint: 1/1 drones`
+and `connection start-waypoint: 1/1 used`. Tests prove the application projection, explicit CLI
+output, and absence of capacity diagnostics in default mode.
+
+For a deeper defense rehearsal, `docs/project/20_CAPACITY_INFO_WALKTHROUGH.md` walks through the
+official easy linear map with the exact command output and the real data passed between CLI parsing,
+`FlyInSolver`, route allocation, schedule validation, `capacity_turns`, and `format_capacity_info()`.
+
+### Deliberate non-goals
+
+No scheduler changes, no API/React work, no terminal dependency, and no attempt to fake a live-coding
+history. The implemented seam is what would be typed during the rehearsal.
+
 ## M6.1-M6.2 - Application solve service and evaluator CLI
 
 ### Problem and observable behavior

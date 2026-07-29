@@ -6,7 +6,10 @@ from pathlib import Path
 from typing import Sequence, TextIO
 
 from flyin.application import FlyInSolver, SolveError
-from flyin.adapters.terminal_visual import format_visual_result
+from flyin.adapters.terminal_visual import (
+    format_capacity_info,
+    format_visual_result,
+)
 
 
 def main(
@@ -26,6 +29,11 @@ def main(
         "--visual",
         action="store_true",
         help="print colored human visualization instead of evaluator output",
+    )
+    parser.add_argument(
+        "--capacity-info",
+        action="store_true",
+        help="append per-turn capacity diagnostics to explicit debug output",
     )
     try:
         args = parser.parse_args(argv)
@@ -50,9 +58,11 @@ def main(
             return 3
         return 2
 
-    output_lines = (
+    output_lines = list(
         format_visual_result(result) if args.visual else result.movement_lines
     )
+    if args.capacity_info:
+        output_lines.extend(format_capacity_info(result))
     for line in output_lines:
         print(line, file=out)
     return 0

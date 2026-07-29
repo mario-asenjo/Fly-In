@@ -1,5 +1,26 @@
 # Session log
 
+## 2026-07-29 - M6.3-M6.4 capacity info and evaluator hardening
+
+- Batched #57 and #58 because both share one M6 presentation/evaluator-hardening boundary and do not
+  touch routing/scheduling correctness.
+- Added `SolveResult.capacity_turns` as an adapter-safe per-turn capacity projection. It replays the
+  already validated schedule to expose zone usage and physical connection usage without reparsing text
+  in the CLI adapter.
+- Added explicit CLI flag `--capacity-info`. Default stdout remains movement lines only; the flag
+  appends a `Capacity info:` diagnostic block for live-coding rehearsal.
+- Updated README from the stale parser-only snapshot to the current M6 CLI/application state, with
+  install/run/debug/test/lint commands, evaluator output example, visual/capacity flags, architecture,
+  benchmark summary, AI-use note, and open Q7/Q8 risks.
+- Updated CLI contract and evaluation matrix to record the implemented visual/capacity seams and M6
+  evidence.
+- Independent review found the first capacity projection double-counted restricted arrival movement
+  facts as link usage. Fixed the diagnostic to match the validator's current link-reservation model
+  and added a regression for the restricted-arrival link row.
+- Added `docs/project/20_CAPACITY_INFO_WALKTHROUGH.md` with the real easy-map command output and
+  every data handoff from CLI arguments through parsing, route allocation, schedule facts,
+  validation, capacity projection, and terminal formatting.
+
 ## 2026-07-29 - M6.1-M6.2 application service and evaluator CLI
 
 - After PRs #61 and #62 were merged, created `feat/m6-application-cli-service` from updated `main`.

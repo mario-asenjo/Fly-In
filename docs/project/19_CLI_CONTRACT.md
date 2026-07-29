@@ -1,20 +1,18 @@
 # CLI contract
 
-Status: target mandatory adapter behavior; confirm exact executable name with project conventions.
+Status: implemented mandatory adapter behavior through `python -m flyin` and `make run ARGS=...`.
 
-## Proposed invocation
-
-```bash
-./main.py map.txt
-```
-
-or installed development entry point:
+## Implemented invocation
 
 ```bash
-fly-in map.txt
+make run ARGS=map.txt
 ```
 
-The evaluator-facing wrapper may be added once repository expectations are confirmed.
+or direct development entry point:
+
+```bash
+uv run --extra dev python -m flyin map.txt
+```
 
 ## Default stdout
 
@@ -38,15 +36,14 @@ Suggested stable policy:
 Confirm evaluator expectations before freezing numeric codes; the stdout isolation is more
 important than the exact non-zero number.
 
-## Optional flags by phase
+## Optional flags
 
 - `--visual`: colored human view using `MapView` / `TurnView`; must not change domain computation
   or default evaluator stdout.
-- `--capacity-info`: rubric live-coding behavior.
-- `--metrics`: optional secondary metrics.
+- `--capacity-info`: explicit capacity diagnostic mode for rubric live-coding rehearsal. It appends
+  per-turn zone/link capacity use and is never emitted by default.
+- Visual mode includes optional secondary metrics.
 - `--debug`: developer diagnostics to stderr/logging.
-
-Do not add flags before a real consumer/milestone.
 
 ## Architecture seam
 
@@ -74,3 +71,18 @@ It also prints the optional subject metrics already derivable from the solved sc
 per turn, average delivery turn per drone, and total weighted path cost. Restricted destination moves
 count once as cost 2 on departure; their later arrival fact is visual progress, not an additional path
 cost.
+
+
+## Implemented capacity-info mode
+
+`python -m flyin --capacity-info map.txt` prints the normal evaluator movement lines first, then a
+`Capacity info:` block with per-turn rows such as:
+
+```text
+zone waypoint: 1/1 drones
+connection start-waypoint: 1/1 used
+```
+
+The data comes from the validated `SolveResult.capacity_turns` projection, not from reparsing in the
+CLI. Regular zone counts represent post-turn occupancy. Delivered drones are counted against the end
+hub's unlimited sink for human diagnostics; they are still removed from authoritative scheduling.

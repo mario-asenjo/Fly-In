@@ -66,6 +66,22 @@ def format_visual_result(result: SolveResult) -> tuple[str, ...]:
     return tuple(lines)
 
 
+def format_capacity_info(result: SolveResult) -> tuple[str, ...]:
+    """Return explicit capacity diagnostics for live-coding rehearsal."""
+    lines = ["Capacity info:"]
+    for turn in result.capacity_turns:
+        lines.append(f"  Turn {turn.number}:")
+        lines.extend(
+            f"    zone {name}: {used}/{capacity} drones"
+            for name, used, capacity in turn.zones
+        )
+        lines.extend(
+            f"    connection {left}-{right}: {used}/{capacity} used"
+            for left, right, used, capacity in turn.connections
+        )
+    return tuple(lines)
+
+
 def _format_zone(zone: ZoneView) -> str:
     color = zone.color or "none"
     return (
