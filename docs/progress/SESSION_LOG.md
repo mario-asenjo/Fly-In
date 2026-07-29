@@ -1,5 +1,16 @@
 # Session log
 
+## 2026-07-28 - M5-D benchmark closure and dense candidate guard
+
+- PR #53 was still open, so M5-D was started as stacked branch `feat/m5-d-benchmark-closure` on top
+  of M5-C to keep the final diff reviewable without waiting for merge.
+- Added a dense layered-map regression: current unbounded DFS produced 891 complete route objects for
+  `max_routes=8`; M5-D stops at 8 complete candidates and still injects the exact A* shortest route.
+- Official benchmark turns remain unchanged from M5-C: easy 4/4/4, medium 8/10/6, hard 13/16/26,
+  challenger 43.
+- Added `docs/progress/M5_CLOSURE.md` with final benchmark evidence, anti-overfit rationale,
+  complexity ceilings, and upgrade trigger for a measured k-shortest path enumerator.
+
 ## 2026-07-28 - M5-C non-prefix route selection robustness
 
 - After PR #52 merged, updated local `main` and created `feat/m5-c-beneficial-route-allocation`.

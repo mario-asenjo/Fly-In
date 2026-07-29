@@ -37,6 +37,7 @@ class CandidateRouteFinder:
             (parsed_map.start,),
             (),
             routes,
+            max_routes,
         )
         ordered = tuple(sorted(routes, key=cls._route_key))[:max_routes]
         shortest = AStarPathfinder.shortest_path(parsed_map)
@@ -52,9 +53,13 @@ class CandidateRouteFinder:
         zones: tuple[Zone, ...],
         connections: tuple[Connection, ...],
         routes: list[Route],
+        max_routes: int,
     ) -> None:
-        # ponytail: simple DFS is enough for M4 correctness; replace with
-        # measured k-shortest search only if M5 benchmarks need it.
+        # ponytail: bounded DFS avoids dense-map blow-ups; replace with a
+        # measured k-shortest search only if later benchmarks prove the bound
+        # loses useful candidates.
+        if len(routes) >= max_routes:
+            return
         if current.name == end.name:
             routes.append(cls._route(zones, connections))
             return
@@ -73,7 +78,10 @@ class CandidateRouteFinder:
                 (*zones, destination),
                 (*connections, traversal.connection),
                 routes,
+                max_routes,
             )
+            if len(routes) >= max_routes:
+                return
 
     @classmethod
     def _route(
