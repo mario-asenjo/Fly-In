@@ -162,8 +162,8 @@ the shared link capacity permits both traversals and zone post-state capacities 
 - **DECISION**: stable output ordering by ascending drone ID.
 - **OPEN**: exact directed/canonical textual name for an in-flight connection must be tested
   against evaluator expectations. Default proposal is `<origin>-<destination>`.
-- Mandatory stdout contains movement lines only. Human visualization/metrics use an explicit
-  flag, stderr, or a separate adapter.
+- Mandatory stdout contains movement lines only. Human visualization/metrics use an explicit flag,
+  stderr, or a separate adapter.
 
 ## Schedule validity versus quality
 

@@ -40,7 +40,8 @@ important than the exact non-zero number.
 
 ## Optional flags by phase
 
-- `--visual`: colored human view; must not change domain computation.
+- `--visual`: colored human view using `MapView` / `TurnView`; must not change domain computation
+  or default evaluator stdout.
 - `--capacity-info`: rubric live-coding behavior.
 - `--metrics`: optional secondary metrics.
 - `--debug`: developer diagnostics to stderr/logging.
@@ -58,3 +59,17 @@ parse args -> read text -> application solve -> SimulationResult
 
 The simulator returns data/events, never prints. Exact-output integration tests capture both stdout
 and stderr.
+
+## Implemented visual mode
+
+`python -m flyin --visual map.txt` switches from evaluator output to a human terminal view. It prints
+map metadata, zone coordinates, zone capacities, source `color=<value>` metadata, and turn-by-turn
+movements with known color names rendered through ANSI/256-color escape codes plus a colored swatch
+next to each zone. Connection text colors each endpoint with that endpoint's zone color instead of
+painting the whole edge as one color. Unknown valid single-word color values are preserved as text
+metadata even when the terminal adapter cannot map them to an ANSI code.
+
+It also prints the optional subject metrics already derivable from the solved schedule: drones moved
+per turn, average delivery turn per drone, and total weighted path cost. Restricted destination moves
+count once as cost 2 on departure; their later arrival fact is visual progress, not an additional path
+cost.

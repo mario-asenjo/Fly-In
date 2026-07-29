@@ -9,10 +9,10 @@ install:
 	uv sync --extra dev
 
 run:
-	$(PYTHON) -m flyin
+	@$(PYTHON) -m flyin $(ARGS)
 
 debug:
-	$(PYTHON) -m pdb -m flyin
+	@$(PYTHON) -m pdb -m flyin $(ARGS)
 
 clean:
 	rm -rf .venv .pytest_cache .mypy_cache .coverage htmlcov build dist
