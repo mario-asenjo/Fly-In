@@ -263,7 +263,11 @@ def test_cli_visual_supports_challenger_color_names(
     assert "\033[35m■\033[0m \033[35mstart\033[0m" in captured.out
     assert "\033[38;5;94m■\033[0m" in captured.out
     assert "\033[38;5;208m■\033[0m" in captured.out
-    assert "\033[38;5;201mgoal\033[0m" in captured.out
+    assert (
+        "\033[31mg\033[0m\033[33mo\033[0m\033[32ma\033[0m"
+        "\033[36ml\033[0m"
+        in captured.out
+    )
 
 
 def test_cli_maps_invalid_input_to_stderr_and_exit_code(

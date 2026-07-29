@@ -3,6 +3,7 @@
 from flyin.application import MovementView, SolveResult, ZoneView
 
 _RESET = "\033[0m"
+_RAINBOW_CODES = ("31", "33", "32", "36", "34", "35")
 _COLOR_CODES = {
     "black": "90",
     "red": "31",
@@ -20,7 +21,6 @@ _COLOR_CODES = {
     "darkred": "38;5;52",
     "violet": "38;5;177",
     "crimson": "38;5;161",
-    "rainbow": "38;5;201",
     "gray": "90",
     "grey": "90",
 }
@@ -102,6 +102,12 @@ def _format_movement(movement: MovementView) -> str:
 
 
 def _paint(text: str, color: str | None) -> str:
+    if (color or "").lower() == "rainbow":
+        return "".join(
+            f"\033[{_RAINBOW_CODES[index % len(_RAINBOW_CODES)]}m"
+            f"{letter}{_RESET}"
+            for index, letter in enumerate(text)
+        )
     code = _COLOR_CODES.get((color or "").lower())
     if code is None:
         return text
