@@ -1,5 +1,17 @@
 # Session log
 
+## 2026-07-29 - M6 application-service planning and GitHub sync
+
+- Verified local Git/GitHub state: PR #54 is merged into the M5 stack, GitHub CLI is authenticated,
+  and the Fly-In Roadmap Project is available as user project #9.
+- Closed GitHub issue #50 and the #4 M4-M5 umbrella as completed, then moved #5 M6 to In Progress.
+- Created M6 child issues #55-#58: application service, evaluator CLI, terminal visualization /
+  `--capacity-info`, and README/evaluation rehearsal.
+- Created future M7/M8 child issues #59-#60 for typed in-process events and the first FastAPI
+  adapter, keeping API work behind the mandatory CLI/presentation hardening boundary.
+- Set #55 as the active next implementation slice. The intended seam is `flyin.application`: map
+  text in, typed solve result out, no CLI/FastAPI/React types leaking inward.
+
 ## 2026-07-28 - M5-D benchmark closure and dense candidate guard
 
 - PR #53 was still open, so M5-D was started as stacked branch `feat/m5-d-benchmark-closure` on top

@@ -1,9 +1,10 @@
 # Current project state
 
-- Last updated: 2026-07-28
-- Current milestone: M5 - Benchmark optimization
-- Production implementation: M5-D closes benchmark optimization with bounded dense-map candidate
-  discovery, non-prefix route selection, final official results, and a defense report
+- Last updated: 2026-07-29
+- Current milestone: M6 - Mandatory presentation and evaluation hardening
+- Production implementation: M5-D is merged into the M5 stack and closes benchmark optimization with
+  bounded dense-map candidate discovery, non-prefix route selection, final official results, and a
+  defense report
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
@@ -109,14 +110,20 @@
 
 ## Next smallest slice
 
-M5 is complete once PR #54 is merged. Next smallest slice after merge: return to the mandatory
-evaluator-facing README/CLI/visualization closure before starting API/UI maturity work.
+M5 is complete: PR #54 is merged, GitHub issue #50 and the #4 M4-M5 umbrella are closed, and the
+Fly-In Roadmap Project marks #5 plus #55 as In Progress. Next slice: #55 `M6.1: servicio de
+aplicación para resolver mapas sin acoplar CLI/API`.
+
+This slice creates the adapter-neutral application use case that consumes map text, calls the
+existing parser/scheduler/validator core, and returns typed solve results with evaluator movement
+lines plus non-fatal diagnostics. The real CLI (#56) should call that service next; FastAPI (#60)
+waits until M7/M8 so the mandatory project remains defensible first.
 
 ## Active blockers
 
-None for M5-D. Further route-allocation optimization, API/UI, and visualization remain intentionally
-deferred. Q7/Q8 restricted-transit evaluator confirmation remains open but does not block benchmark
-measurement.
+None for starting M6. Further route-allocation optimization, API/UI, and React visualization remain
+intentionally deferred. Q7/Q8 restricted-transit evaluator confirmation remains open and should be
+kept visible when CLI/output behavior is hardened.
 
 ## Required context for next session
 
@@ -124,5 +131,5 @@ measurement.
 - `docs/project/02_SOURCE_OF_TRUTH.md`
 - Drone state, turn semantics, restricted movement, capacity invariants, and output sections of
   `docs/project/03_DOMAIN_CONTRACT.md`
-- `docs/project/05_ROADMAP.md` M5
+- `docs/project/05_ROADMAP.md` M6-M8
 - `docs/progress/OPEN_QUESTIONS.md`
