@@ -1,9 +1,9 @@
 # Current project state
 
-- Last updated: 2026-07-28
-- Current milestone: M5 - Benchmark optimization
-- Production implementation: M5-D closes benchmark optimization with bounded dense-map candidate
-  discovery, non-prefix route selection, final official results, and a defense report
+- Last updated: 2026-07-29
+- Current milestone: M6 - Mandatory presentation and evaluation hardening
+- Production implementation: M6.1-M6.2 add the first adapter-neutral application solve service and
+  a real evaluator-safe CLI adapter over it
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
 - API/UI/EDA implementation: intentionally not started
@@ -16,7 +16,7 @@
 - `masenjo` is the confirmed README 42 login.
 - Python 3.13.14, `uv` 0.11.19, GNU Make 4.4.1, and GitHub CLI authentication are verified locally.
 - The Makefile provides the subject-required `install`, `run`, `debug`, `clean`, `lint`, and optional
-  `lint-strict` targets; `run` executes the temporary M0 module entry point.
+  `lint-strict` targets; `run` accepts map arguments through `ARGS` and delegates to `python -m flyin`.
 - The first comment-free minimal-map acceptance test originated as the intentional M0 red contract.
 - M1.1 turns that contract green with immutable typed `Zone`, `Connection`, and `ParsedMap`
   objects plus `MapParser.parse()` for one drone count, start, end, and connection.
@@ -106,17 +106,27 @@
   bound instead of enumerating every simple route before slicing. `docs/progress/M5_CLOSURE.md`
   explains the final benchmark strategy, why it is not map-specific overfitting, complexity ceilings,
   and the measured upgrade path.
+- M6.1-M6.2 introduce `flyin.application.FlyInSolver` as the shared use-case seam and
+  `flyin.adapters.cli` as the evaluator CLI. The service parses text, schedules through the existing
+  core, independently validates the schedule, returns immutable movement lines, warnings, and
+  adapter-safe map/turn projections including zone colors for terminal/API visualization, and
+  translates parse/no-route/deadlock failures into stable adapter-level `SolveError` codes.
+- Default CLI stdout remains evaluator-safe movement lines. `--visual` renders map zones,
+  coordinates, static capacities, source colors, connections, and turn-by-turn movements from
+  `MapView`/`TurnView` using ANSI/256-color swatches plus optional subject metrics from
+  `MetricsView`, while keeping diagnostics on stderr.
 
 ## Next smallest slice
 
-M5 is complete once PR #54 is merged. Next smallest slice after merge: return to the mandatory
-evaluator-facing README/CLI/visualization closure before starting API/UI maturity work.
+Merge PR #63, then continue M6 with the remaining #57 `--capacity-info` seam on top of `MapView` /
+`TurnView`. #58 README/evaluation rehearsal can follow in the same or next iteration if the
+diagnostic diff stays small and reviewable.
 
 ## Active blockers
 
-None for M5-D. Further route-allocation optimization, API/UI, and visualization remain intentionally
-deferred. Q7/Q8 restricted-transit evaluator confirmation remains open but does not block benchmark
-measurement.
+None for #57. Further route-allocation optimization, API/UI, and React visualization remain
+intentionally deferred. Q7/Q8 restricted-transit evaluator confirmation remains open and should stay
+visible while CLI/output behavior is hardened.
 
 ## Required context for next session
 
@@ -124,5 +134,5 @@ measurement.
 - `docs/project/02_SOURCE_OF_TRUTH.md`
 - Drone state, turn semantics, restricted movement, capacity invariants, and output sections of
   `docs/project/03_DOMAIN_CONTRACT.md`
-- `docs/project/05_ROADMAP.md` M5
+- `docs/project/05_ROADMAP.md` M6-M8
 - `docs/progress/OPEN_QUESTIONS.md`

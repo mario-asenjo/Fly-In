@@ -1,5 +1,27 @@
 # Session log
 
+## 2026-07-29 - M6.1-M6.2 application service and evaluator CLI
+
+- After PRs #61 and #62 were merged, created `feat/m6-application-cli-service` from updated `main`.
+- Combined #55 and #56 because they share one adapter boundary: map file/text input, application
+  solve result, and evaluator-safe movement lines. Kept #57 visualization and #60 FastAPI out.
+- Added `flyin.application.FlyInSolver` with immutable `SolveResult` / `SolveWarning` and stable
+  `SolveError` codes. It parses map text, calls `RouteAllocator.schedule()`, validates with
+  `ScheduleValidator`, formats movement lines, exposes adapter-safe map/turn projections with zone
+  colors, and emits terminal-zone metadata warnings without touching stdout.
+- Replaced the temporary `python -m flyin` placeholder with `flyin.adapters.cli`: it reads one map
+  path, prints movement lines only on stdout by default, maps invalid input to exit 2/stderr, and
+  maps no-route failures to exit 3/stderr.
+- Added `flyin.adapters.terminal_visual` on the same PR after reviewing Fly-In 1.5 color
+  requirements. The explicit visual mode renders zones, coordinates, static capacities, source color
+  metadata, endpoint-colored connections, and turn movements with known ANSI/256-color swatches from
+  `MapView` / `TurnView`.
+- Added `MetricsView` for the subject's optional secondary metrics: drones moved per turn, average
+  delivery turn per drone, and total weighted path cost. The terminal view prints these without
+  reparsing or adapter-side simulation.
+- Updated `Makefile` so `make run ARGS=<map-path>` and `make debug ARGS=<map-path>` pass evaluator
+  arguments through the module entry point.
+
 ## 2026-07-28 - M5-D benchmark closure and dense candidate guard
 
 - PR #53 was still open, so M5-D was started as stacked branch `feat/m5-d-benchmark-closure` on top

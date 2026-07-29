@@ -1,5 +1,45 @@
 # Teaching notes ledger
 
+## M6.1-M6.2 - Application solve service and evaluator CLI
+
+### Problem and observable behavior
+
+The core could parse, route, schedule, validate, and format movement facts, but there was no single
+use case for adapters to call. The temporary `python -m flyin` command printed a placeholder instead
+of evaluator output. M6.1-M6.2 adds the shared application seam and the first real CLI adapter.
+
+### Flow and involved classes
+
+`flyin.adapters.cli.main()` owns argument parsing and file I/O. It reads map text and calls
+`FlyInSolver.solve_text()`. The application service coordinates `MapParser`, `RouteAllocator`,
+`ScheduleValidator`, and `format_turn()`, then returns a `SolveResult` containing parsed data, turn
+facts, evaluator movement lines, adapter-safe `MapView` / `TurnView` projections with zone colors,
+and non-fatal `SolveWarning` diagnostics. `SolveError` is the stable boundary for parse, no-route,
+deadlock, and validation failures.
+
+### Invariant and complexity
+
+Default CLI stdout contains only movement lines. Visual color metadata and optional secondary metrics
+stay in application result data so the `--visual` terminal adapter or future API can render each
+zone/hub with its subject color and show efficiency facts without leaking domain objects. The terminal
+adapter uses a tiny ANSI/256-color table plus swatches for the official map color names; unknown color
+strings still print as metadata. Connections are colored by endpoint rather than as a single edge
+color, which keeps movement like `origin-destination` readable without a graph renderer. The core
+still never imports CLI/FastAPI/React types.
+
+### Example and tests
+
+On official `easy/01_linear_path.txt`, the service and CLI produce four movement lines:
+`D1-waypoint1`, then both drones pipeline through the two waypoints, ending with `D2-goal`. Tests also
+cover official and synthetic color projections, per-turn destination colors, optional metrics,
+colored `--visual` output, a terminal `zone=blocked/priority` warning, line-aware parse error
+translation, no-route exit 3, and stdout purity for successful default CLI execution.
+
+### Deliberate non-goals
+
+No terminal visualization, `--capacity-info`, FastAPI DTO, event catalog, or React code is added in
+this slice. #57 owns optional human output; #60 owns the later HTTP adapter over the same service.
+
 ## M4-D - Deadlock detection and official-map closure
 
 ### Problem and observable behavior

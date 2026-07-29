@@ -1,10 +1,6 @@
-"""Temporary executable entry point required by the project Makefile."""
+"""Fly-In command-line entry point."""
 
-
-def main() -> int:
-    """Report that the command interface is not implemented in M0 yet."""
-    print("Fly-In command interface is not implemented yet.")
-    return 0
+from flyin.adapters.cli import main
 
 
 if __name__ == "__main__":
