@@ -2,128 +2,212 @@
 
 # Fly-In
 
-Incremental Fly-In 1.5 implementation with an object-oriented, typed domain core and a
-Hermes-assisted development workflow.
+Fly-In 1.5 implementation in Python with a typed, object-oriented domain core, a custom graph/pathfinding stack, a deterministic capacity-aware scheduler, and an evaluator-safe CLI.
 
-The repository contains immutable source snapshots, project decisions, quality gates, tests, and
-the completed M1 map parser. Routing, scheduling, simulation, visualization, and the evaluator CLI
-will continue in small, test-first vertical slices.
-Hermes maintains continuity between sessions.
+The mandatory CLI is the first-class product. Later API, events, and React work are planned as adapters over the same application service, not as rewrites of the routing or simulation core.
 
-## Start here
+## Current state
 
-1. Install and configure Hermes Agent.
-2. From this repository, run:
+Implemented and verified:
 
-   ```bash
-   bash scripts/setup-hermes.sh
-   ```
+- Fly-In 1.5 parser with line-aware errors, comments, metadata, zone types, capacities, duplicate-link checks, and immutable typed map objects.
+- Custom traversable graph and exact A* one-drone pathfinding using only the Python standard library (`heapq`), with destination movement costs and deterministic priority tie-breaks.
+- Deterministic simulation engine with explicit drone states, two-turn restricted transit, delivered-drone removal, and exact evaluator movement tokens.
+- Independent schedule validator for movement legality, blocked traversal, zone capacity, link capacity, delivered-drone immobility, and restricted arrivals.
+- Capacity-aware route allocation over bounded candidate paths, with deadlock fallback and measured benchmark improvements.
+- Application service `FlyInSolver` that parses text, schedules, validates, and returns adapter-neutral result projections.
+- CLI adapter via `python -m flyin` / `make run` that prints movement lines only by default.
+- Optional terminal presentation flags: `--visual` and `--capacity-info`.
 
-   Native Windows users can run:
+Intentionally not started yet:
 
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File .\scripts\setup-hermes.ps1
-   ```
+- FastAPI adapter.
+- Typed event catalog.
+- React UI.
+- External broker/worker architecture.
 
-   If this is a dedicated Fly-In Hermes profile/home, add `--install-soul` on Bash or
-   `-InstallSoul` on PowerShell after reviewing `hermes/SOUL.flyin.md`.
+## Requirements
 
-4. Restart Hermes because Ponytail is installed as a Hermes plugin.
-5. Open Hermes with this repository as the working directory.
-6. Send the exact first message from [docs/prompts/FIRST_SESSION.md](docs/prompts/FIRST_SESSION.md).
+- Python 3.12 or newer.
+- `uv` for dependency management.
+- GNU Make-compatible `make`.
 
-The short version is:
+Development dependencies are declared in `pyproject.toml` under the `dev` extra. The production package currently has no runtime third-party dependencies.
 
-> Vamos a implementar Fly-In. Lee el contexto del repositorio, realiza el protocolo de
-> inicio de sesión, dime en qué estado real estamos y propón únicamente el primer vertical
-> slice. No escribas código hasta que aprobemos juntos su alcance y criterios de aceptación.
+## Install
+
+From the repository root:
+
+```bash
+make install
+```
+
+This runs:
+
+```bash
+uv sync --extra dev
+```
+
+The Makefile stores the uv virtual environment outside the repository at `../.flyin-venv` through `UV_PROJECT_ENVIRONMENT`, so the mandatory raw `flake8 .` command does not scan a checked-in or repo-local virtualenv.
+
+## Run the evaluator CLI
+
+Default mode prints exactly one line per simulation turn and only movement tokens on stdout:
+
+```bash
+make run ARGS=maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt
+```
+
+Equivalent direct command:
+
+```bash
+uv run --extra dev python -m flyin maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt
+```
+
+Example output for the official easy linear map:
+
+```text
+D1-waypoint1
+D1-waypoint2 D2-waypoint1
+D1-goal D2-waypoint2
+D2-goal
+```
+
+Diagnostics and errors are written to stderr. Default successful output has no banner, colors, metrics, warnings, or blank separators.
+
+## Debug and presentation modes
+
+Colored terminal view:
+
+```bash
+make run ARGS="--visual maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt"
+```
+
+This explicit mode renders zones, coordinates, source colors, static capacities, connections, turn-by-turn movement, and optional subject metrics. `color=rainbow` is rendered character-by-character in the terminal adapter.
+
+Capacity diagnostics / live-coding seam:
+
+```bash
+make run ARGS="--capacity-info maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt"
+```
+
+This explicit mode keeps the movement lines and appends per-turn zone/link usage diagnostics. It is intentionally not part of the default evaluator stdout.
+
+Debug with pdb:
+
+```bash
+make debug ARGS=maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt
+```
+
+## Quality gates
+
+Run all regular tests:
+
+```bash
+make test
+```
+
+Run mandatory lint/type checks:
+
+```bash
+make lint
+```
+
+Run strict type checks:
+
+```bash
+make lint-strict
+```
+
+Validate project context and source/hash rules:
+
+```bash
+make context
+```
+
+Full local quality gate:
+
+```bash
+make quality
+```
+
+Before a slice is called complete, the project contract requires fresh evidence for relevant tests, lint/type checks, context validation, progress docs, and Ponytail review.
+
+## Benchmark evidence
+
+The benchmark runner is developer-only and lives outside the application package:
+
+```bash
+UV_PROJECT_ENVIRONMENT=$(pwd)/../.flyin-venv uv run --extra dev python -m scripts.benchmark_official_maps
+```
+
+Current documented M5-D results on the official Fly-In 1.5 map package are validator-clean:
+
+| Category | Current turns |
+| --- | --- |
+| Easy | 4 / 4 / 4 |
+| Medium | 8 / 10 / 6 |
+| Hard | 13 / 16 / 26 |
+| Challenger | 43 |
+
+The detailed benchmark ledger and map hashes live in `docs/progress/BENCHMARKS.md` and `docs/progress/M5_CLOSURE.md`.
+
+## Architecture
+
+Dependency direction points inward:
+
+```text
+adapters/cli -> application -> parsing/pathfinding/scheduling/simulation -> domain
+```
+
+Key boundaries:
+
+- `domain`: immutable entities/value objects and invariants.
+- `parsing`: text-to-domain conversion with line-aware errors.
+- `pathfinding`: custom graph and route discovery; no graph/pathfinding library.
+- `scheduling`: capacity reservations, route allocation, and deadlock fallback.
+- `simulation`: deterministic turn facts, state transitions, validation, and token formatting.
+- `application`: adapter-neutral solve use case and projections.
+- `adapters/cli`: argument parsing, file I/O, stdout/stderr policy, and terminal presentation.
+
+No NetworkX, `graphlib`, FastAPI, React, broker, or visualization dependency is used by the domain/core scheduler.
 
 ## Source hierarchy
 
 When sources disagree, use this order:
 
 1. `docs/sources/flyin_1.5.pdf` - current normative subject.
-2. `docs/sources/Intra-Projects-Fly-in-Edit.pdf` - actual evaluation rubric.
+2. `docs/sources/Intra-Projects-Fly-in-Edit.pdf` - evaluation rubric.
 3. `maps/maps-v1.5-added-before-m0/` - official Fly-In 1.5 map package.
 4. `maps/provided-v12-snapshot/` - historical v1.2 comparison snapshot.
 5. `docs/sources/fly-in_1.2.pdf` - historical comparison only.
 6. `maps/provided-v12-snapshot/README_maps.md` - non-normative historical helper documentation.
 
-Never silently resolve a contradiction. Record it in
-[docs/progress/OPEN_QUESTIONS.md](docs/progress/OPEN_QUESTIONS.md), choose the safest
-testable interpretation, and keep the decision reversible.
+Never silently resolve contradictions. Record them in `docs/progress/OPEN_QUESTIONS.md`, choose the safest testable interpretation, and keep the decision reversible.
 
-## Intended architecture
+## AI and resources
 
-The target is an evolutionary modular monolith:
+Hermes Agent is used as a pair-programming assistant for planning, implementation, tests, documentation, review, and project tracking. Project state is stored in versioned files under `docs/progress/`; global assistant memory is not used as the project database.
 
-1. Pure Python domain, parser, custom graph, pathfinding, scheduling, simulator, and CLI.
-2. Typed in-process domain events.
-3. FastAPI REST API with generated OpenAPI documentation.
-4. React + TypeScript visualization.
-5. Server-Sent Events first; WebSocket only if bidirectional live control becomes necessary.
-6. An external broker/worker only after the mandatory project and benchmarks are solid.
-
-The CLI remains a first-class adapter and must preserve the subject's exact movement output.
-The algorithm must never depend on FastAPI, React, a broker, or a visualization library.
-
-## Hermes and Ponytail
-
-Hermes automatically reads the root `AGENTS.md` and discovers the nested `AGENTS.md` files
-when it enters `backend/`, `frontend/`, `tests/`, or `docs/`.
-
-Project skills live under `.agents/skills/`. The setup scripts register that directory as a
-Hermes external skill directory and install the matching bundles.
-
-Ponytail is installed from its official repository:
-
-```bash
-hermes plugins install DietrichGebert/ponytail --enable
-```
-
-Ponytail is the minimalism guard: it challenges speculative abstractions and unnecessary
-dependencies. It does not override the Fly-In subject, evaluation rubric, correctness,
-type safety, tests, security, accessibility, or explicit project decisions.
+Ponytail minimalism review is active for coding work. It rejects speculative abstractions, unnecessary dependencies, and future-facing scaffolding, but it does not override the Fly-In subject, evaluation rubric, correctness, type safety, or tests.
 
 ## Repository map
 
 | Path | Purpose |
 | --- | --- |
 | `AGENTS.md` | Always-loaded project operating contract |
-| `.agents/skills/` | On-demand Fly-In workflows for Hermes |
-| `.agents/skill-bundles/` | Short commands for recurring development modes |
-| `docs/project/` | Normative interpreted specification and global plan |
-| `docs/decisions/` | Architecture Decision Records |
-| `docs/progress/` | Current state, session ledger, risks, benchmarks, open questions |
-| `docs/prompts/` | First-session, normal-session, review, and handoff prompts |
-| `docs/sources/` | Supplied subjects and evaluation sheet |
+| `backend/src/flyin/` | Python implementation |
+| `tests/` | Unit, integration, official-map, and regression tests |
+| `docs/project/` | Source hierarchy, architecture, roadmap, contracts, evaluation matrix, `--capacity-info` walkthrough |
+| `docs/progress/` | Current state, benchmarks, session log, risks, open questions |
+| `docs/sources/` | Supplied subject/evaluation PDFs, retained unchanged |
 | `maps/maps-v1.5-added-before-m0/` | Official Fly-In 1.5 maps, retained unchanged |
 | `maps/provided-v12-snapshot/` | Historical v1.2 maps, retained unchanged |
-| `tests/fixtures/derived-v15/` | Clearly marked local fixtures for v1.5 benchmark assumptions |
-| `backend/` | Mandatory Python implementation and later API |
-| `frontend/` | React UI, created only in the UI phase |
-| `hermes/` | Global Hermes templates and integration notes |
-| `scripts/` | Setup and deterministic context validation |
+| `scripts/` | Setup, context validation, and benchmark tooling |
 
-## Mandatory quality gates
+## Open evaluation risks
 
-Before a slice is called complete:
+- Q7: exact evaluator text for restricted in-transit tokens. The project currently emits directed `D<ID>-<origin>-<destination>` tokens.
+- Q8: exact evaluator expectation for restricted link occupancy during the two-turn transit window.
 
-- Its acceptance tests pass.
-- Existing tests pass.
-- `mypy` passes without errors.
-- `flake8` passes without errors.
-- No graph library was introduced.
-- CLI stdout remains evaluator-safe.
-- Relevant progress and decision files are updated.
-- Ponytail reviews the diff for avoidable complexity.
-- Hermes explains what changed, why, evidence, and the next smallest step.
-
-## Current state
-
-The M1 parser is complete. It accepts optional comments before the drone declaration, validates
-the full map grammar, reports stable line-aware errors, and produces typed immutable terminals,
-hubs, metadata, and undirected connections. Pathfinding, simulation, and the real CLI remain
-deliberately unimplemented. See
-[docs/project/05_ROADMAP.md](docs/project/05_ROADMAP.md) and
-[docs/progress/CURRENT.md](docs/progress/CURRENT.md).
+Both risks are tracked in `docs/progress/OPEN_QUESTIONS.md` and kept visible during defense preparation.

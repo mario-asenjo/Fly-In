@@ -2,11 +2,15 @@
 
 from dataclasses import dataclass
 
-from flyin.domain import CapacityLimit, ParsedMap
+from flyin.domain import CapacityLimit, ParsedMap, Zone
 from flyin.parsing import MapParseError, MapParser
 from flyin.pathfinding import NoRouteError
 from flyin.scheduling import RouteAllocator, ScheduleDeadlockError
 from flyin.simulation import (
+    AtZone,
+    Delivered,
+    DroneLocation,
+    InTransit,
     MovementFact,
     ScheduleValidator,
     TransitFact,
@@ -88,6 +92,20 @@ class TurnView:
     movements: tuple[MovementView, ...]
 
 
+CapacityValue = int | str
+ZoneCapacityRow = tuple[str, int, CapacityValue]
+ConnectionCapacityRow = tuple[str, str, int, int]
+
+
+@dataclass(frozen=True, slots=True)
+class TurnCapacityView:
+    """Adapter-safe capacity usage after one completed turn."""
+
+    number: int
+    zones: tuple[ZoneCapacityRow, ...]
+    connections: tuple[ConnectionCapacityRow, ...]
+
+
 @dataclass(frozen=True, slots=True)
 class SolveResult:
     """Completed adapter-neutral solve result."""
@@ -96,6 +114,7 @@ class SolveResult:
     schedule: tuple[tuple[TurnFact, ...], ...]
     map_view: MapView
     turns: tuple[TurnView, ...]
+    capacity_turns: tuple[TurnCapacityView, ...]
     metrics: MetricsView
     movement_lines: tuple[str, ...]
     warnings: tuple[SolveWarning, ...] = ()
@@ -169,6 +188,7 @@ class FlyInSolver:
             schedule=schedule,
             map_view=cls._map_view(parsed_map),
             turns=turns,
+            capacity_turns=cls._capacity_turns(parsed_map, schedule),
             metrics=cls._metrics(turns, parsed_map.end.name),
             movement_lines=tuple(format_turn(turn) for turn in schedule),
             warnings=warnings,
@@ -284,6 +304,118 @@ class FlyInSolver:
                 for movement in turn.movements
             ),
         )
+
+    @classmethod
+    def _capacity_turns(
+        cls,
+        parsed_map: ParsedMap,
+        schedule: tuple[tuple[TurnFact, ...], ...],
+    ) -> tuple[TurnCapacityView, ...]:
+        locations: dict[int, DroneLocation] = {
+            identifier: AtZone(parsed_map.start)
+            for identifier in range(1, parsed_map.drone_count + 1)
+        }
+        capacity_turns: list[TurnCapacityView] = []
+        zones = (parsed_map.start, *parsed_map.hubs, parsed_map.end)
+
+        for number, turn in enumerate(schedule, start=1):
+            facts_by_drone = {fact.drone_id: fact for fact in turn}
+            locations = {
+                drone_id: cls._apply_capacity_fact(
+                    parsed_map,
+                    number,
+                    location,
+                    facts_by_drone.get(drone_id),
+                )
+                for drone_id, location in locations.items()
+            }
+            zone_usage = {zone.name: 0 for zone in zones}
+            for location in locations.values():
+                if isinstance(location, AtZone):
+                    zone_usage[location.zone.name] += 1
+                elif isinstance(location, Delivered):
+                    zone_usage[parsed_map.end.name] += 1
+
+            link_usage: dict[tuple[str, str], int] = {}
+            for fact in turn:
+                if (
+                    isinstance(fact, MovementFact)
+                    and fact.destination.zone_type.value == "restricted"
+                ):
+                    continue
+                endpoints = (fact.origin.name, fact.destination.name)
+                identity = (
+                    endpoints
+                    if endpoints[0] <= endpoints[1]
+                    else (endpoints[1], endpoints[0])
+                )
+                link_usage[identity] = link_usage.get(identity, 0) + 1
+
+            capacity_turns.append(
+                TurnCapacityView(
+                    number=number,
+                    zones=tuple(
+                        (
+                            zone.name,
+                            zone_usage[zone.name],
+                            cls._capacity_value(zone.capacity),
+                        )
+                        for zone in zones
+                    ),
+                    connections=tuple(
+                        (
+                            connection.left.name,
+                            connection.right.name,
+                            link_usage.get(connection.identity, 0),
+                            connection.capacity,
+                        )
+                        for connection in parsed_map.connections
+                    ),
+                )
+            )
+        return tuple(capacity_turns)
+
+    @classmethod
+    def _apply_capacity_fact(
+        cls,
+        parsed_map: ParsedMap,
+        turn: int,
+        location: DroneLocation,
+        fact: TurnFact | None,
+    ) -> DroneLocation:
+        if isinstance(location, Delivered):
+            return location
+        if isinstance(location, InTransit):
+            if not isinstance(fact, MovementFact):
+                return location
+            if location.arrival_turn != turn:
+                return location
+            return cls._capacity_arrival(parsed_map, fact.destination)
+        if fact is None:
+            return location
+        if isinstance(fact, MovementFact):
+            return cls._capacity_arrival(parsed_map, fact.destination)
+        return InTransit(
+            fact.connection,
+            fact.origin,
+            fact.destination,
+            turn + 1,
+        )
+
+    @staticmethod
+    def _capacity_arrival(
+        parsed_map: ParsedMap,
+        destination: Zone,
+    ) -> DroneLocation:
+        if destination.name == parsed_map.end.name:
+            return Delivered()
+        return AtZone(destination)
+
+    @staticmethod
+    def _capacity_value(capacity: int | CapacityLimit) -> CapacityValue:
+        if capacity is CapacityLimit.UNLIMITED:
+            return capacity.value
+        return capacity
 
     @staticmethod
     def _warnings(parsed_map: ParsedMap) -> tuple[SolveWarning, ...]:

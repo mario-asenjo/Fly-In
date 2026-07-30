@@ -8,6 +8,7 @@ from flyin.application.solver import (
     SolveError,
     SolveResult,
     SolveWarning,
+    TurnCapacityView,
     TurnView,
     ZoneView,
     FlyInSolver,
@@ -22,6 +23,7 @@ __all__ = [
     "SolveError",
     "SolveResult",
     "SolveWarning",
+    "TurnCapacityView",
     "TurnView",
     "ZoneView",
 ]

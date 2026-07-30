@@ -88,6 +88,32 @@ def test_application_service_solves_official_map() -> None:
     assert result.metrics.total_path_cost == 6
 
 
+def test_application_service_exposes_capacity_projection() -> None:
+    result = FlyInSolver.solve_text(
+        "\n".join(
+            (
+                "nb_drones: 2",
+                "start_hub: start 0 0",
+                "hub: waypoint 1 0 [max_drones=1]",
+                "end_hub: end 2 0",
+                "connection: start-waypoint [max_link_capacity=1]",
+                "connection: waypoint-end [max_link_capacity=1]",
+            )
+        )
+    )
+
+    assert tuple(turn.number for turn in result.capacity_turns) == (1, 2, 3)
+    assert result.capacity_turns[0].zones == (
+        ("start", 1, "unlimited"),
+        ("waypoint", 1, 1),
+        ("end", 0, "unlimited"),
+    )
+    assert result.capacity_turns[1].connections == (
+        ("start", "waypoint", 1, 1),
+        ("waypoint", "end", 1, 1),
+    )
+
+
 def test_application_metrics_count_restricted_cost_once() -> None:
     result = FlyInSolver.solve_text(
         "\n".join(
@@ -110,6 +136,42 @@ def test_application_metrics_count_restricted_cost_once() -> None:
     assert result.metrics.moved_drones_per_turn == (1, 1, 1)
     assert result.metrics.average_turns_per_drone == 3.0
     assert result.metrics.total_path_cost == 3
+    assert result.capacity_turns[0].zones == (
+        ("start", 0, "unlimited"),
+        ("restricted", 0, 1),
+        ("end", 0, "unlimited"),
+    )
+    assert result.capacity_turns[1].zones == (
+        ("start", 0, "unlimited"),
+        ("restricted", 1, 1),
+        ("end", 0, "unlimited"),
+    )
+    assert result.capacity_turns[1].connections == (
+        ("start", "restricted", 0, 1),
+        ("restricted", "end", 0, 1),
+    )
+
+
+def test_capacity_projection_skips_restricted_arrival_link() -> None:
+    result = FlyInSolver.solve_text(
+        "\n".join(
+            (
+                "nb_drones: 2",
+                "start_hub: start 0 0",
+                "hub: restricted 1 0 [zone=restricted max_drones=1]",
+                "end_hub: end 2 0",
+                "connection: start-restricted [max_link_capacity=1]",
+                "connection: restricted-end",
+            )
+        )
+    )
+
+    assert result.capacity_turns[1].connections[0] == (
+        "start",
+        "restricted",
+        1,
+        1,
+    )
 
 
 def test_cli_visual_preserves_restricted_connection_tokens(
@@ -233,6 +295,43 @@ def test_cli_prints_colored_map_and_turns(
     assert "moved_drones_per_turn=1,1" in captured.out
     assert "average_turns_per_drone=2.00" in captured.out
     assert "total_path_cost=2" in captured.out
+
+
+def test_cli_capacity_info_prints_diagnostics_without_default_stdout(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    map_path = tmp_path / "capacity-map.txt"
+    map_path.write_text(
+        "\n".join(
+            (
+                "nb_drones: 2",
+                "start_hub: start 0 0",
+                "hub: waypoint 1 0 [max_drones=1]",
+                "end_hub: end 2 0",
+                "connection: start-waypoint [max_link_capacity=1]",
+                "connection: waypoint-end [max_link_capacity=1]",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = main(("--capacity-info", str(map_path)))
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.err == ""
+    assert "D1-waypoint" in captured.out
+    assert "Capacity info:" in captured.out
+    assert "Turn 1:" in captured.out
+    assert "zone waypoint: 1/1 drones" in captured.out
+    assert "connection start-waypoint: 1/1 used" in captured.out
+
+    exit_code = main((str(map_path),))
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Capacity info:" not in captured.out
 
 
 def test_cli_visual_supports_challenger_color_names(
