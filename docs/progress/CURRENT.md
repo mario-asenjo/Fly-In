@@ -1,6 +1,6 @@
 # Current project state
 
-- Last updated: 2026-07-29
+- Last updated: 2026-07-31
 - Current milestone: M6 - Mandatory presentation and evaluation hardening
 - Production implementation: M6.1-M6.4 have landed the adapter-neutral application service,
   evaluator-safe CLI adapter, optional terminal visual mode, visual metrics, rainbow labels,
@@ -119,14 +119,19 @@
   the terminal adapter.
 - `--capacity-info` reuses validated application capacity projections and appends per-turn zone/link
   diagnostics only when explicitly requested.
+- M6.5 moves UTF-8 filesystem reading out of `flyin.adapters.cli` into shared adapter helpers:
+  `FileReader.retrieve_text()` reads map source for CLI and future API use, while `MapCatalog`
+  provides deterministic numbered `.txt` map discovery under `maps/`. Running `make run` without
+  `ARGS` now prompts on stdout for a map number before printing solved movement lines.
 - README and the evaluation matrix now describe the real M6 state instead of the old parser-only
   snapshot.
 
 ## Next smallest slice
 
-Open the M6 hardening PR for #57/#58, verify CI, then close the M6 umbrella if review accepts the
-README/evaluation evidence. After M6 is merged, the next planned coding slice is #59 M7.1 typed
-in-process events; do not start FastAPI (#60) before that event seam is proven.
+Open/update the M6 hardening PR to include M6.5 shared file input and the no-ARGS map menu, verify
+CI, then close the M6 umbrella if review accepts the README/evaluation evidence. After M6 is merged,
+the next planned coding slice is #59 M7.1 typed in-process events; do not start FastAPI (#60) before
+that event seam is proven.
 
 ## Active blockers
 

@@ -8,6 +8,9 @@ Status: implemented mandatory adapter behavior through `python -m flyin` and `ma
 make run ARGS=map.txt
 ```
 
+`make run` without `ARGS` opens a human-only numbered map picker built from `.txt` files under
+`maps/`; the prompt is human UI before the solve output.
+
 or direct development entry point:
 
 ```bash
@@ -44,11 +47,12 @@ important than the exact non-zero number.
   per-turn zone/link capacity use and is never emitted by default.
 - Visual mode includes optional secondary metrics.
 - `--debug`: developer diagnostics to stderr/logging.
+- no `ARGS`: interactive numbered map selection on stdout before solving.
 
 ## Architecture seam
 
 ```text
-parse args -> read text -> application solve -> SimulationResult
+parse args -> FileReader.retrieve_text() -> application solve -> SimulationResult
                                       -> MandatoryOutputFormatter -> stdout
                                       -> VisualFormatter -> human output
                                       -> CapacityFormatter -> diagnostic output

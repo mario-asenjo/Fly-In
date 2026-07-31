@@ -395,3 +395,17 @@
 - Next: agree on M0 and first parser vertical slice.
 
 Future entries should be short, evidence-based, and link decisions/tests rather than duplicate them.
+## 2026-07-31 - M6.5 shared file input and no-ARGS map menu
+
+- Inspected the current M6 state, source-of-truth hierarchy, CLI contract, and GitHub issue list.
+- Found the CLI still owned direct `Path.read_text(encoding="utf-8")`; added shared filesystem
+  adapter helpers instead of duplicating that concern in future API code.
+- Added `FileReader.retrieve_text()` and `MapCatalog` under `flyin.adapters.files`; the CLI now uses
+  `FileReader` for explicit paths and opens a deterministic numbered map menu when no map path is
+  provided.
+- Kept the mandatory solve stdout evaluator-safe: the no-ARGS menu prints to stdout before the selected map movement lines.
+- Verified with focused CLI tests, full pytest, targeted flake8/mypy, and an actual `make run`
+  no-ARGS execution selecting the official easy linear map.
+- Tooling note: WSL invoking Windows `uv.exe` through `make lint` creates `.venv` inside the repo,
+  causing `flake8 .` to scan site-packages. Direct source lint/type/test commands passed; native
+  Git Bash should remain the canonical Makefile environment.
