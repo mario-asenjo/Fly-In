@@ -1,12 +1,38 @@
+from io import StringIO
 from pathlib import Path
 
 import pytest
 
-from flyin.adapters.cli import main
+from flyin.adapters.cli import _default_map_root, main
+from flyin.adapters.files import FileReader, MapCatalog
 from flyin.application import FlyInSolver, SolveError
 
 PROJECT_ROOT = Path(__file__).parents[1]
 OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+
+
+def test_file_reader_retrieves_utf8_map_text(tmp_path: Path) -> None:
+    map_path = tmp_path / "map.txt"
+    map_path.write_text("nb_drones: 1\n", encoding="utf-8")
+
+    assert FileReader(map_path).retrieve_text() == "nb_drones: 1\n"
+
+
+def test_map_catalog_lists_txt_maps_deterministically(tmp_path: Path) -> None:
+    (tmp_path / "easy").mkdir()
+    (tmp_path / "easy" / "02_beta.txt").write_text("", encoding="utf-8")
+    (tmp_path / "easy" / "01_alpha.txt").write_text("", encoding="utf-8")
+    (tmp_path / "README.md").write_text("ignored", encoding="utf-8")
+
+    options = MapCatalog(tmp_path).available_maps()
+
+    assert tuple(option.display_path for option in options) == (
+        "easy/01_alpha.txt",
+        "easy/02_beta.txt",
+    )
+    assert options[0].index == 1
+    assert MapCatalog(tmp_path).option_for_index(2) == options[1]
+    assert MapCatalog(tmp_path).option_for_index(3) is None
 
 
 def test_application_service_solves_text_to_evaluator_lines() -> None:
@@ -230,6 +256,44 @@ def test_application_service_translates_parse_errors() -> None:
         assert "positive integer" in exc.message
     else:
         raise AssertionError("expected SolveError")
+
+
+def test_cli_without_args_prompts_for_known_map(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    catalog = MapCatalog(_default_map_root())
+    selected = next(
+        option
+        for option in catalog.available_maps()
+        if option.display_path
+        == "maps-v1.5-added-before-m0/easy/01_linear_path.txt"
+    )
+
+    exit_code = main((), stdin=StringIO(f"{selected.index}\n"))
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out.startswith("Available maps:\n")
+    assert "maps-v1.5-added-before-m0/easy/01_linear_path.txt" in captured.out
+    assert captured.out.endswith(
+        "D1-waypoint1\n"
+        "D1-waypoint2 D2-waypoint1\n"
+        "D1-goal D2-waypoint2\n"
+        "D2-goal\n"
+    )
+    assert captured.err == ""
+
+
+def test_cli_without_args_rejects_invalid_selection(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    exit_code = main((), stdin=StringIO("999999\n"))
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert captured.out.startswith("Available maps:\n")
+    assert "Choose map number:" in captured.out
+    assert "out of range" in captured.err
 
 
 def test_cli_prints_only_movement_lines_to_stdout(
