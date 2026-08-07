@@ -6,6 +6,7 @@ from typing import Sequence
 from flyin.adapters.cli import main as cli_main
 from flyin.adapters.api.runner import main as api_main
 
+
 def main(
     argv: Sequence[str] | None = None
 ) -> int:
