@@ -72,6 +72,12 @@ def main(
             return 3
         return 2
 
+    for warn in result.warnings:
+        print(
+            f"WARNING {warn.code}: {warn.message}",
+            file=err
+        )
+
     output_lines = list(
         format_visual_result(result) if args.visual else result.movement_lines
     )

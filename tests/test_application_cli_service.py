@@ -474,3 +474,31 @@ def test_cli_maps_unsolvable_input_to_stderr_and_exit_code(
     assert exit_code == 3
     assert captured.out == ""
     assert "NO_ROUTE" in captured.err
+
+
+def test_cli_prints_application_warnings_to_stderr(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Warnings do not contaminate evaluator stdout."""
+    map_path = tmp_path / "warning-map.txt"
+    map_path.write_text(
+        "\n".join(
+            (
+                "nb_drones: 1",
+                "start_hub: start 0 0 [zone=blocked]",
+                "end_hub: end 1 0 [zone=priority]",
+                "connection: start-end",
+            )
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = main((str(map_path),))
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out == "D1-end\n"
+    assert captured.err.count(
+        "WARNING TERMINAL_ZONE_TYPE_IGNORED:"
+    ) == 2

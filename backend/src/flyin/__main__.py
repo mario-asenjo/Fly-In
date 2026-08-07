@@ -1,6 +1,6 @@
-"""Fly-In command-line entry point."""
+"""Fly-In package entry point."""
 
-from flyin.adapters.cli import main
+from flyin.launcher import main
 
 
 if __name__ == "__main__":
