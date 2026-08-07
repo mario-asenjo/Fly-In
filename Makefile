@@ -2,11 +2,11 @@
 
 UV_ENV = $(abspath ../.flyin-venv)
 export UV_PROJECT_ENVIRONMENT = $(UV_ENV)
-UV_RUN = uv run --extra dev
+UV_RUN = uv run --extra dev --extra api
 PYTHON = $(UV_RUN) python
 
 install:
-	uv sync --extra dev
+	uv sync --extra dev --extra api
 
 run:
 	@$(PYTHON) -m flyin $(ARGS)
