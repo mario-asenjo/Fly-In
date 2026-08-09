@@ -11,7 +11,7 @@ from flyin.pathfinding import (
 )
 
 PROJECT_ROOT = Path(__file__).parents[1]
-OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+OFFICIAL_MAPS = PROJECT_ROOT / "maps"
 
 
 class _MissingDeadBranchHops:

@@ -5,13 +5,13 @@ Status: M6 rehearsal document for explaining the implemented CLI flag with real 
 Map used for this walkthrough:
 
 ```bash
-maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt
+maps/easy/01_linear_path.txt
 ```
 
 Command used to collect the output:
 
 ```bash
-make run ARGS='--capacity-info maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt'
+make run ARGS='--capacity-info maps/easy/01_linear_path.txt'
 ```
 
 Real command output:
@@ -63,7 +63,7 @@ Capacity info:
 Default command:
 
 ```bash
-make run ARGS='maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt'
+make run ARGS='maps/easy/01_linear_path.txt'
 ```
 
 prints only movement lines on stdout:
@@ -110,23 +110,23 @@ Entry point: `backend/src/flyin/adapters/cli.py`.
 For this command:
 
 ```bash
-make run ARGS='--capacity-info maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt'
+make run ARGS='--capacity-info maps/easy/01_linear_path.txt'
 ```
 
 `main()` receives equivalent argv data:
 
 ```text
-('--capacity-info', 'maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt')
+('--capacity-info', 'maps/easy/01_linear_path.txt')
 ```
 
 Then it does these calls:
 
 1. `argparse.ArgumentParser(...).parse_args(argv)`
-   - real `args.map_path`: `maps/maps-v1.5-added-before-m0/easy/01_linear_path.txt`
+   - real `args.map_path`: `maps/easy/01_linear_path.txt`
    - real `args.visual`: `False`
    - real `args.capacity_info`: `True`
 
-2. `Path(args.map_path).read_text(encoding='utf-8')`
+2. `FileReader(args.map_path).retrieve_text()`
    - returns the exact map text shown above.
 
 3. `FlyInSolver.solve_text(source)`

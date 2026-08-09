@@ -114,10 +114,11 @@ pytest
 Benchmarking is separate so normal correctness tests remain fast:
 
 ```bash
-python -m flyin.devtools.benchmark maps/maps-v1.5-added-before-m0
+python -m scripts.benchmark_official_maps --maps-root maps
 ```
 
-The benchmark command is a target interface to implement during M5, not present initially.
+The benchmark command is implemented by `scripts/benchmark_official_maps.py` and defaults to the
+official category folders under `maps/`.
 
 ## Coverage policy
 

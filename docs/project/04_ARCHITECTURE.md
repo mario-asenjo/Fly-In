@@ -3,8 +3,8 @@
 ## Architectural style
 
 Use a modular monolith with ports and adapters. “Modular” protects dependency direction;
-“monolith” keeps deployment, debugging, and evaluation simple. Typed events are introduced
-inside the process before any external event infrastructure.
+“monolith” keeps deployment, debugging, and evaluation simple. Synchronous adapters may consume
+direct application returns; typed events are introduced before streaming or external infrastructure.
 
 ```text
 CLI ---------\
@@ -47,11 +47,12 @@ file path -> CLI -> parser -> application solve use case -> planner/simulator
           -> validated turns -> exact movement formatter -> stdout
 ```
 
-### API query/command
+### Implemented synchronous API query/command
 
 ```text
-JSON or uploaded text -> FastAPI DTO -> mapper -> application use case
-                      -> result/error -> response DTO/status
+GET official catalog -> FastAPI -> MapCatalog -> response DTO
+POST map selection -> FastAPI -> FileReader -> application solve use case
+                   -> result/error mapper -> response DTO/status
 ```
 
 ### UI playback
@@ -65,13 +66,14 @@ POST simulation -> simulation_id -> GET initial graph/result
 
 | Level | Mechanism | Exit condition |
 | --- | --- | --- |
-| 0 | Direct returns | Mandatory CLI behavior stable |
+| 0 | Direct returns through CLI/synchronous REST | Mandatory CLI behavior stable |
 | 1 | Immutable in-process events | CLI and metrics consume without domain coupling |
-| 2 | REST + SSE | React renders complete playback reliably |
+| 2 | SSE over retained ordered events | React renders complete playback reliably |
 | 3 | WebSocket | Demonstrated need for live bidirectional controls |
 | 4 | NATS/RabbitMQ worker | Measured need for process isolation, queueing, or parallel compute |
 
-An ADR is required before moving levels. Do not implement event sourcing.
+ADR-0006 allows synchronous REST at level 0; typed events remain required before SSE. An ADR is
+required before moving beyond these boundaries. Do not implement event sourcing.
 
 ## State and persistence
 

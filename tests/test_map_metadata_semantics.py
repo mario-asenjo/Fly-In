@@ -7,7 +7,7 @@ from flyin.parsing import MapParseError, MapParser
 
 PROJECT_ROOT = Path(__file__).parents[1]
 FIXTURES = PROJECT_ROOT / "tests" / "fixtures" / "derived-v15"
-OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+OFFICIAL_MAPS = PROJECT_ROOT / "maps"
 
 
 def test_interprets_zone_color_and_effective_capacities() -> None:

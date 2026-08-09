@@ -1,5 +1,32 @@
 # Session log
 
+## 2026-08-09 - Repository, roadmap, and API iteration resynchronization
+
+- Audited merged PR #68 and the uncommitted `feat/api-map-catalog` implementation against the
+  application boundary, FastAPI contract, GitHub issues, Project v2, and all progress documents.
+- Confirmed PR #68 merged a backward-compatible CLI/API launcher, Uvicorn runner, FastAPI factory,
+  versioned routing, health endpoint, and OpenAPI; it is now linked retrospectively to #60.
+- Confirmed the active branch implements an official-map catalog plus synchronous simulation by
+  index. The initial audit found 154 passing tests, one mypy mismatch, eight raw project Flake8
+  violations, and missing error-contract coverage before the #69 closure pass.
+- Accepted ADR-0006: direct synchronous REST may precede typed events because it consumes
+  `FlyInSolver` return values; typed events remain required before SSE or async resources.
+- Verified every relocated official map is byte-for-byte equal, moved all
+  operational references to `maps/{easy,medium,hard,challenger}/`, and repinned the manifest. The
+  duplicate v1.2 map tree stays removed; historical evidence remains in the v1.2 subject, delta,
+  fixture provenance, and Git history.
+- Resynchronized README, architecture, roadmap, API/event contracts, backlog, risks, source hierarchy,
+  decision/open-question records, teaching notes, benchmark/test paths, and current-state handoff.
+- GitHub synchronization records M6 as complete, tracks PR #68 retrospectively, and makes the active
+  catalog/simulation closure slice the single In Progress API item.
+- Removed an ignored repository-local `.venv` that polluted raw `flake8 .`; the reproducible
+  Makefile-managed environment remains at `../.flyin-venv`.
+- Implemented the #69 closure shape with a separate `adapters/api/errors.py` handler for API errors,
+  `SolveError`, request validation, and map-read failures; focused API tests and mypy for the touched
+  area pass, and a local curl walkthrough records health, catalog, simulation, and `MAP_NOT_FOUND`.
+- Final local verification for the slice passes: 161 pytest tests, `make lint`, `make lint-strict`,
+  context validation, 13 manifest hashes, and all ten official-map benchmark rows are valid.
+
 ## 2026-07-29 - M6.3-M6.4 capacity info and evaluator hardening
 
 - Batched #57 and #58 because both share one M6 presentation/evaluator-hardening boundary and do not

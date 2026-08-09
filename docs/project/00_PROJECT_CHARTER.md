@@ -24,8 +24,8 @@ The final repository should provide:
 - valid turn-by-turn simulation and independent schedule validation;
 - colored terminal representation;
 - benchmark report for all official maps;
-- typed domain/application events;
 - FastAPI REST API and OpenAPI contract;
+- typed domain/application events before streaming;
 - React + TypeScript visualization;
 - SSE event playback, with WebSocket/broker only if justified;
 - tests, `mypy`, `flake8`, README, algorithm explanation, and evaluation rehearsal.

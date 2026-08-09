@@ -50,3 +50,8 @@ class MapCatalog:
             if option.index == index:
                 return option
         return None
+
+
+def default_map_root() -> Path:
+    """Return the repository map folder for interactive runs."""
+    return Path(__file__).parents[4] / "maps"

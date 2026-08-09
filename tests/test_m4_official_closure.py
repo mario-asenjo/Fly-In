@@ -13,7 +13,7 @@ from flyin.scheduling import (
 from flyin.simulation import ScheduleValidator
 
 PROJECT_ROOT = Path(__file__).parents[1]
-OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+OFFICIAL_MAPS = PROJECT_ROOT / "maps"
 
 
 def _parse(lines: tuple[str, ...]) -> ParsedMap:

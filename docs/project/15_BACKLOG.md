@@ -3,49 +3,32 @@
 This is a planning inventory, not permission to implement everything. Move only the approved
 smallest item into `docs/progress/CURRENT.md`.
 
-## Now - M0/M1
+## Completed mandatory foundation - M0-M6
 
-- [ ] Confirm team logins and Python 3.12 availability.
-- [ ] Initialize Git repository if needed and establish clean baseline.
-- [ ] Install dev extras and run empty gates.
-- [ ] Define minimal valid map fixture.
-- [ ] Write first parser acceptance test.
-- [ ] Implement only drone count/start/end/connection needed by that test.
-- [ ] Add physical-line error representation.
+- [x] Parser, custom graph/pathfinding, deterministic simulation, capacity scheduler, benchmarks,
+  application service, evaluator CLI, terminal visualization, and defense hardening.
 
-## Next - parser/graph
+## Now - M7 synchronous FastAPI
 
-- [ ] Metadata tokenizer and defaults.
-- [ ] Zone uniqueness and terminal count.
-- [ ] Connection prior definition and reversed duplicate.
-- [ ] Types/capacity/terminal ignore behavior.
-- [ ] Blocked traversability.
-- [ ] Reachability and weighted path.
+- [x] CLI/API launcher, FastAPI factory, health, and OpenAPI bootstrap.
+- [ ] Close official-map catalog and synchronous simulation with stable errors and full gates.
+- [ ] Complete Swagger/curl teaching walkthrough.
 
-## Later - simulation/scheduler
+## Next - M8 events and streaming readiness
 
-- [ ] Drone state machine.
-- [ ] Atomic one-turn movement.
-- [ ] Restricted transit timeline.
-- [ ] Independent schedule validator.
-- [ ] Zone/link reservation table.
-- [ ] Multi-path route allocation.
-- [ ] Deadlock detection/prevention.
+- [ ] Typed immutable in-process events for a real playback/stream consumer.
+- [ ] Ordered/idempotent projection tests.
+- [ ] SSE only after ordinary REST and event ordering are proven.
 
-## Later - product/evaluation
+## Later - M9 product UI
 
-- [ ] Exact CLI.
-- [ ] Colored terminal view.
-- [ ] Benchmark harness and table.
-- [ ] Full README/resource/AI-use statement.
-- [ ] Capacity-info live-coding rehearsal.
+- [ ] React graph/playback over the backend contract.
+- [ ] Loading, empty, error, accessibility, and reconnection states.
 
 ## Future - learning expansion
 
-- [ ] Typed in-process events.
-- [ ] FastAPI validation/solve endpoints.
-- [ ] Simulation resource and SSE.
-- [ ] React graph/playback.
+- [ ] Content validation/upload only after the server-map flow is closed.
+- [ ] Simulation resource only if lifecycle or asynchronous work becomes real.
 - [ ] Optional broker ADR and experiment.
 - [ ] Teammate onboarding workshop.
 

@@ -4,7 +4,7 @@ from types import ModuleType
 
 PROJECT_ROOT = Path(__file__).parents[1]
 SCRIPT_PATH = PROJECT_ROOT / "scripts" / "benchmark_official_maps.py"
-OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+OFFICIAL_MAPS = PROJECT_ROOT / "maps"
 
 
 def _benchmark_module() -> ModuleType:

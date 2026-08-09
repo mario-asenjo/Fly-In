@@ -5,9 +5,9 @@ import sys
 from pathlib import Path
 from typing import Sequence, TextIO
 
-from flyin.adapters.files import FileReader, MapCatalog, MapFileOption
-from flyin.application import FlyInSolver, SolveError
-from flyin.adapters.terminal_visual import (
+from .files import FileReader, MapCatalog, MapFileOption, default_map_root
+from ..application import FlyInSolver, SolveError
+from .terminal_visual import (
     format_capacity_info,
     format_visual_result,
 )
@@ -88,18 +88,13 @@ def main(
     return 0
 
 
-def _default_map_root() -> Path:
-    """Return the repository map folder for interactive runs."""
-    return Path(__file__).parents[4] / "maps"
-
-
 def _prompt_for_map(
     input_stream: TextIO,
     out: TextIO,
     err: TextIO,
 ) -> MapFileOption | None:
     """Let a human choose a known map before solving."""
-    catalog = MapCatalog(_default_map_root())
+    catalog = MapCatalog(default_map_root())
     options = catalog.available_maps()
     if not options:
         print(

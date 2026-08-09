@@ -5,7 +5,7 @@ from flyin.pathfinding import CandidateRouteFinder
 from flyin.scheduling import FleetMakespanEstimator, RouteMetrics
 
 PROJECT_ROOT = Path(__file__).parents[1]
-OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+OFFICIAL_MAPS = PROJECT_ROOT / "maps"
 
 
 def test_route_metrics_reports_cost_and_bottleneck() -> None:

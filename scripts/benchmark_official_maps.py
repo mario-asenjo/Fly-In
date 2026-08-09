@@ -13,7 +13,7 @@ from flyin.scheduling import RouteAllocator
 from flyin.simulation import ScheduleValidator
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MAPS_ROOT = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+DEFAULT_MAPS_ROOT = PROJECT_ROOT / "maps"
 BenchmarkRecord = dict[str, str | int | float | bool]
 
 

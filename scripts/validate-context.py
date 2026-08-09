@@ -25,7 +25,7 @@ REQUIRED = (
     "docs/sources/flyin_1.5.pdf",
     "docs/sources/fly-in_1.2.pdf",
     "docs/sources/Intra-Projects-Fly-in-Edit.pdf",
-    "maps/provided-v12-snapshot/README_maps.md",
+    "maps/easy/01_linear_path.txt",
     "hermes/PONYTAIL.md",
 )
 

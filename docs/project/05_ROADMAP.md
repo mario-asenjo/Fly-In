@@ -115,31 +115,34 @@ Deliverables:
 
 Exit: mandatory project is defensible before API work begins.
 
-## M7 - Typed in-process events
-
-Deliverables:
-
-- Minimal event catalog driven by actual consumers.
-- Event envelope with simulation ID, sequence, turn, type, schema version, payload.
-- CLI/metrics projection consuming emitted facts where beneficial.
-- Event ordering/idempotency tests.
-- ADR confirming no external broker yet.
-
-Exit: events add consumers without changing simulator correctness or output.
-
-## M8 - FastAPI learning API
+## M7 - Synchronous FastAPI foundation
 
 Order:
 
-1. Health endpoint and OpenAPI orientation.
-2. Map validation resource.
-3. Synchronous solve endpoint returning graph/turns/metrics.
-4. Simulation resource with ID/status/result.
-5. Stable error envelope.
-6. API contract/integration tests.
-7. SSE event stream after ordinary REST works.
+1. CLI/API launcher, FastAPI application factory, health endpoint, and OpenAPI orientation (#60,
+   merged through PR #68).
+2. Deterministic official-map catalog with version-local selection keys (#69, active).
+3. Synchronous simulation returning graph, ordered turns, metrics, movement lines, and warnings
+   (#69, active).
+4. Stable application-to-HTTP error mapping and request/resource limits.
+5. API contract, integration tests, and Swagger/curl teaching walkthrough.
 
-Exit: API can be taught and exercised from Swagger/curl without React.
+Exit: ordinary REST can be taught and exercised without React, streaming, persistence, or events.
+
+ADR-0006 records why synchronous request/response may use direct application returns before events.
+
+## M8 - Typed in-process events and streaming readiness
+
+Deliverables (#59):
+
+- Minimal event catalog driven by the first real playback/stream consumer.
+- Event envelope with simulation ID, sequence, turn, type, schema version, and payload.
+- Event ordering/idempotency tests.
+- ADR confirming no external broker yet.
+- Simulation resource with ID/status/result only if work needs a lifecycle.
+- SSE event stream after ordinary REST and event ordering are proven.
+
+Exit: events support ordered playback without changing simulator correctness or CLI output.
 
 ## M9 - React visualization
 

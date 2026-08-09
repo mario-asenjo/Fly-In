@@ -1,6 +1,7 @@
 # Event catalog and EDA evolution
 
-Status: design constraint for M7 onward. Create only events with a real consumer.
+Status: design constraint for M8 onward. ADR-0006 permits synchronous REST to use direct application
+returns; create events only when playback/streaming introduces a real consumer.
 
 ## Command versus event
 
