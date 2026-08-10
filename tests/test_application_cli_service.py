@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from flyin.adapters.cli import _default_map_root, main
-from flyin.adapters.files import FileReader, MapCatalog
+from flyin.adapters.cli import main
+from flyin.adapters.files import FileReader, MapCatalog, default_map_root
 from flyin.application import FlyInSolver, SolveError
 
 PROJECT_ROOT = Path(__file__).parents[1]
-OFFICIAL_MAPS = PROJECT_ROOT / "maps" / "maps-v1.5-added-before-m0"
+OFFICIAL_MAPS = PROJECT_ROOT / "maps"
 
 
 def test_file_reader_retrieves_utf8_map_text(tmp_path: Path) -> None:
@@ -261,12 +261,11 @@ def test_application_service_translates_parse_errors() -> None:
 def test_cli_without_args_prompts_for_known_map(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    catalog = MapCatalog(_default_map_root())
+    catalog = MapCatalog(default_map_root())
     selected = next(
         option
         for option in catalog.available_maps()
-        if option.display_path
-        == "maps-v1.5-added-before-m0/easy/01_linear_path.txt"
+        if option.display_path == "easy/01_linear_path.txt"
     )
 
     exit_code = main((), stdin=StringIO(f"{selected.index}\n"))
@@ -274,7 +273,7 @@ def test_cli_without_args_prompts_for_known_map(
 
     assert exit_code == 0
     assert captured.out.startswith("Available maps:\n")
-    assert "maps-v1.5-added-before-m0/easy/01_linear_path.txt" in captured.out
+    assert "easy/01_linear_path.txt" in captured.out
     assert captured.out.endswith(
         "D1-waypoint1\n"
         "D1-waypoint2 D2-waypoint1\n"

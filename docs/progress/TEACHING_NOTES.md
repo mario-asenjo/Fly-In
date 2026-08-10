@@ -1,5 +1,52 @@
 # Teaching notes ledger
 
+## M7.1-M7.2 - FastAPI bootstrap and official-map simulation
+
+### Problem and observable behavior
+
+The CLI was the only external adapter. PR #68 added a second entry path without changing the solver:
+`python -m flyin api` starts FastAPI/Uvicorn and `GET /api/v1/health` proves the HTTP boundary. The
+active slice lists server-known official maps and synchronously solves one selected by catalog index.
+
+### Flow and involved classes
+
+`launcher.main()` dispatches to either CLI or API. `create_app()` composes `/api/v1` routers.
+`list_maps()` projects `MapCatalog.available_maps()` to Pydantic DTOs. The simulation route resolves
+one catalog option, reads it through `FileReader`, calls `FlyInSolver.solve_text()`, and maps the
+adapter-neutral `SolveResult` to response DTOs. FastAPI/Pydantic types stay outside the application
+and core.
+
+### Invariant and complexity
+
+HTTP is an adapter, not a second simulator. Catalog lookup currently rescans and sorts the ten map
+files, which is acceptable at this scale; add caching only if measurement or a larger mutable catalog
+requires it. Numeric indices are version-local selection keys, not durable resource identifiers.
+
+### Example and tests
+
+`GET /api/v1/maps` returns ordered `{index, display_path}` entries. Selecting the official easy
+linear map with `POST /api/v1/maps/{index}/simulate` returns the same four `movement_lines` as the
+CLI. Tests now cover the happy path, unknown/invalid indices, solver failures, map-read failures, and
+OpenAPI path/schema publication.
+
+### Deliberate non-goals and closure work
+
+No upload/content input, async lifecycle, events, SSE, React, CORS, auth, persistence, cache, or
+broker. The API adapter uses `errors.py` as the single transport error boundary: routes raise or let
+application/filesystem exceptions escape, and FastAPI handlers translate them to the public
+`{"error": {"code", "message", "details"}}` envelope.
+
+### Real curl walkthrough recorded for #69
+
+With `python -m flyin api --host 127.0.0.1 --port 8765` running locally:
+
+```text
+GET /api/v1/health -> 200 {"status":"ok"}
+GET /api/v1/maps -> 200, ten official entries, including index 2 easy/01_linear_path.txt
+POST /api/v1/maps/2/simulate -> 200, turn_count 4, movement_lines for the official easy linear map
+POST /api/v1/maps/999/simulate -> 404 {"error":{"code":"MAP_NOT_FOUND","message":"map index 999 was not found.","details":{"map_index":999}}}
+```
+
 ## M6.3-M6.4 - Capacity diagnostics and evaluator hardening
 
 ### Problem and observable behavior
@@ -107,7 +154,7 @@ For a two-drone synthetic fixture with routes `start-left-right-end` and `start-
 drones can enter opposite single-capacity hubs and then neither can swap, so the known-route scheduler
 raises `ScheduleDeadlockError`. On official `hard/02_capacity_hell.txt`, the allocator first sees the
 deadlocking eight-route window, falls back, and returns a 16-turn validator-clean schedule. A permanent
-parametrized test covers every official v1.5 map file under `maps/maps-v1.5-added-before-m0/`.
+parametrized test covers every official v1.5 map file under the category folders in `maps/`.
 
 ### Deliberate non-goals
 

@@ -51,7 +51,8 @@ performance bonus.
 
 ## Known supplied-map conflicts
 
-The included maps are retained as a v1.2 snapshot, at the user's request:
+The original supplied v1.2 maps had these documented conflicts before their duplicate repository
+snapshot was removed from the evaluator-facing tree:
 
 | File | Snapshot value | Subject 1.5/evaluation value |
 | --- | ---: | ---: |
@@ -59,9 +60,9 @@ The included maps are retained as a v1.2 snapshot, at the user's request:
 | `medium_03_priority_puzzle.txt` | 4 drones | 5 drones |
 | `README_maps.md` Challenger record | 41 turns | 45 turns |
 
-Do not edit either snapshot. `maps/maps-v1.5-added-before-m0/` is the confirmed official 1.5
-package; retain the v1.2 copy only for historical provenance. Derived v1.5 fixtures may change
-only `nb_drones` and must say so in their comments.
+Do not edit the official maps under `maps/{easy,medium,hard,challenger}/`. Historical comparison uses
+the retained v1.2 subject, this delta, fixture provenance, and Git history. Derived v1.5 fixtures may
+change only `nb_drones` and must say so in their comments.
 
 ## Compatibility policy
 

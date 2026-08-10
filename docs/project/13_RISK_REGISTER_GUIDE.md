@@ -7,7 +7,8 @@ owner, and status. A risk is not a vague concern; it must identify a future cond
 
 ### R1 - Official map replacement
 
-The owner confirmed `maps/maps-v1.5-added-before-m0/` as the official 1.5 package on 2026-07-17.
+The owner confirmed the official 1.5 package on 2026-07-17; it now lives in category folders under
+`maps/` with the same exact content hashes.
 Trigger: a newer verified package arrives. Mitigation: preserve the current hash manifest, add a
 named snapshot, then update provenance, fixtures, and benchmark evidence together.
 

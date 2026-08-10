@@ -1,6 +1,8 @@
-# Proposed API contract
+# Fly-In API contract
 
-Status: target design for milestone M8, not authorization to implement early.
+Status: M7 synchronous foundation in progress. PR #68 implemented launcher, application factory,
+OpenAPI, and health. The active map-catalog slice now has a stable error envelope and remains open
+until all local gates and the PR review pass.
 
 ## Learning goals
 
@@ -27,7 +29,37 @@ Use the actual Fly-In flow to teach:
 - SSE uses `text/event-stream`.
 - API schema types live only in the adapter layer.
 
-## Initial synchronous slice
+## Implemented foundation
+
+### Health
+
+`GET /api/v1/health` returns `200 OK` with `{"status": "ok"}`.
+
+### Official map catalog
+
+`GET /api/v1/maps` returns deterministic one-based entries:
+
+```json
+{"maps": [{"index": 1, "display_path": "challenger/01_the_impossible_dream.txt"}]}
+```
+
+The index is a catalog selection key, not a filesystem path accepted from the client. Catalog order
+is deterministic for one repository version but indices are not durable IDs across map-set changes.
+
+### Synchronous official-map simulation
+
+`POST /api/v1/maps/{map_index}/simulate` selects one server-known map and calls `FlyInSolver`.
+Success returns `200 OK` with map projection, ordered turns/movements, metrics, evaluator movement
+lines, and warnings. An unknown index returns `404 Not Found`.
+
+The current map DTO represents finite capacity as an integer and unlimited terminal capacity as the
+string `"unlimited"`. The closure tests must lock this public JSON choice or deliberately replace it
+with the later `null` plus `unlimited: true` design before clients depend on both forms.
+
+All `SolveError` variants, server map-read failures, unknown indices, and path validation failures
+are translated into the stable error envelope instead of framework-generated responses or stack traces.
+
+## Later content-input slice
 
 ### Validate a map
 
@@ -106,6 +138,13 @@ Do not expose states the backend cannot actually produce.
   }
 }
 ```
+
+Implemented M7 examples:
+
+- Unknown catalog selection: `404` with `MAP_NOT_FOUND`.
+- Invalid path parameter: `422` with `REQUEST_VALIDATION_ERROR`.
+- Solver/application failure: `422` with the public `SolveError.code`.
+- Server map-read failure: `500` with `MAP_READ_ERROR` and no filesystem path leakage.
 
 Suggested mapping:
 

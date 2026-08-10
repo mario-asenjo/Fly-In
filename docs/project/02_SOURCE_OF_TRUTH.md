@@ -8,16 +8,12 @@
 2. `docs/sources/Intra-Projects-Fly-in-Edit.pdf`
    - Normative evaluation behavior and evidence expected during defense.
    - Includes the `--capacity-info` live-coding request.
-3. `maps/maps-v1.5-added-before-m0/`
+3. `maps/{easy,medium,hard,challenger}/`
    - Official Fly-In 1.5 maps, confirmed by the project owner on 2026-07-17.
    - Authoritative topology and benchmark inputs where the subject refers to provided maps.
-4. `maps/provided-v12-snapshot/`
-   - Exact historical v1.2 snapshot retained as immutable comparison evidence only.
-5. `docs/sources/fly-in_1.2.pdf`
+4. `docs/sources/fly-in_1.2.pdf`
    - Historical delta only.
-6. `maps/provided-v12-snapshot/README_maps.md`
-   - Helpful historical context, not a binding requirement.
-7. Project architecture documents and ADRs.
+5. Project architecture documents and ADRs.
    - Interpret and implement the sources; cannot override them.
 
 ## Contradiction protocol
@@ -47,9 +43,8 @@ Use these labels in documentation:
 
 ## Source immutability
 
-Files in `docs/sources/`, `maps/maps-v1.5-added-before-m0/`, and
-`maps/provided-v12-snapshot/` are immutable evidence. Validation scripts compare their manifest
-hashes. If a new official package arrives:
+Files in `docs/sources/` and the official category folders under `maps/` are immutable evidence.
+Validation scripts compare their manifest hashes. If a new official package arrives:
 
 1. Add it as a new named snapshot or deliberately replace the provisional snapshot.
 2. Regenerate the manifest.

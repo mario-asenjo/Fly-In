@@ -20,5 +20,7 @@
 | 2026-07-27 | Treat undirected link capacity as shared across both traversal directions | M4-B scheduler regression + Q6 |
 | 2026-07-28 | Keep benchmark reporting outside app/core and compare evaluator targets only in docs/PRs | M5-B user feedback + benchmark tests |
 | 2026-07-28 | Bound candidate DFS by requested completed routes; use measured k-shortest only if future dense benchmarks prove need | M5-D dense-map regression + Ponytail |
+| 2026-08-09 | Allow synchronous REST over direct application returns before typed events; events remain mandatory before SSE | ADR-0006 |
+| 2026-08-09 | Move byte-identical official maps to category folders under `maps/` and remove the duplicate v1.2 map snapshot from the evaluator tree | Manifest verification + map provenance |
 
 Append concise accepted decisions here. Detailed rationale belongs in ADRs.

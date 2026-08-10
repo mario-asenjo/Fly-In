@@ -1,19 +1,23 @@
 # Current project state
 
-- Last updated: 2026-07-31
-- Current milestone: M6 - Mandatory presentation and evaluation hardening
+- Last updated: 2026-08-09
+- Current milestone: M7 - Synchronous FastAPI foundation
 - Production implementation: M6.1-M6.4 have landed the adapter-neutral application service,
   evaluator-safe CLI adapter, optional terminal visual mode, visual metrics, rainbow labels,
   `--capacity-info`, and README/evaluation hardening
 - Mandatory completion: M0, parser slices M1.1-M1.9, graph/path slices M2.1-M2.6, and M3
   deterministic simulation slices M3.1-M3.6 are complete
-- API/UI/EDA implementation: intentionally not started
+- API implementation: PR #68 merged the CLI/API launcher, FastAPI factory, OpenAPI, and health;
+  `feat/api-map-catalog` contains an incomplete official-map catalog/simulation slice
+- Events/UI/EDA: intentionally not started
 
 ## Verified completed
 
 - Fly-In 1.2 and 1.5 subjects compared; the Fly-In 1.5 Makefile rules were rechecked directly.
-- `maps/maps-v1.5-added-before-m0/` is confirmed as the official 1.5 map package and hash-pinned.
-- The historical v1.2 snapshot remains immutable comparison evidence only.
+- The official 1.5 maps are hash-pinned under `maps/{easy,medium,hard,challenger}/`; their 2026-08-09
+  relocation from the former wrapper was verified byte-for-byte.
+- The duplicate v1.2 map snapshot was removed from the evaluator-facing tree; the v1.2 subject,
+  delta document, derived-fixture provenance, and Git history preserve historical comparison.
 - `masenjo` is the confirmed README 42 login.
 - Python 3.13.14, `uv` 0.11.19, GNU Make 4.4.1, and GitHub CLI authentication are verified locally.
 - The Makefile provides the subject-required `install`, `run`, `debug`, `clean`, `lint`, and optional
@@ -88,8 +92,7 @@
   turn validity, waits, and capacity enforcement to `KnownRouteScheduler` plus `ScheduleValidator`.
 - M4.7 adds explicit `ScheduleDeadlockError` detection for known-route no-progress/max-turn failure,
   has `RouteAllocator` retry smaller candidate windows when a route mix deadlocks, and permanently
-  validates terminating schedules for every official v1.5 map under
-  `maps/maps-v1.5-added-before-m0/`.
+  validates terminating schedules for every official v1.5 map under the category folders in `maps/`.
 - M5-A added `scripts/benchmark_official_maps.py` as a developer-only benchmark runner. M5-B keeps
   benchmarking outside the application package; no target/evaluation thresholds live in code.
 - M5-B adds `RouteMetrics`, `RouteWindowEstimate`, and `FleetMakespanEstimator` for candidate-route
@@ -125,19 +128,28 @@
   `ARGS` now prompts on stdout for a map number before printing solved movement lines.
 - README and the evaluation matrix now describe the real M6 state instead of the old parser-only
   snapshot.
+- PR #68 adds a backward-compatible launcher, explicit `cli`/`api` modes, a Uvicorn runner, FastAPI
+  application factory, versioned router composition, `GET /api/v1/health`, and OpenAPI coverage.
+- ADR-0006 records the accepted refinement: synchronous REST may consume direct `FlyInSolver` returns
+  before typed events, but events remain mandatory before SSE/asynchronous simulation resources.
+- The active branch exposes `GET /api/v1/maps` and
+  `POST /api/v1/maps/{map_index}/simulate` with a separate API error handler for unknown indices,
+  request validation, `SolveError`, and map-read failures. The 161-test suite, `make lint`,
+  `make lint-strict`, context validation, manifest hashes, official-map benchmark, and a real local
+  curl walkthrough now pass.
 
 ## Next smallest slice
 
-Open/update the M6 hardening PR to include M6.5 shared file input and the no-ARGS map menu, verify
-CI, then close the M6 umbrella if review accepts the README/evaluation evidence. After M6 is merged,
-the next planned coding slice is #59 M7.1 typed in-process events; do not start FastAPI (#60) before
-that event seam is proven.
+Close the active M7 catalog/synchronous official-map simulation slice without expanding scope: review
+the final diff, fill the PR template for #69 with the verified evidence, and open the PR. Do not add
+content upload, async resources, events, SSE, React, CORS, auth, persistence, cache, or a broker in
+that closure iteration.
 
 ## Active blockers
 
-None for M6 hardening. Further route-allocation optimization, API/UI, and React visualization remain
-intentionally deferred. Q7/Q8 restricted-transit evaluator confirmation remains open and should stay
-visible during defense and before API/event projection hardening.
+Public map indices are deterministic but not durable across catalog changes; document them as
+selection keys rather than persistent IDs. Q7/Q8 restricted-transit evaluator confirmation remains
+open and should stay visible before API/event projection hardening.
 
 ## Required context for next session
 
@@ -145,5 +157,7 @@ visible during defense and before API/event projection hardening.
 - `docs/project/02_SOURCE_OF_TRUTH.md`
 - Drone state, turn semantics, restricted movement, capacity invariants, and output sections of
   `docs/project/03_DOMAIN_CONTRACT.md`
-- `docs/project/05_ROADMAP.md` M6-M8
+- `docs/project/05_ROADMAP.md` M7-M9
+- `docs/project/06_API_CONTRACT.md`
+- `docs/decisions/ADR-0006-synchronous-rest-before-events.md`
 - `docs/progress/OPEN_QUESTIONS.md`

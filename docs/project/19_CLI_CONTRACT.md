@@ -46,13 +46,12 @@ important than the exact non-zero number.
 - `--capacity-info`: explicit capacity diagnostic mode for rubric live-coding rehearsal. It appends
   per-turn zone/link capacity use and is never emitted by default.
 - Visual mode includes optional secondary metrics.
-- `--debug`: developer diagnostics to stderr/logging.
 - no `ARGS`: interactive numbered map selection on stdout before solving.
 
 ## Architecture seam
 
 ```text
-parse args -> FileReader.retrieve_text() -> application solve -> SimulationResult
+parse args -> FileReader.retrieve_text() -> application solve -> SolveResult
                                       -> MandatoryOutputFormatter -> stdout
                                       -> VisualFormatter -> human output
                                       -> CapacityFormatter -> diagnostic output

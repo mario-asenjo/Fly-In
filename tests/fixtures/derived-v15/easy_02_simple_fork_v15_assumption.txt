@@ -1,5 +1,5 @@
 # DERIVED FIXTURE, NOT AN OFFICIAL MAP.
-# Source: maps/provided-v12-snapshot/easy_02_simple_fork.txt
+# Source: historical supplied v1.2 map, removed from the evaluator-facing tree.
 # Change: nb_drones 3 -> 4 to match Fly-In 1.5/evaluation benchmark text.
 nb_drones: 4
 

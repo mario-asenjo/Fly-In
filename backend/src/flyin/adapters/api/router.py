@@ -3,7 +3,8 @@
 from fastapi import APIRouter
 
 from .routers.health import health_router
-
+from .routers.maps import maps_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
+api_v1_router.include_router(maps_router)
 api_v1_router.include_router(health_router)

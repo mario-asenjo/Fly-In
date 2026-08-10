@@ -82,7 +82,6 @@ def test_route_allocator_uses_shortest_valid_candidate_window() -> None:
     map_path = (
         project_root
         / "maps"
-        / "maps-v1.5-added-before-m0"
         / "challenger"
         / "01_the_impossible_dream.txt"
     )
