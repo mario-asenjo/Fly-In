@@ -1,105 +1,145 @@
-# React UI plan
+# Native web UI plan
 
-Status: target design for milestone M9.
+Status: active target design from M8.1 onward.
 
 ## Purpose
 
-Visualize the map and simulation so topology, occupancy, restricted transit, bottlenecks, and
-parallel movement are easier to understand. The UI is also the concrete API/event-learning
-consumer.
+Visualize Fly-In so topology, occupancy, restricted transit, bottlenecks and parallel movement are
+easier to understand while keeping the client/server boundary transparent for learning.
+
+The browser is a projection adapter. Python remains authoritative for parsing, pathfinding,
+scheduling, capacity semantics, restricted transit and validation.
 
 ## Technology decision
 
-- React + TypeScript strict mode.
-- Vite for development/build.
-- SVG for graph rendering first.
-- Native browser controls/CSS before component libraries.
-- Generated or schema-checked API types after the OpenAPI contract stabilizes.
-- No client state framework until React state/reducer is demonstrably insufficient.
+ADR-0007 supersedes the React-first plan for the current architecture.
 
-Ponytail should strongly challenge graph libraries, UI kits, animation libraries, and global
-state dependencies. A visualization library must never provide graph/pathfinding logic.
+Use first:
 
-## Main screen
+- semantic HTML;
+- plain CSS;
+- native JavaScript and `fetch()`;
+- browser-native SVG for graph work;
+- FastAPI same-origin static serving.
 
-### Input panel
+Do not add React, Vite, TypeScript, a UI kit, graph library, animation framework, client state library,
+CORS middleware or Node tooling until a measured problem justifies it.
 
-- Select or paste map text.
-- Validate.
-- Show line-aware errors.
-- Submit simulation.
+## Repository shape
 
-### Graph canvas
+```text
+frontend/
+├── index.html
+├── style.css
+├── app.js
+└── img/
+    ├── sad.svg
+    ├── normal.svg
+    ├── happy.svg
+    ├── zone.svg
+    └── conn.svg
+```
 
-- Position zones from integer coordinates using a deterministic viewport transform.
-- Draw bidirectional connections and capacity labels.
-- Show zone name/type/color/effective capacity.
-- Show start/end as unlimited regardless of declared metadata.
-- Show blocked zones distinctly.
-- Show drones at zones and on restricted links.
-- Avoid relying on color alone for meaning.
+CSS and JavaScript stay at the frontend root by design. Assets are the only nested UI files.
 
-### Playback controls
+## M8.1 - catalog selector (#71)
 
-- Run/pause playback.
-- Step forward.
-- Step backward through already received/projected events.
-- Reset to turn zero.
-- Speed control.
-- Current turn and completion status.
+The first slice proves the simplest real HTTP consumer:
 
-Playback controls usually affect local visualization time, not authoritative backend computation.
-This distinction should be taught explicitly.
+```text
+browser load
+    |
+    v
+GET /api/v1/maps
+    |
+    v
+JSON catalog
+    |
+    v
+<select>
+```
 
-### Inspection panel
+Required behavior:
 
-- Selected zone occupancy/capacity.
-- Selected link use/capacity.
-- Drone state and route/history if available.
-- Makespan, delivered count, path cost, moved drones per turn.
-- Benchmark target and delta for recognized developer fixtures only; do not hard-code map logic
-  into the production solver.
+- FastAPI serves `/`, `/style.css`, `/app.js` and `/img/*` from the same origin as `/api/v1`;
+- the selector populates from the real official-map catalog;
+- loading, ready, empty and failure states are explicit;
+- selection changes update a visible summary;
+- **Simulate** logs intent only and does not call the solve endpoint yet;
+- meaningful browser actions use the `[Fly-In UI]` console prefix;
+- the layout uses clear grouping, hierarchy, proximity, figure/ground separation and responsive
+  spacing rather than a framework-generated default appearance.
+
+The drone SVGs can be decorative at low opacity. `zone.svg` and `conn.svg` are included as future
+runtime-visualization candidates, not as a commitment to template-based graph rendering.
+
+## M8.2 - completed synchronous simulation (#72)
+
+After the selector is proven:
+
+1. `POST /api/v1/maps/{map_index}/simulate`.
+2. Store the complete structured `SolveResponse` in browser memory.
+3. Render the static map from `map.zones` and `map.connections`.
+4. Project turn state from `turns[].movements` rather than parsing `movement_lines`.
+5. Add step/reset before automatic playback.
+6. Add play/pause/speed after deterministic stepping works.
+7. Add metrics, capacities and selected-zone/link inspection.
+
+If `zone.svg` or `conn.svg` makes coordinate placement, scaling or runtime labels awkward, use native
+SVG primitives for the graph. The supplied assets remain useful decorative/reference material; data
+readability wins over asset reuse.
+
+## Drone visual states
+
+The supplied visual language maps naturally to eventual playback:
+
+- `sad.svg`: drone still at the starting area / not yet dispatched;
+- `normal.svg`: active or in-progress drone;
+- `happy.svg`: delivered drone.
+
+The exact runtime representation must follow backend state, not client inference.
 
 ## State model
 
-Separate:
+For the synchronous UI, keep only the state that exists:
 
-1. Server resource state: simulation ID/status/result.
-2. Ordered event log received.
-3. Deterministic projection at each sequence/turn.
-4. Local playback cursor/speed/selection.
-5. Transient request/error state.
+1. official-map catalog;
+2. selected map index;
+3. completed solve response, once M8.2 starts;
+4. local playback cursor/speed/selection;
+5. transient loading/error state.
 
-One reducer can project events initially. Do not duplicate backend rules; reject/impossible event
-sequences should surface as client errors rather than be “fixed” in React.
+Do not invent simulation IDs, lifecycle states or an event log before the backend produces them.
 
-## Delivery slices
+## Events and streaming
 
-1. Render one hard-coded API response, no network.
-2. Fetch a completed synchronous result.
-3. Input and validation errors.
-4. Basic graph and turn stepping.
-5. Capacity/transit details.
-6. SSE append and live projection.
-7. Reconnect using last event ID/sequence.
-8. Accessibility, empty/loading/error/responsive states.
+Typed events and SSE are no longer prerequisites for completed playback. Revisit them only when a
+real requirement needs live ordered updates, reconnection, replay or work that outlives the HTTP
+request. ADR-0006 still requires typed immutable events before any SSE/asynchronous resource is
+introduced.
 
 ## Accessibility
 
-- All controls keyboard accessible with visible focus.
-- Buttons have explicit labels.
-- Status changes use an appropriate live region without excessive announcements.
-- Zone information is available in text/list form as well as SVG.
-- Color contrast is sufficient; arbitrary map colors may require a safe display treatment.
-- Animation respects reduced-motion preference.
+- Native controls must remain keyboard accessible with visible focus.
+- Buttons use explicit labels and status changes use restrained live regions.
+- Do not rely on map metadata color alone to express zone meaning.
+- Zone/link information should eventually have a textual alternative to the graph.
+- Respect `prefers-reduced-motion` for visual transitions/animation.
+- Decorative artwork uses empty alternative text and does not enter the accessibility tree.
 
 ## Tests
 
-- Coordinate-to-viewport transform.
-- Event reducer/projection.
-- Playback cursor behavior.
-- API error rendering including line number.
-- Critical keyboard controls.
-- One end-to-end happy path only after the real API exists.
+M8.1:
 
-Avoid broad snapshots that fail on harmless SVG markup changes.
+- same-origin index/CSS/JS/SVG delivery;
+- API/OpenAPI regressions remain green.
+
+M8.2 and later:
+
+- coordinate-to-viewport transform;
+- completed-turn state projection;
+- playback cursor behavior;
+- API error rendering;
+- critical keyboard controls.
+
+Avoid broad snapshots that fail on harmless SVG or CSS changes.
