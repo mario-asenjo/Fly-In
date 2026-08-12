@@ -1,18 +1,25 @@
 # Frontend context
 
-This directory is intentionally empty until the UI milestone is approved. Do not scaffold
-React during parser/pathfinding/scheduler work.
+The UI milestone is active and starts with native browser technologies per ADR-0007.
 
-When the UI phase begins:
+Rules for frontend work:
 
-- Use React with TypeScript strict mode and Vite unless an ADR changes the choice.
-- Treat the FastAPI OpenAPI contract as the transport authority.
+- Use plain HTML, CSS and JavaScript first; no React/Vite/TypeScript unless a later ADR proves a need.
+- Treat the FastAPI HTTP/OpenAPI contract as the transport authority.
 - Keep authoritative routing and simulation decisions in the backend.
-- Render coordinates, connections, metadata colors, capacities, drones, transit, and turns.
-- Provide keyboard-accessible run/pause/step/reset/speed controls.
-- Keep view state separate from server simulation state.
-- Start with a static completed simulation response; add SSE after the projection works.
-- Add a dependency only after checking browser-native SVG/CSS and installed packages.
-- Test pure transformations and critical interaction behavior; avoid snapshot-test noise.
+- Keep `frontend/` flat (`index.html`, `style.css`, `app.js`) except for `frontend/img/` assets.
+- Prefer same-origin serving from FastAPI so supported local development does not require CORS.
+- Log meaningful browser actions with the `[Fly-In UI]` prefix while the teaching client is small.
+- Consume structured API DTOs; never reconstruct simulation semantics by parsing evaluator stdout.
+- Use browser-native SVG/CSS before graph, UI, animation or state-management dependencies.
+- Render coordinates, connections, metadata colors, capacities, drones, transit, and turns only in the
+  slice that actually needs them.
+- Keep local playback state separate from authoritative backend simulation data.
+- Provide keyboard-accessible controls and visible focus; do not rely on color alone for meaning.
+- Respect `prefers-reduced-motion` when animation is introduced.
+- Test HTTP/static integration and pure transformations; avoid snapshot-test noise.
 
-Read `docs/project/07_UI_PLAN.md` and activate the `flyin-ui-implementation` skill before work.
+Current slice (#71): load the official catalog into a polished selector. **Simulate** logs intent only.
+Next slice (#72): call the completed synchronous simulation endpoint and project its result locally.
+
+Read `docs/project/07_UI_PLAN.md` and `docs/decisions/ADR-0007-native-web-before-react.md` before UI work.
