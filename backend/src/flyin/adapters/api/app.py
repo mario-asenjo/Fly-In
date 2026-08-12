@@ -26,19 +26,31 @@ def create_app() -> FastAPI:
     app.include_router(api_v1_router)
 
     root = frontend_root()
-    app.mount("/img", StaticFiles(directory=root / "img"), name="frontend-images")
+    app.mount(
+        "/img",
+        StaticFiles(directory=root / "img"),
+        name="frontend-images",
+    )
 
     @app.get("/", include_in_schema=False, response_class=FileResponse)
     def frontend_index() -> FileResponse:
         """Serve the native Fly-In browser client."""
         return FileResponse(root / "index.html")
 
-    @app.get("/style.css", include_in_schema=False, response_class=FileResponse)
+    @app.get(
+        "/style.css",
+        include_in_schema=False,
+        response_class=FileResponse,
+    )
     def frontend_styles() -> FileResponse:
         """Serve the native client stylesheet."""
         return FileResponse(root / "style.css", media_type="text/css")
 
-    @app.get("/app.js", include_in_schema=False, response_class=FileResponse)
+    @app.get(
+        "/app.js",
+        include_in_schema=False,
+        response_class=FileResponse,
+    )
     def frontend_script() -> FileResponse:
         """Serve the native client JavaScript."""
         return FileResponse(root / "app.js", media_type="text/javascript")
