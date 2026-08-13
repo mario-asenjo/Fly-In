@@ -13,15 +13,18 @@ coordinate complex component-local state.
 
 The earlier UI decision selected React + TypeScript mainly to support API/event learning and a future
 SSE projection. ADR-0006 later established that the real system can remain synchronous until a
-consumer demonstrates a need for events. Introducing React, Vite, Node.js and a separate development
-origin before that need exists would make the first HTTP lesson harder to see and would add CORS,
-build and dependency concerns unrelated to Fly-In correctness.
+consumer demonstrates a need for events. Introducing React, Vite and Node.js before that need exists
+would make the first HTTP lesson harder to see and add build/toolchain concerns unrelated to Fly-In.
+
+A second decision concerns process boundaries. `flyin.adapters.api` should remain the API adapter,
+not become a static-file host. The browser UI is therefore served independently and crosses a small,
+explicit local CORS boundary.
 
 ## Decision
 
 Start the browser UI with native HTML, CSS, JavaScript, `fetch()` and browser-native SVG.
 
-FastAPI serves the UI and `/api/v1` from the same origin. The initial frontend stays flat:
+Keep the frontend flat:
 
 ```text
 frontend/
@@ -31,27 +34,58 @@ frontend/
 └── img/
 ```
 
-The frontend is a thin visualization adapter. It must consume structured HTTP DTOs and must never
-reimplement parsing, pathfinding, capacity rules, restricted-transit semantics or scheduling.
+Run the two concerns independently during local development:
+
+```text
+API:      python -m flyin api              -> http://127.0.0.1:8000
+Frontend: python3 -m http.server 8080 --directory frontend
+Browser:  http://127.0.0.1:8080
+```
+
+The API enables narrow CORS only for the documented local frontend origins on port 8080. It does not
+serve `/`, CSS, JavaScript or image assets. The browser calls the API explicitly at
+`http://127.0.0.1:8000`.
+
+The frontend remains a thin visualization adapter. It must consume structured HTTP DTOs and must
+never reimplement parsing, pathfinding, capacity rules, restricted-transit semantics or scheduling.
 
 React remains a possible future upgrade only if measured UI complexity makes native browser code
 materially harder to understand or maintain.
+
+## Alternatives considered
+
+### FastAPI serves frontend and API from one origin
+
+This avoids CORS and uses one process, but makes the API application responsible for static frontend
+hosting. Rejected because preserving a clean API-only adapter is more valuable than avoiding a small
+local CORS configuration.
+
+### Separate frontend and API plus CORS
+
+Accepted. Two explicit processes make the client/server boundary visible and the required CORS policy
+is only a few lines with a narrow origin allow-list.
+
+### Separate processes behind a reverse proxy
+
+Would also avoid CORS, but introduces another runtime/configuration layer with no current benefit.
 
 ## Consequences
 
 Positive:
 
-- the client/server lesson is visible directly as DOM event -> `fetch()` -> HTTP -> JSON -> DOM;
+- `flyin.adapters.api` stays focused on HTTP/JSON/OpenAPI;
+- frontend hosting is independent from the Fly-In launcher;
+- client/server separation is visible during teaching;
 - no Node/npm/Vite/build step is needed;
-- no CORS configuration is required for the supported local flow;
-- the UI can still use SVG, animation, keyboard controls and completed-turn playback;
-- deployment and evaluator demonstration require one API process rather than two development servers.
+- Python's standard library is sufficient to host the static client;
+- CORS is explicit and deliberately narrow rather than wildcard-based.
 
 Trade-offs:
 
-- JavaScript does not have the compile-time guarantees previously planned with strict TypeScript;
-- DOM code must stay intentionally small and separated by responsibility as the UI grows;
-- if playback/inspection becomes large enough, a component framework may become justified later.
+- two local processes must be started for the browser demo;
+- the frontend has an explicit API base URL during this local phase;
+- CORS becomes one additional web concept to explain;
+- JavaScript does not have the compile-time guarantees previously planned with strict TypeScript.
 
 ## Asset decision
 
@@ -62,11 +96,8 @@ switch to SVG primitives if template assets make coordinates, capacities or labe
 
 ## Revisit trigger
 
-Reconsider React or another framework only when one or more of these are demonstrated in real code:
+Reconsider React or another framework only when real UI state/DOM coordination becomes difficult to
+reason about, repeated components create significant manual synchronization, or a real streaming
+consumer needs a more structured client projection.
 
-- UI state/DOM coordination becomes difficult to reason about;
-- repeated visual components create significant manual synchronization;
-- completed playback plus inspection creates unmanageable native state transitions;
-- a real streaming/reconnection consumer requires a more structured client projection.
-
-A framework must solve an observed problem, not anticipate one.
+Reconsider the two-process/CORS setup only if packaging or deployment becomes a real project goal.
