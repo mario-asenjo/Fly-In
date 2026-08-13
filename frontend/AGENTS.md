@@ -1,25 +1,21 @@
 # Frontend context
 
-The UI milestone is active and starts with native browser technologies per ADR-0007.
+The UI milestone uses native browser technologies per ADR-0007.
 
-Rules for frontend work:
+Rules:
 
-- Use plain HTML, CSS and JavaScript first; no React/Vite/TypeScript unless a later ADR proves a need.
-- Treat the FastAPI HTTP/OpenAPI contract as the transport authority.
-- Keep authoritative routing and simulation decisions in the backend.
-- Keep `frontend/` flat (`index.html`, `style.css`, `app.js`) except for `frontend/img/` assets.
-- Keep frontend hosting separate from `flyin.adapters.api`; the API must not serve frontend files.
-- Serve `frontend/` independently on port 8080 with Python's standard-library static HTTP server.
-- Call the API at `http://127.0.0.1:8000`; FastAPI permits only the documented local frontend origins through narrow CORS.
-- Log meaningful browser actions with the `[Fly-In UI]` prefix while the teaching client is small.
-- Consume structured API DTOs; never reconstruct simulation semantics by parsing evaluator stdout.
-- Use browser-native SVG/CSS before graph, UI, animation or state-management dependencies.
-- Keep local playback state separate from authoritative backend simulation data.
-- Provide keyboard-accessible controls and visible focus; do not rely on color alone for meaning.
-- Respect `prefers-reduced-motion` when animation is introduced.
-- Test API/CORS integration and pure transformations; avoid snapshot-test noise.
+- Use plain HTML, CSS and JavaScript. Add a framework only after a later ADR proves a measured need.
+- FastAPI/OpenAPI owns the transport contract; Python owns parsing, routing, capacity, restricted transit and scheduling.
+- Keep frontend source files directly under `frontend/`; only `frontend/img/` is nested.
+- Keep frontend hosting separate from the API. Serve `frontend/` on port 8080 with Python's standard static server; the API remains on port 8000 with narrow CORS.
+- Log meaningful browser actions with the `[Fly-In UI]` prefix.
+- Consume structured DTOs. Never derive simulation state by parsing evaluator `movement_lines`.
+- Try the supplied zone, connection and drone SVG assets first. Use native SVG primitives only after a real visual test proves the supplied assets hurt readability or scaling.
+- Keep completed backend results separate from local playback state.
+- Keep native controls keyboard accessible, show visible focus, and do not rely on color alone.
+- Respect reduced-motion preferences.
+- Separate scripts only for real responsibilities: transport, graph rendering, turn projection, output rendering and playback.
 
-Current slice (#71): load the official catalog into a polished selector. **Simulate** logs intent only.
-Next slice (#72): call the completed synchronous simulation endpoint and project its result locally.
+PR #73 covers the catalog selector plus the synchronous solve/playback scope originally planned for #72.
 
 Read `docs/project/07_UI_PLAN.md` and `docs/decisions/ADR-0007-native-web-before-react.md` before UI work.
