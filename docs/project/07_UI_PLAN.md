@@ -1,6 +1,6 @@
 # Native web UI plan
 
-Status: synchronous native UI implemented in draft PR #73.
+Status: synchronous native UI implemented; current refinement prioritizes the simulation canvas for dense maps.
 
 ## Purpose
 
@@ -12,15 +12,13 @@ ADR-0007 supersedes the React-first plan. Use semantic HTML, CSS and native Java
 
 No React, Vite, TypeScript, Node, UI kit, graph library, state library, animation framework, reverse proxy or event transport is required.
 
-All frontend source files stay directly under `frontend/`; `frontend/img/` is the only nested asset directory. Scripts are separated only where the implemented UI now has distinct responsibilities: API/bootstrap, graph rendering, turn projection, result rendering and playback.
-
-## Implemented synchronous flow (#71 + #72)
+## Synchronous flow
 
 ```text
 GET /api/v1/maps
         |
         v
-official map selector
+map selector
         |
         v
 POST /api/v1/maps/{index}/simulate
@@ -31,11 +29,24 @@ completed SolveResponse
         +--> SVG-first map projection
         +--> local turn projection
         +--> playback controls
-        +--> metrics / warnings / evaluator output
-        +--> zone and connection inspector
+        +--> optional warning presentation
 ```
 
 The browser stores the completed response and changes only its local playback cursor. It never asks the backend to recompute a turn during playback.
+
+## Canvas-first presentation
+
+The simulation is the primary visual artifact, not a dashboard. After a simulation loads:
+
+- the workspace may use roughly 90-96% of the viewport width;
+- the airspace consumes most of the visible height;
+- dense maps use a virtual graph surface larger than the viewport rather than compressing every label and SVG template;
+- the user can scroll or drag to pan around the airspace;
+- simple `-`, `Fit`, and `+` controls change the virtual canvas scale;
+- playback controls stay directly below the graph;
+- zone/connection inspection appears as a lightweight overlay instead of a permanent sidebar.
+
+Do not render redundant metrics, fleet summary cards or evaluator `movement_lines` in the page. Those values may remain in `SolveResponse` for API/debug/other consumers, but the visualizer should communicate drone state directly through the graph. Warnings are shown only when the backend actually returns them.
 
 ## SVG-first decision
 
@@ -49,7 +60,7 @@ Use the supplied artwork first:
 
 Runtime labels and counts are overlaid by JavaScript. Zone metadata colors are shown as a halo while a separate kind badge preserves semantic meaning without relying on color alone.
 
-Do **not** replace zone/connection templates with native SVG primitives pre-emptively. First inspect real easy, medium, hard and challenger maps. Switch only if actual rendering demonstrates unacceptable overlap, scaling or label readability.
+Do **not** replace zone/connection templates with native SVG primitives pre-emptively. First inspect real easy, medium, hard and challenger maps. Switch only if actual rendering demonstrates unacceptable overlap, scaling or label readability after the larger pannable canvas is available.
 
 ## Projection rules
 
@@ -60,11 +71,9 @@ Use structured `turns[].movements`; never parse `movement_lines` to reconstruct 
 - Other movement: drone is at `destination` after that turn.
 - Destination equal to `map.end`: drone is delivered and uses the happy visual state.
 
-Evaluator movement lines remain presentation-only and are highlighted alongside the current visual turn.
-
 ## Interaction
 
-The implemented workspace includes reset, previous, next, play/pause, timeline seek and playback speed. Zones and connections are mouse/keyboard inspectable. Console traces use the `[Fly-In UI]` prefix for transport, selection, simulation, playback and inspection actions.
+The workspace includes reset, previous, next, play/pause, timeline seek and playback speed. Zones and connections are inspectable. The canvas adds pan, scroll, fit and zoom. Console traces use `[Fly-In UI]` for transport, selection, simulation, playback, inspection and canvas actions.
 
 ## CORS
 
@@ -72,11 +81,11 @@ Keep the API policy deliberately narrow: only the documented local frontend orig
 
 ## Accessibility and motion
 
-Use native controls, visible focus, keyboard graph inspection, text metrics/output in addition to graphics, semantic type labels in addition to colors, and `prefers-reduced-motion`.
+Use native controls, visible focus, keyboard graph inspection, semantic type labels in addition to colors, textual inspector information and `prefers-reduced-motion`.
 
 ## Validation
 
-The PR contains API/CORS bootstrap coverage plus a static native-frontend contract covering favicon, script pipeline, real catalog/simulate endpoints and supplied SVG usage. Human visual review of dense official maps remains the acceptance gate before deciding whether the SVG templates need a native-primitive fallback.
+Static frontend-contract tests lock the real catalog/simulate calls, supplied SVG usage, large scrollable canvas controls, and the absence of metrics/fleet/movement-line dashboard elements. Human review of hard and challenger maps remains the visual acceptance gate for the SVG templates.
 
 ## Deferred work
 
