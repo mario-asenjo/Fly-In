@@ -1,4 +1,5 @@
 const UI_PREFIX = "[Fly-In UI]";
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 const mapSelect = document.querySelector("#map-select");
 const simulateButton = document.querySelector("#simulate-button");
@@ -71,7 +72,7 @@ function renderCatalog(catalog) {
 }
 
 async function loadCatalog() {
-  const endpoint = "/api/v1/maps";
+  const endpoint = `${API_BASE_URL}/api/v1/maps`;
   logAction("catalog:request", { method: "GET", endpoint });
 
   try {
@@ -128,6 +129,8 @@ simulateButton.addEventListener("click", () => {
 
 logAction("bootstrap", {
   architecture: "native-html-css-js",
-  catalog_endpoint: "/api/v1/maps",
+  frontend_origin: window.location.origin,
+  api_origin: API_BASE_URL,
+  catalog_endpoint: `${API_BASE_URL}/api/v1/maps`,
 });
 loadCatalog();
