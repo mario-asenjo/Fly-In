@@ -121,43 +121,69 @@ Order:
 
 1. CLI/API launcher, FastAPI application factory, health endpoint, and OpenAPI orientation (#60,
    merged through PR #68).
-2. Deterministic official-map catalog with version-local selection keys (#69, active).
+2. Deterministic official-map catalog with version-local selection keys (#69, merged through PR #70).
 3. Synchronous simulation returning graph, ordered turns, metrics, movement lines, and warnings
-   (#69, active).
-4. Stable application-to-HTTP error mapping and request/resource limits.
-5. API contract, integration tests, and Swagger/curl teaching walkthrough.
+   (#69, merged through PR #70).
+4. Stable application-to-HTTP error mapping and integration coverage.
+5. API contract and curl/Swagger teaching walkthrough.
 
-Exit: ordinary REST can be taught and exercised without React, streaming, persistence, or events.
+Exit: ordinary REST can be taught and exercised without a frontend framework, streaming,
+persistence, or events.
 
 ADR-0006 records why synchronous request/response may use direct application returns before events.
 
-## M8 - Typed in-process events and streaming readiness
+## M8 - Native web visualization
 
-Deliverables (#59):
+ADR-0007 supersedes the earlier React-first plan. The browser starts as a thin same-origin adapter
+using HTML, CSS, native JavaScript, `fetch()` and browser SVG.
 
-- Minimal event catalog driven by the first real playback/stream consumer.
-- Event envelope with simulation ID, sequence, turn, type, schema version, and payload.
-- Event ordering/idempotency tests.
-- ADR confirming no external broker yet.
-- Simulation resource with ID/status/result only if work needs a lifecycle.
-- SSE event stream after ordinary REST and event ordering are proven.
+### M8.1 - browser shell and official-map selector (#71)
 
-Exit: events support ordered playback without changing simulator correctness or CLI output.
+- FastAPI serves `/`, `/style.css`, `/app.js` and `/img/*` from the same origin as `/api/v1`.
+- `frontend/` stays flat except for `img/`.
+- `GET /api/v1/maps` populates an accessible selector.
+- Loading, ready, empty and failure states are explicit.
+- Selection changes and **Simulate** intent are logged with `[Fly-In UI]`.
+- **Simulate** does not call the solve endpoint yet.
+- Supplied drone/zone/connection SVG artwork is versioned for decorative and future visualization use.
+- No Node.js, npm, Vite, React, TypeScript, CORS, UI framework or graph dependency.
 
-## M9 - React visualization
+Exit: the first real browser consumer demonstrates DOM -> fetch -> HTTP -> JSON -> DOM clearly.
 
-Order:
+### M8.2 - completed synchronous playback (#72)
 
-1. Vite + strict TypeScript scaffold.
-2. Generated/typed API boundary.
-3. Upload/paste and validation display.
-4. Static graph SVG from coordinates.
-5. Completed-turn playback.
-6. Controls and metrics/capacity panel.
-7. SSE live projection/reconnection.
-8. Accessibility/responsive polish.
+- Call `POST /api/v1/maps/{map_index}/simulate`.
+- Store the completed structured response locally.
+- Render graph coordinates/connections from API DTOs.
+- Project drone/turn state from structured movements, never reparsed evaluator stdout.
+- Add deterministic step/reset, then play/pause/speed.
+- Add metrics, capacities and inspection after the projection is correct.
+- Use `zone.svg`/`conn.svg` only if runtime text/scaling remains readable; otherwise use native SVG
+  primitives for the graph.
 
-Exit: UI never computes routes and reproduces backend state reliably.
+Exit: UI never computes routes and can replay a completed backend simulation reliably.
+
+## M9 - Deferred typed events and streaming readiness
+
+This milestone is conditional (#59). Do not enter it merely because the old roadmap placed events
+before UI.
+
+Activation trigger: the real M8 browser consumer needs live ordered updates, replay, reconnection,
+or work that outlives one HTTP request.
+
+If activated:
+
+- minimal typed immutable event catalog driven by that consumer;
+- simulation/sequence/turn/type/schema envelope;
+- ordering and projection-idempotency tests;
+- no external broker;
+- SSE only after event ordering is proven;
+- simulation resource lifecycle only if asynchronous work actually exists.
+
+Exit: events solve a demonstrated streaming/lifecycle problem without changing simulator correctness
+or evaluator output.
+
+ADR-0006 still requires typed events before SSE or asynchronous resources.
 
 ## M10 - Optional distributed EDA
 
@@ -179,5 +205,5 @@ learning is an explicit goal. Do not use Kafka for this project.
 - Complexity and algorithm whiteboard explanation.
 - Two map walkthroughs: simple and capacity/restricted complex.
 - Live-coding `--capacity-info` under ten minutes.
-- Teammate teaching sequence from CLI through REST/events/UI.
+- Teammate teaching sequence from CLI through REST/native UI and any event layer actually retained.
 - Final Ponytail audit and delete-list review.
