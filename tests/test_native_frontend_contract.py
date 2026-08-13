@@ -35,13 +35,42 @@ def test_frontend_calls_catalog_and_synchronous_simulation_api() -> None:
 
 
 def test_supplied_svg_assets_drive_the_graph_renderer() -> None:
-    """The first graph implementation uses the supplied visual assets."""
+    """The graph continues to use the supplied visual assets."""
     graph = read("graph.js")
 
     assert 'href:"img/zone.svg"' in graph
     assert 'href:"img/conn.svg"' in graph
     assert 'href:`img/${icon}.svg`' in graph
     assert "window.FlyInGraph" in graph
+
+
+def test_simulation_ui_prioritizes_large_navigable_canvas() -> None:
+    """Dense maps get an explorable canvas instead of dashboard chrome."""
+    index = read("index.html")
+    styles = read("style.css")
+    playback = read("playback.js")
+
+    assert 'id="graph-viewport"' in index
+    assert 'id="graph-surface"' in index
+    assert 'id="zoom-in-button"' in index
+    assert 'id="zoom-out-button"' in index
+    assert 'id="fit-button"' in index
+    assert "height:min(74vh,900px)" in styles
+    assert "overflow:auto" in styles
+    assert 'window.FlyInCanvas={fit}' in playback
+    assert '"canvas:pan"' in playback
+    assert '"canvas:zoom"' in playback
+
+
+def test_dashboard_metrics_and_movement_lines_are_not_rendered() -> None:
+    """The simulation remains visually focused on the graph and playback."""
+    index = read("index.html")
+    renderer = read("render-simulation.js")
+
+    assert 'id="metric-turns"' not in index
+    assert 'id="fleet-waiting"' not in index
+    assert 'id="movement-output"' not in index
+    assert "movement_lines" not in renderer
 
 
 def test_runtime_zone_and_connection_assets_have_no_placeholder_text() -> None:
