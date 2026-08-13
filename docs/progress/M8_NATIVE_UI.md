@@ -1,91 +1,86 @@
-# M8 native UI kickoff
+# M8 native UI progress
 
-Date: 2026-08-12
-Active slice: #71 - native web shell and official-map selector
-Follow-up: #72 - completed synchronous simulation playback
+Date: 2026-08-13
+Completed foundation: #71 / PR #73
+Active slice: #72 - completed synchronous simulation playback
 
-## Why the UI plan changed
+## Runtime architecture
 
-The old roadmap assumed the browser would arrive after typed events and would use React + TypeScript.
-The implemented architecture disproved the need for that ordering: M7 now exposes a synchronous map
-catalog and completed solve response through a stable FastAPI boundary. The first browser consumer
-can therefore teach the actual HTTP interaction directly with native `fetch()` and DOM updates.
+PR #73 established a native frontend served independently on port 8080 and a pure FastAPI JSON/OpenAPI adapter on port 8000 with narrow CORS. ADR-0007 supersedes the earlier React-first decision.
 
-ADR-0007 records the new decision and ADR-0002 is retained as superseded history rather than deleted.
-Issue #59 remains open but deferred: events become relevant only if the real client later needs live
-updates, replay, reconnection, or work that outlives one request.
+The frontend is intentionally dependency-free: HTML, CSS, native JavaScript and the supplied SVG artwork. Events/SSE remain deferred because the backend already returns a complete synchronous simulation.
 
-## M8.1 implementation
+## #72 implementation
+
+The selector now drives the real endpoint:
 
 ```text
-GET /
- |
- v
-index.html + style.css + app.js
- |
- v
 GET /api/v1/maps
- |
- v
-MapCatalogResponse
- |
- v
-<select>
+        |
+        v
+select official map
+        |
+        v
+POST /api/v1/maps/{index}/simulate
+        |
+        v
+completed SolveResponse
+        |
+        +--> SVG-first map
+        +--> local turn projection
+        +--> playback
+        +--> metrics / warnings / evaluator output
 ```
 
-FastAPI also serves `/img/*` from the same origin. This deliberately avoids a second development
-server and CORS configuration.
+The browser never computes paths or reparses evaluator stdout. `turns[].movements` is the state source; `movement_lines` is shown only as evaluator-facing output.
 
-The page provides:
+## SVG-first visual implementation
 
-- a responsive, Gestalt-oriented selector card with clear hierarchy and grouping;
-- API status, loading, ready, empty and error states;
-- selection summary;
-- a **Simulate** action that intentionally logs intent only;
-- consistent `[Fly-In UI]` console traces for bootstrap, catalog request/result, selection and
-  simulation intent;
-- low-opacity decorative drone SVGs that do not compete with the interaction surface;
-- keyboard focus treatment, live-region status text and reduced-motion support.
+The user-supplied SVGs are used before considering native graph primitives:
 
-## Assets
+- `zone.svg` is the shell for every runtime zone;
+- `conn.svg` is stretched/rotated between map coordinates for physical links;
+- `sad.svg` represents drones still waiting at start;
+- `normal.svg` represents active/transit drones;
+- `happy.svg` represents delivered drones and is also the favicon.
 
-The user supplied PNG references plus hand-converted SVG equivalents. M8.1 versions the SVGs:
+Runtime zone/connection labels were removed from the templates so JavaScript can overlay real names, capacities and occupancy. Zone metadata colors appear as a visual halo while the explicit zone-type badge preserves meaning without color alone.
 
-- `sad.svg`: eventual not-dispatched/start-state visual language;
-- `normal.svg`: eventual active/in-progress state;
-- `happy.svg`: eventual delivered state;
-- `zone.svg`: candidate runtime zone template;
-- `conn.svg`: candidate runtime connection template.
+No fallback to primitive-only rendering is chosen yet. The acceptance criterion is to inspect actual easy/medium/hard/challenger maps and change only if the supplied templates demonstrably hurt readability, overlap or scaling.
 
-SVG was chosen over PNG because it scales cleanly, is easy to fade/decorate with CSS, and preserves
-runtime text/template possibilities. This is not a commitment to use the zone/connection templates
-for the actual graph. M8.2 must prefer readable coordinate/capacity visualization; native SVG
-primitives are the fallback if template assets become awkward.
+## Playback and inspection
 
-## Protected boundaries
+The completed response is stored in memory and replayed locally with reset, previous, next, play/pause, timeline seek and speed controls. The workspace also exposes:
 
-M8.1 does not change:
+- turn number and evaluator line;
+- waiting/active/delivered fleet counts;
+- turn count, drone count, total path cost and average delivery turn;
+- solver warnings;
+- highlighted evaluator movement lines;
+- clickable/keyboard-focusable zone and connection inspection.
 
-- parser/domain/pathfinding/scheduler/validator logic;
-- the CLI or evaluator stdout contract;
-- the public catalog/simulation DTOs;
-- simulation execution behavior;
-- event/SSE/resource lifecycle behavior.
+Restricted-entry transit is projected from structured movement data: `path_cost == 2` places the drone on the connection for that completed turn. The following structured movement places it at the destination. No token parsing is used.
 
-The browser does not parse `movement_lines`, infer capacities, or calculate routes.
+## Visual polish
 
-## Non-goals intentionally rejected
+The page now uses `happy.svg` as favicon and includes additional low-opacity drones, zones and connections in the background. The decoration remains non-interactive and reduced-motion preferences are respected.
 
-- React, TypeScript, Vite, npm and Node.js;
-- CORS middleware;
-- UI/graph/state libraries;
-- calling `POST /simulate` in this slice;
-- graph rendering and playback;
-- custom map upload/paste;
-- events, SSE, WebSocket, persistence, cache or broker.
+## Code shape
 
-## Next proof
+Frontend scripts remain directly in `frontend/` and are split only by real responsibility after the UI outgrew one teaching script:
 
-#72 should turn the logged **Simulate** intent into one synchronous POST, retain the completed
-`SolveResponse`, render the map from structured DTOs and prove deterministic local stepping before
-adding automatic playback.
+- `app.js`: catalog/API transport and simulation submission;
+- `graph.js`: SVG-first graph/inspector;
+- `project-turn.js`: deterministic turn projection;
+- `render-simulation.js`: metrics/output/current-turn rendering;
+- `playback.js`: local playback controller.
+
+No bundler, module loader, framework, graph package or state library was introduced.
+
+## Validation added
+
+`tests/test_native_frontend_contract.py` locks the favicon/script pipeline, real catalog/simulate endpoints, supplied SVG renderer usage and removal of placeholder asset text. Existing API bootstrap tests continue to protect API-only hosting and narrow CORS.
+
+## Still to verify visually
+
+Human browser review on the densest official maps is required before declaring the supplied `zone.svg` / `conn.svg` layout universally readable. That review determines whether a later native-primitive fallback is necessary; it must not be assumed in advance.
