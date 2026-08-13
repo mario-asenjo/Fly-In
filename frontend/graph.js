@@ -12,6 +12,7 @@
   const zoneKind = (zone, map) => zone.name === map.start ? "start" : zone.name === map.end ? "end" : zone.kind;
   const kindLabel = (kind) => ({start:"START",end:"END",normal:"NORMAL",priority:"PRIORITY",restricted:"RESTRICTED",blocked:"BLOCKED"}[kind] ?? kind.toUpperCase());
   const kindColor = (kind) => ({start:"#06b6d4",end:"#10b981",normal:"#3b82f6",priority:"#f59e0b",restricted:"#8b5cf6",blocked:"#64748b"}[kind] ?? "#3b82f6");
+  const displayColor = (value, fallback) => value && value !== "rainbow" && window.CSS?.supports?.("color", value) ? value : fallback;
 
   function points(zones) {
     const xs = zones.map((z) => z.x), ys = zones.map((z) => z.y);
@@ -43,6 +44,7 @@
     const distance = Math.max(90, Math.hypot(dx,dy)), angle = Math.atan2(dy,dx)*180/Math.PI;
     const occupied = projection.links.get(edgeKey(item.left,item.right)) ?? [];
     const g = svg("g", {class:`graph-connection${occupied.length?" is-active":""}`,transform:`translate(${(a.x+b.x)/2} ${(a.y+b.y)/2}) rotate(${angle})`,tabindex:0,role:"button"});
+    g.setAttribute("aria-label", `Connection ${item.left} to ${item.right}, capacity ${item.capacity}, ${occupied.length} drones in transit`);
     const image = svg("image", {href:"img/conn.svg",x:-distance/2,y:-24,width:distance,height:48,preserveAspectRatio:"none"});
     const label = svg("text", {class:"connection-label",x:0,y:-31}); label.textContent=`↔ ${item.capacity}${occupied.length?` · ${occupied.length} flying`:""}`;
     const open = () => { inspect("img/conn.svg",`${item.left} ↔ ${item.right}`,[['Capacity',item.capacity],['In transit',occupied.length],['Drones',occupied.length?occupied.map((id)=>`D${id}`).join(', '):'none']]); window.uiLog?.("connection:select",{connection:[item.left,item.right],occupied}); };
@@ -53,7 +55,8 @@
   function zone(layer, item, point, projection, map) {
     const kind = zoneKind(item,map), occupied = projection.zones.get(item.name) ?? [];
     const g=svg("g",{class:"graph-zone",transform:`translate(${point.x} ${point.y})`,tabindex:0,role:"button"});
-    const halo=svg("rect",{x:-82,y:-41,width:164,height:78,rx:21,fill:kindColor(kind),opacity:.14});
+    g.setAttribute("aria-label", `${kindLabel(kind)} zone ${item.name}, capacity ${item.capacity}, ${occupied.length} drones`);
+    const halo=svg("rect",{x:-82,y:-41,width:164,height:78,rx:21,fill:displayColor(item.color,kindColor(kind)),opacity:.18});
     const image=svg("image",{href:"img/zone.svg",x:-78,y:-34,width:156,height:67});
     const badge=svg("rect",{x:-34,y:-39,width:68,height:16,rx:8,fill:kindColor(kind)});
     const name=svg("text",{class:"zone-name",x:0,y:-4}); name.textContent=item.name.length>16?`${item.name.slice(0,14)}…`:item.name;
