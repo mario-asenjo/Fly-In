@@ -26,21 +26,37 @@ def test_openapi_contains_health_endpoint() -> None:
     assert "/app.js" not in response.json()["paths"]
 
 
-def test_native_frontend_is_served_from_same_origin() -> None:
-    """The API process serves the browser shell and its flat assets."""
+def test_api_does_not_serve_frontend_files() -> None:
+    """The API remains JSON/OpenAPI only and does not host the native UI."""
     client = TestClient(create_app())
 
-    index = client.get("/")
-    stylesheet = client.get("/style.css")
-    script = client.get("/app.js")
-    drone = client.get("/img/happy.svg")
+    assert client.get("/").status_code == 404
+    assert client.get("/style.css").status_code == 404
+    assert client.get("/app.js").status_code == 404
+    assert client.get("/img/happy.svg").status_code == 404
 
-    assert index.status_code == 200
-    assert "Choose a flight map" in index.text
-    assert stylesheet.status_code == 200
-    assert "selector-card" in stylesheet.text
-    assert script.status_code == 200
-    assert 'const UI_PREFIX = "[Fly-In UI]";' in script.text
-    assert 'const endpoint = "/api/v1/maps";' in script.text
-    assert drone.status_code == 200
-    assert "Drone happy" in drone.text
+
+def test_api_allows_local_frontend_origin() -> None:
+    """The standalone frontend may read API responses through narrow CORS."""
+    client = TestClient(create_app())
+    response = client.get(
+        "/api/v1/health",
+        headers={"Origin": "http://127.0.0.1:8080"},
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == (
+        "http://127.0.0.1:8080"
+    )
+
+
+def test_api_does_not_allow_unknown_frontend_origin() -> None:
+    """CORS stays restricted to the documented local frontend origins."""
+    client = TestClient(create_app())
+    response = client.get(
+        "/api/v1/health",
+        headers={"Origin": "http://example.test"},
+    )
+
+    assert response.status_code == 200
+    assert "access-control-allow-origin" not in response.headers
