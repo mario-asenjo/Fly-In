@@ -23,7 +23,7 @@ window.renderFlyInTurn = function (result, turn) {
   document.querySelector("#turn-badge").textContent = `Turn ${turn} / ${result.turn_count}`;
   document.querySelector("#completion-badge").textContent = `${projection.delivered} delivered`;
   document.querySelector("#current-turn-label").textContent = String(turn);
-  document.querySelector("#current-turn-line").textContent = current?.line || "Initial fleet state.";
+  document.querySelector("#current-turn-line").hidden = true;
   window.FlyInGraph.resetInspector();
   window.FlyInGraph.render(result.map, projection);
   window.uiLog?.("turn:render", {
