@@ -8,16 +8,16 @@ Rules for frontend work:
 - Treat the FastAPI HTTP/OpenAPI contract as the transport authority.
 - Keep authoritative routing and simulation decisions in the backend.
 - Keep `frontend/` flat (`index.html`, `style.css`, `app.js`) except for `frontend/img/` assets.
-- Prefer same-origin serving from FastAPI so supported local development does not require CORS.
+- Keep frontend hosting separate from `flyin.adapters.api`; the API must not serve frontend files.
+- Serve `frontend/` independently on port 8080 with Python's standard-library static HTTP server.
+- Call the API at `http://127.0.0.1:8000`; FastAPI permits only the documented local frontend origins through narrow CORS.
 - Log meaningful browser actions with the `[Fly-In UI]` prefix while the teaching client is small.
 - Consume structured API DTOs; never reconstruct simulation semantics by parsing evaluator stdout.
 - Use browser-native SVG/CSS before graph, UI, animation or state-management dependencies.
-- Render coordinates, connections, metadata colors, capacities, drones, transit, and turns only in the
-  slice that actually needs them.
 - Keep local playback state separate from authoritative backend simulation data.
 - Provide keyboard-accessible controls and visible focus; do not rely on color alone for meaning.
 - Respect `prefers-reduced-motion` when animation is introduced.
-- Test HTTP/static integration and pure transformations; avoid snapshot-test noise.
+- Test API/CORS integration and pure transformations; avoid snapshot-test noise.
 
 Current slice (#71): load the official catalog into a polished selector. **Simulate** logs intent only.
 Next slice (#72): call the completed synchronous simulation endpoint and project its result locally.
