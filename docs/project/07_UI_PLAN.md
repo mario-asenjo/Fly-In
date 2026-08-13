@@ -4,26 +4,21 @@ Status: active target design from M8.1 onward.
 
 ## Purpose
 
-Visualize Fly-In so topology, occupancy, restricted transit, bottlenecks and parallel movement are
-easier to understand while keeping the client/server boundary transparent for learning.
-
-The browser is a projection adapter. Python remains authoritative for parsing, pathfinding,
-scheduling, capacity semantics, restricted transit and validation.
+Visualize Fly-In while keeping the browser as a thin projection adapter. Python remains authoritative
+for parsing, pathfinding, scheduling, capacities, restricted transit and validation.
 
 ## Technology decision
 
 ADR-0007 supersedes the React-first plan for the current architecture.
 
-Use first:
+Use semantic HTML, plain CSS, native JavaScript with `fetch()`, browser-native SVG, and Python's
+standard-library static HTTP server for the frontend. Keep FastAPI focused on the JSON/OpenAPI API.
 
-- semantic HTML;
-- plain CSS;
-- native JavaScript and `fetch()`;
-- browser-native SVG for graph work;
-- FastAPI same-origin static serving.
+The local browser UI runs on port 8080 and calls the API on port 8000. FastAPI enables narrow CORS
+only for `http://127.0.0.1:8080` and `http://localhost:8080`.
 
-Do not add React, Vite, TypeScript, a UI kit, graph library, animation framework, client state library,
-CORS middleware or Node tooling until a measured problem justifies it.
+Do not add React, Vite, TypeScript, a UI kit, graph library, animation framework, state library or
+reverse proxy until a measured problem justifies it.
 
 ## Repository shape
 
@@ -40,106 +35,63 @@ frontend/
     └── conn.svg
 ```
 
-CSS and JavaScript stay at the frontend root by design. Assets are the only nested UI files.
+## Runtime boundary
+
+The frontend and API are separate processes. `flyin.adapters.api` must not serve HTML, CSS,
+JavaScript or image assets. The browser calls `http://127.0.0.1:8000/api/v1/...` from the frontend
+origin on port 8080.
 
 ## M8.1 - catalog selector (#71)
 
-The first slice proves the simplest real HTTP consumer:
-
-```text
-browser load
-    |
-    v
-GET /api/v1/maps
-    |
-    v
-JSON catalog
-    |
-    v
-<select>
-```
-
 Required behavior:
 
-- FastAPI serves `/`, `/style.css`, `/app.js` and `/img/*` from the same origin as `/api/v1`;
-- the selector populates from the real official-map catalog;
+- the API remains API-only and returns 404 for frontend paths;
+- the documented frontend origin is allowed by CORS;
+- `GET /api/v1/maps` populates an accessible selector;
 - loading, ready, empty and failure states are explicit;
 - selection changes update a visible summary;
 - **Simulate** logs intent only and does not call the solve endpoint yet;
 - meaningful browser actions use the `[Fly-In UI]` console prefix;
-- the layout uses clear grouping, hierarchy, proximity, figure/ground separation and responsive
-  spacing rather than a framework-generated default appearance.
+- the page uses clear grouping, hierarchy, proximity, figure/ground separation and responsive spacing.
 
-The drone SVGs can be decorative at low opacity. `zone.svg` and `conn.svg` are included as future
-runtime-visualization candidates, not as a commitment to template-based graph rendering.
+The drone SVGs can be decorative at low opacity. `zone.svg` and `conn.svg` remain candidates for
+future runtime visualization, not a commitment.
 
 ## M8.2 - completed synchronous simulation (#72)
 
-After the selector is proven:
-
-1. `POST /api/v1/maps/{map_index}/simulate`.
+1. Call `POST /api/v1/maps/{map_index}/simulate` on the API origin.
 2. Store the complete structured `SolveResponse` in browser memory.
-3. Render the static map from `map.zones` and `map.connections`.
-4. Project turn state from `turns[].movements` rather than parsing `movement_lines`.
-5. Add step/reset before automatic playback.
-6. Add play/pause/speed after deterministic stepping works.
-7. Add metrics, capacities and selected-zone/link inspection.
+3. Render the map from `map.zones` and `map.connections`.
+4. Project turn state from `turns[].movements`, never from reparsed evaluator stdout.
+5. Add step/reset before play/pause/speed.
+6. Add metrics, capacities and inspection after projection correctness.
 
-If `zone.svg` or `conn.svg` makes coordinate placement, scaling or runtime labels awkward, use native
-SVG primitives for the graph. The supplied assets remain useful decorative/reference material; data
-readability wins over asset reuse.
+If `zone.svg` or `conn.svg` hurts runtime readability, use native SVG primitives.
 
-## Drone visual states
+## CORS policy
 
-The supplied visual language maps naturally to eventual playback:
+Keep it deliberately narrow:
 
-- `sad.svg`: drone still at the starting area / not yet dispatched;
-- `normal.svg`: active or in-progress drone;
-- `happy.svg`: delivered drone.
-
-The exact runtime representation must follow backend state, not client inference.
-
-## State model
-
-For the synchronous UI, keep only the state that exists:
-
-1. official-map catalog;
-2. selected map index;
-3. completed solve response, once M8.2 starts;
-4. local playback cursor/speed/selection;
-5. transient loading/error state.
-
-Do not invent simulation IDs, lifecycle states or an event log before the backend produces them.
+- origins: local frontend on port 8080 only;
+- methods: `GET` and `POST`;
+- headers: `Accept` and `Content-Type`;
+- no wildcard origin;
+- no credentials until a real requirement exists.
 
 ## Events and streaming
 
-Typed events and SSE are no longer prerequisites for completed playback. Revisit them only when a
-real requirement needs live ordered updates, reconnection, replay or work that outlives the HTTP
-request. ADR-0006 still requires typed immutable events before any SSE/asynchronous resource is
-introduced.
+Typed events and SSE are not prerequisites for completed playback. Revisit them only when the real
+client needs live ordered updates, replay, reconnection or work that outlives the HTTP request.
 
 ## Accessibility
 
-- Native controls must remain keyboard accessible with visible focus.
-- Buttons use explicit labels and status changes use restrained live regions.
-- Do not rely on map metadata color alone to express zone meaning.
-- Zone/link information should eventually have a textual alternative to the graph.
-- Respect `prefers-reduced-motion` for visual transitions/animation.
-- Decorative artwork uses empty alternative text and does not enter the accessibility tree.
+Keep native controls keyboard accessible, show visible focus, do not rely on color alone, provide
+textual alternatives to graph information, and respect `prefers-reduced-motion`.
 
 ## Tests
 
-M8.1:
+M8.1 tests should prove the API stays API-only, the documented frontend origin receives the CORS
+allow-origin header, unknown origins do not, and existing API/OpenAPI behavior remains green.
 
-- same-origin index/CSS/JS/SVG delivery;
-- API/OpenAPI regressions remain green.
-
-M8.2 and later:
-
-- coordinate-to-viewport transform;
-- completed-turn state projection;
-- playback cursor behavior;
-- API error rendering;
-- critical keyboard controls.
-
-Avoid broad snapshots that fail on harmless SVG or CSS changes.
+Later tests cover coordinate transforms, completed-turn projection, playback cursor behavior, API
+errors and critical keyboard controls.
