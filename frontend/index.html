@@ -4,27 +4,39 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="Fly-In official map selector">
+  <meta name="description" content="Fly-In native drone route visualizer">
   <title>Fly-In · Drone Route Visualizer</title>
+  <link rel="icon" type="image/svg+xml" href="img/happy.svg">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="ambient ambient-one" aria-hidden="true"></div>
   <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="ambient ambient-three" aria-hidden="true"></div>
 
-  <img class="decor-drone decor-drone-left" src="img/sad.svg" alt="" aria-hidden="true">
-  <img class="decor-drone decor-drone-right" src="img/happy.svg" alt="" aria-hidden="true">
-  <img class="decor-drone decor-drone-top" src="img/normal.svg" alt="" aria-hidden="true">
+  <div class="background-art" aria-hidden="true">
+    <img class="decor-art decor-drone decor-drone-left" src="img/sad.svg" alt="">
+    <img class="decor-art decor-drone decor-drone-right" src="img/happy.svg" alt="">
+    <img class="decor-art decor-drone decor-drone-top" src="img/normal.svg" alt="">
+    <img class="decor-art decor-drone decor-drone-low" src="img/happy.svg" alt="">
+    <img class="decor-art decor-drone decor-drone-far" src="img/normal.svg" alt="">
+    <img class="decor-art decor-zone decor-zone-left" src="img/zone.svg" alt="">
+    <img class="decor-art decor-zone decor-zone-right" src="img/zone.svg" alt="">
+    <img class="decor-art decor-conn decor-conn-top" src="img/conn.svg" alt="">
+    <img class="decor-art decor-conn decor-conn-bottom" src="img/conn.svg" alt="">
+  </div>
 
   <main class="page-shell">
     <header class="hero" aria-labelledby="page-title">
-      <div class="brand-mark" aria-hidden="true">FI</div>
+      <div class="brand-mark" aria-hidden="true">
+        <img src="img/happy.svg" alt="">
+      </div>
       <div>
         <p class="eyebrow">42 · Fly-In</p>
-        <h1 id="page-title">Choose a flight map</h1>
+        <h1 id="page-title">Drone Route Visualizer</h1>
         <p class="hero-copy">
-          Pick one of the official maps exposed by the Fly-In API. This first UI slice
-          keeps the browser intentionally simple: native HTML, CSS and JavaScript.
+          Select an official map, ask the Python backend to solve it, and replay the completed
+          simulation locally in the browser. Routing and capacity decisions always remain in Fly-In.
         </p>
       </div>
     </header>
@@ -32,48 +44,191 @@
     <section class="selector-card" aria-labelledby="selector-title">
       <div class="card-heading">
         <div>
-          <p class="step-label">Step 01</p>
-          <h2 id="selector-title">Select the scenario</h2>
+          <p class="step-label">Flight setup</p>
+          <h2 id="selector-title">Choose the scenario</h2>
         </div>
         <span id="api-status" class="status-pill" data-state="loading" aria-live="polite">
           Connecting…
         </span>
       </div>
 
-      <div class="field-group">
-        <label for="map-select">Official map</label>
-        <div class="select-wrap">
-          <select id="map-select" disabled aria-describedby="map-help">
-            <option value="">Loading official maps…</option>
-          </select>
+      <div class="selector-grid">
+        <div class="field-group">
+          <label for="map-select">Official map</label>
+          <div class="select-wrap">
+            <select id="map-select" disabled aria-describedby="map-help">
+              <option value="">Loading official maps…</option>
+            </select>
+          </div>
+          <p id="map-help" class="field-help">
+            Catalog source: <code>GET http://127.0.0.1:8000/api/v1/maps</code>
+          </p>
         </div>
-        <p id="map-help" class="field-help">
-          The list is loaded from the API at <code>http://127.0.0.1:8000/api/v1/maps</code>.
-        </p>
+
+        <article id="selection-summary" class="selection-summary" aria-live="polite">
+          <div class="summary-icon" aria-hidden="true">↗</div>
+          <div>
+            <p class="summary-kicker">Selected map</p>
+            <p id="selected-map-name" class="summary-value">Waiting for the catalog…</p>
+          </div>
+        </article>
       </div>
 
-      <article id="selection-summary" class="selection-summary" aria-live="polite">
-        <div class="summary-icon" aria-hidden="true">↗</div>
+      <div class="selector-actions">
+        <button id="simulate-button" class="simulate-button" type="button" disabled>
+          <span id="simulate-label">Simulate</span>
+          <span class="button-arrow" aria-hidden="true">→</span>
+        </button>
+        <p id="ui-message" class="ui-message" role="status" aria-live="polite">
+          Loading the official Fly-In catalog.
+        </p>
+      </div>
+    </section>
+
+    <section id="simulation-workspace" class="simulation-workspace is-hidden" aria-labelledby="workspace-title">
+      <div class="workspace-heading">
         <div>
-          <p class="summary-kicker">Selected map</p>
-          <p id="selected-map-name" class="summary-value">Waiting for the catalog…</p>
+          <p class="step-label">Simulation</p>
+          <h2 id="workspace-title">Completed backend schedule</h2>
+          <p id="workspace-map-name" class="workspace-subtitle">No simulation loaded.</p>
         </div>
-      </article>
+        <div class="workspace-badges" aria-label="Simulation status">
+          <span id="turn-badge" class="workspace-badge">Turn 0 / 0</span>
+          <span id="completion-badge" class="workspace-badge workspace-badge-success">0 delivered</span>
+        </div>
+      </div>
 
-      <button id="simulate-button" class="simulate-button" type="button" disabled>
-        <span>Simulate</span>
-        <span class="button-arrow" aria-hidden="true">→</span>
-      </button>
+      <div class="simulation-grid">
+        <section class="graph-panel panel" aria-labelledby="graph-title">
+          <div class="panel-heading graph-panel-heading">
+            <div>
+              <p class="panel-kicker">Map projection</p>
+              <h3 id="graph-title">Airspace</h3>
+            </div>
+            <div class="graph-legend" aria-label="Zone legend">
+              <span><i class="legend-dot legend-start"></i>Start</span>
+              <span><i class="legend-dot legend-priority"></i>Priority</span>
+              <span><i class="legend-dot legend-restricted"></i>Restricted</span>
+              <span><i class="legend-dot legend-blocked"></i>Blocked</span>
+              <span><i class="legend-dot legend-end"></i>End</span>
+            </div>
+          </div>
 
-      <p id="ui-message" class="ui-message" role="status" aria-live="polite">
-        Loading the official Fly-In catalog.
-      </p>
+          <div class="graph-stage">
+            <svg id="graph-canvas" viewBox="0 0 1200 700" role="img" aria-labelledby="graph-svg-title graph-svg-desc">
+              <title id="graph-svg-title">Fly-In map</title>
+              <desc id="graph-svg-desc">Zones, physical connections and current drone positions.</desc>
+            </svg>
+            <div id="graph-placeholder" class="graph-placeholder">
+              <img src="img/normal.svg" alt="" aria-hidden="true">
+              <strong>Ready for a flight plan</strong>
+              <span>Select a map and simulate it to draw the solved airspace.</span>
+            </div>
+          </div>
+        </section>
+
+        <aside class="sidebar" aria-label="Simulation information">
+          <section class="panel metric-panel" aria-labelledby="metrics-title">
+            <div class="panel-heading compact-heading">
+              <div>
+                <p class="panel-kicker">Backend result</p>
+                <h3 id="metrics-title">Metrics</h3>
+              </div>
+            </div>
+            <div class="metric-grid">
+              <article class="metric-card"><span>Turns</span><strong id="metric-turns">—</strong></article>
+              <article class="metric-card"><span>Drones</span><strong id="metric-drones">—</strong></article>
+              <article class="metric-card"><span>Path cost</span><strong id="metric-cost">—</strong></article>
+              <article class="metric-card"><span>Avg. delivery</span><strong id="metric-average">—</strong></article>
+            </div>
+          </section>
+
+          <section class="panel fleet-panel" aria-labelledby="fleet-title">
+            <div class="panel-heading compact-heading">
+              <div>
+                <p class="panel-kicker">Current projection</p>
+                <h3 id="fleet-title">Fleet</h3>
+              </div>
+            </div>
+            <div class="fleet-row">
+              <div class="fleet-state"><img src="img/sad.svg" alt=""><span>Waiting</span><strong id="fleet-waiting">0</strong></div>
+              <div class="fleet-state"><img src="img/normal.svg" alt=""><span>Active</span><strong id="fleet-active">0</strong></div>
+              <div class="fleet-state"><img src="img/happy.svg" alt=""><span>Delivered</span><strong id="fleet-delivered">0</strong></div>
+            </div>
+          </section>
+
+          <section class="panel inspector-panel" aria-labelledby="inspector-title">
+            <div class="panel-heading compact-heading">
+              <div>
+                <p class="panel-kicker">Click the graph</p>
+                <h3 id="inspector-title">Inspector</h3>
+              </div>
+            </div>
+            <div id="inspector-content" class="inspector-empty">
+              Select a zone or connection to inspect its current capacity and occupancy.
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <section class="playback-panel panel" aria-labelledby="playback-title">
+        <div class="playback-copy">
+          <p class="panel-kicker">Local playback</p>
+          <h3 id="playback-title">Turn <span id="current-turn-label">0</span></h3>
+          <p id="current-turn-line" class="current-turn-line">Initial fleet state.</p>
+        </div>
+
+        <div class="playback-controls" aria-label="Playback controls">
+          <button id="reset-button" class="control-button" type="button" aria-label="Reset to turn zero" disabled>↺</button>
+          <button id="previous-button" class="control-button" type="button" aria-label="Previous turn" disabled>←</button>
+          <button id="play-button" class="control-button control-button-primary" type="button" aria-label="Play simulation" disabled>▶</button>
+          <button id="next-button" class="control-button" type="button" aria-label="Next turn" disabled>→</button>
+        </div>
+
+        <div class="timeline-wrap">
+          <label for="turn-slider">Timeline</label>
+          <input id="turn-slider" type="range" min="0" max="0" value="0" step="1" disabled>
+        </div>
+
+        <div class="speed-wrap">
+          <label for="speed-select">Speed</label>
+          <select id="speed-select" disabled>
+            <option value="1400">0.5×</option>
+            <option value="850" selected>1×</option>
+            <option value="450">2×</option>
+          </select>
+        </div>
+      </section>
+
+      <div class="output-grid">
+        <section class="panel evaluator-panel" aria-labelledby="evaluator-title">
+          <div class="panel-heading compact-heading">
+            <div>
+              <p class="panel-kicker">Evaluator-safe output</p>
+              <h3 id="evaluator-title">Movement lines</h3>
+            </div>
+          </div>
+          <ol id="movement-output" class="movement-output"></ol>
+        </section>
+
+        <section class="panel warning-panel" aria-labelledby="warnings-title">
+          <div class="panel-heading compact-heading">
+            <div>
+              <p class="panel-kicker">Solver diagnostics</p>
+              <h3 id="warnings-title">Warnings</h3>
+            </div>
+          </div>
+          <div id="warning-output" class="warning-output">
+            <p class="empty-copy">No simulation loaded.</p>
+          </div>
+        </section>
+      </div>
     </section>
 
     <section class="learning-strip" aria-label="Current UI architecture">
       <div class="learning-item">
         <span class="learning-number">01</span>
-        <div><strong>Browser :8080</strong><span>Native DOM + fetch()</span></div>
+        <div><strong>Browser :8080</strong><span>Native DOM + SVG templates</span></div>
       </div>
       <span class="learning-arrow" aria-hidden="true">→</span>
       <div class="learning-item">
@@ -83,7 +238,7 @@
       <span class="learning-arrow" aria-hidden="true">→</span>
       <div class="learning-item">
         <span class="learning-number">03</span>
-        <div><strong>FlyInSolver</strong><span>Authoritative backend</span></div>
+        <div><strong>FlyInSolver</strong><span>Authoritative routing</span></div>
       </div>
     </section>
   </main>
