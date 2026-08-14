@@ -43,6 +43,8 @@ The simulation is the primary visual artifact, not a dashboard.
 - dense maps grow a virtual graph surface larger than the viewport;
 - the user can scroll or drag to pan;
 - `-`, `Fit`, and `+` control canvas scale;
+- a newly loaded map opens at readable 1:1 scale near the start instead of auto-fitting the whole topology;
+- `Fit` is an explicit overview action, not the default presentation;
 - playback stays directly below the graph;
 - zone/connection inspection appears as a lightweight overlay;
 - metrics, fleet summary cards and evaluator `movement_lines` are not painted;
@@ -55,12 +57,14 @@ The supplied `zone.svg` and `conn.svg` were implemented first and reviewed on th
 The runtime graph therefore uses compact native SVG primitives:
 
 - physical connections: `<line>` plus a small capacity/transit badge only when useful;
-- zones: compact `<g>` groups built from `<rect>`, `<circle>` and `<text>`;
-- zone metadata color: outer accent;
-- zone semantic type: independent marker color so meaning does not depend on metadata color;
+- zones: compact `<g>` groups built primarily from concentric `<circle>` elements plus `<text>`;
+- zone metadata color: outer ring/halo;
+- zone semantic type: independent inner color and one-character glyph (`S`, `E`, `N`, `P`, `R`, `×`), so meaning does not depend on metadata color;
+- zone name: one small label below the node;
+- capacity/occupancy: tiny badges only when relevant;
 - full zone/connection detail: inspector overlay instead of permanent text inside every node.
 
-Coordinate meaning is preserved, but each coordinate unit receives a minimum visual spacing. The surface grows from the map coordinate bounds instead of scaling all nodes into a fixed 1200x700 box. For Challenger (`x=0..21`), this intentionally produces a virtual width of roughly 3.3k px before user zoom.
+Coordinate meaning is preserved, but each coordinate unit receives a minimum visual spacing (`205px` horizontally and `190px` vertically). The surface grows from the map coordinate bounds instead of scaling all nodes into a fixed box. The supplied Challenger map spans `x=0..21` and `y=-2..2`, so its virtual surface is intentionally several thousand pixels wide at 1:1 scale. This is desirable: the user navigates the map rather than compressing the topology until labels collide.
 
 The supplied drone artwork remains part of the graph:
 
@@ -68,7 +72,7 @@ The supplied drone artwork remains part of the graph:
 - `normal.svg`: active or restricted transit;
 - `happy.svg`: delivered and favicon.
 
-Large groups at one location are aggregated into one drone icon plus a count badge instead of drawing dozens of overlapping icons. `zone.svg` and `conn.svg` remain available as visual/decorative assets but are no longer runtime graph primitives.
+Large groups at one location are aggregated into one drone icon plus a count badge instead of drawing dozens of overlapping icons. `zone.svg` and `conn.svg` remain available as decorative assets but are no longer runtime graph primitives.
 
 ## Projection rules
 
@@ -93,7 +97,7 @@ Use native controls, visible focus, keyboard graph inspection, semantic type cue
 
 ## Validation
 
-Static frontend-contract tests lock the real catalog/simulate calls, native zone/connection primitives, retained drone SVG assets, dynamic graph dimensions, pan/zoom/fit controls, and the absence of metrics/fleet/movement-line dashboard elements. Challenger is the key dense-map visual regression case.
+Static frontend-contract tests lock the real catalog/simulate calls, compact native zone/connection primitives, retained drone SVG assets, dynamic graph dimensions, readable default scale, pan/zoom/fit controls, and the absence of metrics/fleet/movement-line dashboard elements. Challenger is the key dense-map visual regression case.
 
 ## Deferred work
 

@@ -99,5 +99,6 @@ mapSelect.addEventListener("change", () => {
   uiLog("selection:change", selectedMap() ?? {});
 });
 simulateButton.addEventListener("click", runSimulation);
-uiLog("bootstrap", { frontend: location.origin, api: API_BASE_URL, renderer: "supplied-svg-first" });
+window.uiLog = uiLog;
+uiLog("bootstrap", { frontend: location.origin, api: API_BASE_URL, renderer: "native-compact-svg" });
 loadCatalog();

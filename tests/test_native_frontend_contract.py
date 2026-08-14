@@ -34,18 +34,20 @@ def test_frontend_calls_catalog_and_synchronous_simulation_api() -> None:
     assert "window.FlyInSimulation.load(payload, map)" in script
 
 
-def test_graph_uses_native_svg_for_zones_and_connections() -> None:
-    """Dense graph primitives no longer reuse the oversized card assets."""
+def test_graph_uses_compact_native_svg_for_dense_topologies() -> None:
+    """Zones and edges use compact primitives instead of oversized card assets."""
     graph = read("graph.js")
 
-    assert 'S("line"' in graph
-    assert 'S("rect"' in graph
+    assert 'svg("line"' in graph
+    assert 'svg("circle"' in graph
     assert 'href:"img/zone.svg"' not in graph
     assert 'href:"img/conn.svg"' not in graph
-    assert "img/${O(" in graph
-    assert "X_STEP=142" in graph
-    assert "Y_STEP=156" in graph
-    assert "setBaseSize(a.w,a.h)" in graph
+    assert 'href:`img/${droneIcon(' in graph
+    assert "const X_STEP=205" in graph
+    assert "const Y_STEP=190" in graph
+    assert "NODE_R=19" in graph
+    assert 'renderer:"native-compact"' in graph
+    assert "setBaseSize(geometry.width,geometry.height)" in graph
     assert "window.FlyInGraph" in graph
 
 
@@ -66,6 +68,9 @@ def test_simulation_ui_prioritizes_large_navigable_canvas() -> None:
     assert '"canvas:pan"' in playback
     assert '"canvas:zoom"' in playback
     assert '"canvas:fit"' in playback
+    assert '"canvas:reset"' in playback
+    assert "FlyInCanvas?.reset()" in playback
+    assert "FlyInCanvas?.fit()" not in playback
 
 
 def test_dashboard_metrics_and_movement_lines_are_not_rendered() -> None:
@@ -79,12 +84,14 @@ def test_dashboard_metrics_and_movement_lines_are_not_rendered() -> None:
     assert "movement_lines" not in renderer
 
 
-def test_drone_and_decorative_assets_remain_available() -> None:
-    """Native graph primitives do not remove the supplied visual identity."""
+def test_drone_assets_remain_for_state_identity() -> None:
+    """Native graph primitives keep the expressive drone visual language."""
     index = read("index.html")
     graph = read("graph.js")
 
     assert 'img/happy.svg' in index
     assert 'img/sad.svg' in index
     assert 'img/normal.svg' in index
-    assert '"sad":"normal"' in graph
+    assert 'return"happy"' in graph
+    assert 'return"sad"' in graph
+    assert 'return"normal"' in graph
