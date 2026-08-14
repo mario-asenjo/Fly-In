@@ -12,7 +12,7 @@ def read(name: str) -> str:
 
 
 def test_frontend_declares_happy_drone_favicon_and_runtime_scripts() -> None:
-    """The browser shell loads the SVG-first simulation pipeline."""
+    """The browser shell loads the native simulation pipeline."""
     index = read("index.html")
 
     assert 'rel="icon" type="image/svg+xml" href="img/happy.svg"' in index
@@ -34,13 +34,18 @@ def test_frontend_calls_catalog_and_synchronous_simulation_api() -> None:
     assert "window.FlyInSimulation.load(payload, map)" in script
 
 
-def test_supplied_svg_assets_drive_the_graph_renderer() -> None:
-    """The graph continues to use the supplied visual assets."""
+def test_graph_uses_native_svg_for_zones_and_connections() -> None:
+    """Dense graph primitives no longer reuse the oversized card assets."""
     graph = read("graph.js")
 
-    assert 'href:"img/zone.svg"' in graph
-    assert 'href:"img/conn.svg"' in graph
-    assert 'href:`img/${icon}.svg`' in graph
+    assert 'S("line"' in graph
+    assert 'S("rect"' in graph
+    assert 'href:"img/zone.svg"' not in graph
+    assert 'href:"img/conn.svg"' not in graph
+    assert "img/${O(" in graph
+    assert "X_STEP=142" in graph
+    assert "Y_STEP=156" in graph
+    assert "setBaseSize(a.w,a.h)" in graph
     assert "window.FlyInGraph" in graph
 
 
@@ -57,9 +62,10 @@ def test_simulation_ui_prioritizes_large_navigable_canvas() -> None:
     assert 'id="fit-button"' in index
     assert "height:min(74vh,900px)" in styles
     assert "overflow:auto" in styles
-    assert 'window.FlyInCanvas={fit}' in playback
+    assert "setBaseSize" in playback
     assert '"canvas:pan"' in playback
     assert '"canvas:zoom"' in playback
+    assert '"canvas:fit"' in playback
 
 
 def test_dashboard_metrics_and_movement_lines_are_not_rendered() -> None:
@@ -73,12 +79,12 @@ def test_dashboard_metrics_and_movement_lines_are_not_rendered() -> None:
     assert "movement_lines" not in renderer
 
 
-def test_runtime_zone_and_connection_assets_have_no_placeholder_text() -> None:
-    """Template assets leave labels to runtime data instead of demo copy."""
-    zone = read("img/zone.svg")
-    connection = read("img/conn.svg")
+def test_drone_and_decorative_assets_remain_available() -> None:
+    """Native graph primitives do not remove the supplied visual identity."""
+    index = read("index.html")
+    graph = read("graph.js")
 
-    assert "Zone A" not in zone
-    assert "drones received" not in zone
-    assert "Connection</text>" not in connection
-    assert "in transit: 0" not in connection
+    assert 'img/happy.svg' in index
+    assert 'img/sad.svg' in index
+    assert 'img/normal.svg' in index
+    assert '"sad":"normal"' in graph

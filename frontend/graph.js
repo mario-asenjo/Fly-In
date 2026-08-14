@@ -1,88 +1,10 @@
-(() => {
-  const NS = "http://www.w3.org/2000/svg";
-  const canvas = document.querySelector("#graph-canvas");
-  const placeholder = document.querySelector("#graph-placeholder");
-  const inspector = document.querySelector("#inspector-content");
-  const svg = (name, attrs = {}) => {
-    const node = document.createElementNS(NS, name);
-    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, String(value)));
-    return node;
-  };
-  const edgeKey = (a, b) => a < b ? `${a}::${b}` : `${b}::${a}`;
-  const zoneKind = (zone, map) => zone.name === map.start ? "start" : zone.name === map.end ? "end" : zone.kind;
-  const kindLabel = (kind) => ({start:"START",end:"END",normal:"NORMAL",priority:"PRIORITY",restricted:"RESTRICTED",blocked:"BLOCKED"}[kind] ?? kind.toUpperCase());
-  const kindColor = (kind) => ({start:"#06b6d4",end:"#10b981",normal:"#3b82f6",priority:"#f59e0b",restricted:"#8b5cf6",blocked:"#64748b"}[kind] ?? "#3b82f6");
-  const displayColor = (value, fallback) => value && value !== "rainbow" && window.CSS?.supports?.("color", value) ? value : fallback;
-
-  function points(zones) {
-    const xs = zones.map((z) => z.x), ys = zones.map((z) => z.y);
-    const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
-    const sx = Math.max(1, maxX - minX), sy = Math.max(1, maxY - minY);
-    const scale = Math.min(950 / sx, 500 / sy), usedX = sx * scale, usedY = sy * scale;
-    return new Map(zones.map((z) => [z.name, {
-      x: (1200 - usedX) / 2 + (z.x - minX) * scale,
-      y: 700 - ((700 - usedY) / 2 + (z.y - minY) * scale),
-    }]));
-  }
-
-  function inspect(image, title, rows) {
-    inspector.className = "inspector-content";
-    inspector.replaceChildren();
-    const card = document.createElement("div"); card.className = "inspector-card";
-    const img = document.createElement("img"); img.src = image; img.alt = "";
-    const body = document.createElement("div"), heading = document.createElement("strong"), dl = document.createElement("dl");
-    heading.textContent = title;
-    rows.forEach(([label, value]) => {
-      const dt = document.createElement("dt"), dd = document.createElement("dd");
-      dt.textContent = label; dd.textContent = value; dl.append(dt, dd);
-    });
-    body.append(heading, dl); card.append(img, body); inspector.append(card);
-  }
-
-  function connection(layer, item, pts, projection) {
-    const a = pts.get(item.left), b = pts.get(item.right), dx = b.x-a.x, dy = b.y-a.y;
-    const distance = Math.max(90, Math.hypot(dx,dy)), angle = Math.atan2(dy,dx)*180/Math.PI;
-    const occupied = projection.links.get(edgeKey(item.left,item.right)) ?? [];
-    const g = svg("g", {class:`graph-connection${occupied.length?" is-active":""}`,transform:`translate(${(a.x+b.x)/2} ${(a.y+b.y)/2}) rotate(${angle})`,tabindex:0,role:"button"});
-    g.setAttribute("aria-label", `Connection ${item.left} to ${item.right}, capacity ${item.capacity}, ${occupied.length} drones in transit`);
-    const image = svg("image", {href:"img/conn.svg",x:-distance/2,y:-24,width:distance,height:48,preserveAspectRatio:"none"});
-    const label = svg("text", {class:"connection-label",x:0,y:-31}); label.textContent=`↔ ${item.capacity}${occupied.length?` · ${occupied.length} flying`:""}`;
-    const open = () => { inspect("img/conn.svg",`${item.left} ↔ ${item.right}`,[['Capacity',item.capacity],['In transit',occupied.length],['Drones',occupied.length?occupied.map((id)=>`D${id}`).join(', '):'none']]); window.uiLog?.("connection:select",{connection:[item.left,item.right],occupied}); };
-    g.addEventListener("click",open); g.addEventListener("keydown",(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});
-    g.append(image,label); layer.append(g);
-  }
-
-  function zone(layer, item, point, projection, map) {
-    const kind = zoneKind(item,map), occupied = projection.zones.get(item.name) ?? [];
-    const g=svg("g",{class:"graph-zone",transform:`translate(${point.x} ${point.y})`,tabindex:0,role:"button"});
-    g.setAttribute("aria-label", `${kindLabel(kind)} zone ${item.name}, capacity ${item.capacity}, ${occupied.length} drones`);
-    const halo=svg("rect",{x:-82,y:-41,width:164,height:78,rx:21,fill:displayColor(item.color,kindColor(kind)),opacity:.18});
-    const image=svg("image",{href:"img/zone.svg",x:-78,y:-34,width:156,height:67});
-    const badge=svg("rect",{x:-34,y:-39,width:68,height:16,rx:8,fill:kindColor(kind)});
-    const name=svg("text",{class:"zone-name",x:0,y:-4}); name.textContent=item.name.length>16?`${item.name.slice(0,14)}…`:item.name;
-    const meta=svg("text",{class:"zone-meta",x:0,y:16}); meta.textContent=`${item.capacity} cap · ${occupied.length} here`;
-    const type=svg("text",{class:"zone-kind-badge",x:0,y:-27}); type.textContent=kindLabel(kind);
-    const open=()=>{inspect("img/zone.svg",`${kindLabel(kind)} · ${item.name}`,[['Coordinates',`(${item.x}, ${item.y})`],['Capacity',item.capacity],['Color',item.color??'default'],['Drones',occupied.length?occupied.map((id)=>`D${id}`).join(', '):'none']]);window.uiLog?.("zone:select",{zone:item.name,occupied});};
-    g.addEventListener("click",open);g.addEventListener("keydown",(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});
-    g.append(halo,image,badge,name,meta,type);layer.append(g);
-  }
-
-  function dronePoint(position, pts, index, count) {
-    if(position.type==="transit") { const a=pts.get(position.origin),b=pts.get(position.destination),dx=b.x-a.x,dy=b.y-a.y,l=Math.max(1,Math.hypot(dx,dy)),o=(index-(count-1)/2)*24; return{x:(a.x+b.x)/2-dy/l*o,y:(a.y+b.y)/2+dx/l*o}; }
-    const c=pts.get(position.zone),cols=Math.min(5,Math.ceil(Math.sqrt(count))),row=Math.floor(index/cols),col=index%cols,rowCount=Math.min(cols,count-row*cols);
-    return{x:c.x+(col-(rowCount-1)/2)*34,y:c.y+48+row*34};
-  }
-
-  function drones(layer, projection, pts, map) {
-    const buckets=new Map(); projection.positions.forEach((position,id)=>{const k=position.type==="transit"?`t:${edgeKey(position.origin,position.destination)}`:`z:${position.zone}`,list=buckets.get(k)??[];list.push({id,position});buckets.set(k,list);});
-    buckets.forEach((list)=>list.forEach(({id,position},index)=>{const p=dronePoint(position,pts,index,list.length),icon=position.type==="delivered"?"happy":position.type==="zone"&&position.zone===map.start?"sad":"normal";const image=svg("image",{class:"drone-node",href:`img/${icon}.svg`,x:p.x-18,y:p.y-18,width:36,height:36}),label=svg("text",{class:"drone-id",x:p.x,y:p.y+25});label.textContent=`D${id}`;layer.append(image,label);}));
-  }
-
-  function render(map, projection) {
-    const pts=points(map.zones); canvas.replaceChildren(); placeholder.classList.add("is-hidden");
-    const title=svg("title");title.textContent="Fly-In map";const links=svg("g"),zones=svg("g"),fleet=svg("g");canvas.append(title,links,zones,fleet);
-    map.connections.forEach((item)=>connection(links,item,pts,projection));map.zones.forEach((item)=>zone(zones,item,pts.get(item.name),projection,map));drones(fleet,projection,pts,map);
-  }
-  function resetInspector(){inspector.className="inspector-empty";inspector.textContent="Select a zone or connection to inspect its current capacity and occupancy.";}
-  window.FlyInGraph={render,resetInspector,edgeKey};
-})();
+(()=>{const N="http://www.w3.org/2000/svg",c=document.querySelector("#graph-canvas"),p=document.querySelector("#graph-placeholder"),i=document.querySelector("#inspector-content"),XS=142,YS=156,PX=190,PY=170,W=104,H=42,S=(n,a={})=>{const e=document.createElementNS(N,n);for(const[k,v]of Object.entries(a))e.setAttribute(k,v);return e},K=(a,b)=>a<b?`${a}::${b}`:`${b}::${a}`,T=(z,m)=>z.name===m.start?"start":z.name===m.end?"end":z.kind,C=k=>({start:"#06b6d4",end:"#10b981",normal:"#3b82f6",priority:"#f59e0b",restricted:"#8b5cf6",blocked:"#64748b"}[k]||"#3b82f6"),L=k=>({start:"START",end:"END",normal:"NORMAL",priority:"PRIORITY",restricted:"RESTRICTED",blocked:"BLOCKED"}[k]||k.toUpperCase()),D=(v,f)=>v&&v!=="rainbow"&&CSS.supports("color",v)?v:f;
+function A(z){const x=z.map(q=>q.x),y=z.map(q=>q.y),a=Math.min(...x),b=Math.max(...x),d=Math.min(...y),e=Math.max(...y),w=Math.max(1200,PX*2+(b-a)*XS),h=Math.max(760,PY*2+(e-d)*YS);return{w,h,q:new Map(z.map(n=>[n.name,{x:PX+(n.x-a)*XS,y:PY+(e-n.y)*YS}]))}}
+function I(t,r,o){i.className="inspector-popover";i.innerHTML="";const a=document.createElement("div"),b=document.createElement("span"),d=document.createElement("div"),h=document.createElement("strong"),l=document.createElement("dl");a.style.cssText="display:grid;grid-template-columns:10px 1fr;gap:12px";b.style.cssText=`border-radius:9px;background:${o}`;h.textContent=t;l.style.cssText="display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:7px 0 0;font-size:.75rem";for(const[x,y]of r){const dt=document.createElement("dt"),dd=document.createElement("dd");dt.textContent=x;dt.style.color="#7890ad";dd.textContent=y;dd.style.cssText="margin:0;text-align:right;font-weight:750";l.append(dt,dd)}d.append(h,l);a.append(b,d);i.append(a)}
+function E(g,e,q,r){const a=q.get(e.left),b=q.get(e.right),o=r.links.get(K(e.left,e.right))||[],x=S("g",{class:"graph-connection",tabindex:0,role:"button"}),h=S("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:"transparent","stroke-width":24}),l=S("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:o.length?"#19bddd":"#9ebfdf","stroke-width":o.length?8:5,"stroke-linecap":"round","vector-effect":"non-scaling-stroke"});x.append(h,l);if(e.capacity>1||o.length){const u=(a.x+b.x)/2,v=(a.y+b.y)/2,z=S("g",{transform:`translate(${u} ${v})`}),bg=S("rect",{x:-18,y:-10,width:36,height:20,rx:10,fill:"#fff",stroke:"#b9cfe7"}),tx=S("text",{x:0,y:4,"text-anchor":"middle","font-size":10,"font-weight":900,fill:"#315d96"});tx.textContent=o.length?`✈${o.length}`:`×${e.capacity}`;z.append(bg,tx);x.append(z)}const f=()=>{I(`${e.left} ↔ ${e.right}`,[['Capacity',e.capacity],['In transit',o.length],['Drones',o.length?o.map(n=>`D${n}`).join(', '):'none']],"#38bdf8");uiLog?.("connection:select",{connection:[e.left,e.right],occupied:o})};x.onclick=f;x.onkeydown=n=>{if(n.key==="Enter"||n.key===" "){n.preventDefault();f()}};g.append(x)}
+function Z(g,z,q,r,m){const k=T(z,m),s=C(k),a=D(z.color,s),o=r.zones.get(z.name)||[],x=S("g",{class:"graph-zone",transform:`translate(${q.x} ${q.y})`,tabindex:0,role:"button"}),sh=S("rect",{x:-W/2,y:-H/2+3,width:W,height:H,rx:14,fill:"rgba(19,55,109,.14)"}),ou=S("rect",{x:-W/2,y:-H/2,width:W,height:H,rx:14,fill:a,opacity:.88}),inn=S("rect",{x:-W/2+4,y:-H/2+4,width:W-8,height:H-8,rx:11,fill:"#fff"}),mk=S("circle",{cx:-W/2+12,cy:0,r:5,fill:s,stroke:"#fff","stroke-width":2}),tx=S("text",{x:4,y:4,"text-anchor":"middle","font-size":12,"font-weight":850,fill:"#153b71"});tx.textContent=z.name.length>14?z.name.slice(0,12)+"…":z.name;x.append(sh,ou,inn,mk,tx);if(z.capacity>1||o.length){const b=S("g",{transform:`translate(${W/2-4} ${-H/2+3})`}),cc=S("circle",{r:12,fill:"#12376d",stroke:"#fff","stroke-width":2}),tt=S("text",{x:0,y:4,"text-anchor":"middle",fill:"#fff","font-size":9,"font-weight":900});tt.textContent=o.length?o.length:z.capacity;b.append(cc,tt);x.append(b)}const f=()=>{I(`${L(k)} · ${z.name}`,[['Coordinates',`(${z.x}, ${z.y})`],['Capacity',z.capacity],['Color',z.color||'default'],['Drones',o.length?o.map(n=>`D${n}`).join(', '):'none']],s);uiLog?.("zone:select",{zone:z.name,occupied:o})};x.onclick=f;x.onkeydown=n=>{if(n.key==="Enter"||n.key===" "){n.preventDefault();f()}};g.append(x)}
+function P(o,q,j,n){if(o.type==="transit"){const a=q.get(o.origin),b=q.get(o.destination),x=b.x-a.x,y=b.y-a.y,l=Math.max(1,Math.hypot(x,y)),d=(j-(n-1)/2)*24;return{x:(a.x+b.x)/2-y/l*d,y:(a.y+b.y)/2+x/l*d}}const a=q.get(o.zone),k=Math.min(4,Math.ceil(Math.sqrt(n))),r=Math.floor(j/k),u=j%k,v=Math.min(k,n-r*k);return{x:a.x+(u-(v-1)/2)*28,y:a.y+34+r*28}}
+const O=(o,m)=>o.type==="delivered"?"happy":o.type==="zone"&&o.zone===m.start?"sad":"normal";
+function F(g,r,q,m){const b=new Map;r.positions.forEach((o,id)=>{const k=o.type==="transit"?`t:${K(o.origin,o.destination)}`:`z:${o.zone}`,a=b.get(k)||[];a.push({id,o});b.set(k,a)});b.forEach(a=>{if(a.length>5){const v=P(a[0].o,q,0,1),im=S("image",{href:`img/${O(a[0].o,m)}.svg`,x:v.x-17,y:v.y+23,width:34,height:34}),c=S("circle",{cx:v.x+16,cy:v.y+25,r:11,fill:"#12376d",stroke:"#fff","stroke-width":2}),t=S("text",{x:v.x+16,y:v.y+29,"text-anchor":"middle",fill:"#fff","font-size":8,"font-weight":900});t.textContent=`×${a.length}`;g.append(im,c,t);return}a.forEach((e,j)=>{const v=P(e.o,q,j,a.length),im=S("image",{href:`img/${O(e.o,m)}.svg`,x:v.x-14,y:v.y-14,width:28,height:28}),t=S("text",{x:v.x,y:v.y+19,"text-anchor":"middle","font-size":9,"font-weight":900,fill:"#14366a",stroke:"#fff","stroke-width":3,"paint-order":"stroke"});t.textContent=`D${e.id}`;g.append(im,t)})})}
+function R(m,r){const a=A(m.zones);c.setAttribute("viewBox",`0 0 ${a.w} ${a.h}`);c.innerHTML="";p.classList.add("is-hidden");FlyInCanvas?.setBaseSize(a.w,a.h);const e=S("g"),z=S("g"),f=S("g");c.append(e,z,f);m.connections.forEach(x=>E(e,x,a.q,r));m.zones.forEach(x=>Z(z,x,a.q.get(x.name),r,m));F(f,r,a.q,m);uiLog?.("graph:layout",{width:a.w,height:a.h,zones:m.zones.length,connections:m.connections.length,x_step:XS,y_step:YS})}
+function Q(){i.className="inspector-popover inspector-empty";i.textContent="Select a zone or connection to inspect it."}window.FlyInGraph={render:R,resetInspector:Q,edgeKey:K}})();
