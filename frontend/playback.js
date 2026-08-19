@@ -10,12 +10,13 @@
   function clearTransition(){cancelFrame();state.transition=null;}
 
   function stop(reason="pause"){
-    if(state.transition?.startedAt!==null){
+    const hadAnimation=state.playing||state.frame!==null||state.transition!==null;
+    if(state.transition&&state.transition.startedAt!==null){
       state.transition.elapsed=Math.min(state.transition.duration,performance.now()-state.transition.startedAt);
       state.transition.startedAt=null;
     }
     cancelFrame();state.playing=false;updatePlayButton();
-    window.uiLog?.("animation:cancel",{reason,turn:state.turn});
+    if(hadAnimation)window.uiLog?.("animation:cancel",{reason,turn:state.turn});
   }
 
   function render(turn){
