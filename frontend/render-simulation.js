@@ -40,9 +40,14 @@ window.renderFlyInTurn = function (result, turn) {
   return projection;
 };
 
-window.renderFlyInTransition = function (result, fromTurn, toTurn, progress) {
-  const fromProjection = window.projectFlyInTurn(result, fromTurn);
-  const toProjection = window.projectFlyInTurn(result, toTurn);
+window.renderFlyInTransition = function (
+  result,
+  fromTurn,
+  toTurn,
+  progress,
+  fromProjection,
+  toProjection,
+) {
   updateTurnChrome(
     result,
     fromTurn,
@@ -55,5 +60,4 @@ window.renderFlyInTransition = function (result, fromTurn, toTurn, progress) {
     toProjection,
     progress,
   );
-  return { fromProjection, toProjection };
 };
