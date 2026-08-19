@@ -17,13 +17,17 @@ window.renderFlyInOutput = function (result) {
   });
 };
 
-window.renderFlyInTurn = function (result, turn) {
-  const projection = window.projectFlyInTurn(result, turn);
-  const current = turn > 0 ? result.turns[turn - 1] : null;
-  document.querySelector("#turn-badge").textContent = `Turn ${turn} / ${result.turn_count}`;
+function updateTurnChrome(result, turn, projection, label = null) {
+  document.querySelector("#turn-badge").textContent = label ?? `Turn ${turn} / ${result.turn_count}`;
   document.querySelector("#completion-badge").textContent = `${projection.delivered} delivered`;
   document.querySelector("#current-turn-label").textContent = String(turn);
   document.querySelector("#current-turn-line").hidden = true;
+}
+
+window.renderFlyInTurn = function (result, turn) {
+  const projection = window.projectFlyInTurn(result, turn);
+  const current = turn > 0 ? result.turns[turn - 1] : null;
+  updateTurnChrome(result, turn, projection);
   window.FlyInGraph.resetInspector();
   window.FlyInGraph.render(result.map, projection);
   window.uiLog?.("turn:render", {
@@ -34,4 +38,22 @@ window.renderFlyInTurn = function (result, turn) {
     movements: current?.movements.length ?? 0,
   });
   return projection;
+};
+
+window.renderFlyInTransition = function (result, fromTurn, toTurn, progress) {
+  const fromProjection = window.projectFlyInTurn(result, fromTurn);
+  const toProjection = window.projectFlyInTurn(result, toTurn);
+  updateTurnChrome(
+    result,
+    fromTurn,
+    fromProjection,
+    `Turn ${fromTurn} → ${toTurn}`,
+  );
+  window.FlyInGraph.renderTransition(
+    result.map,
+    fromProjection,
+    toProjection,
+    progress,
+  );
+  return { fromProjection, toProjection };
 };
